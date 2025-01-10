@@ -5,16 +5,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:device_apps/device_apps.dart';
+import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
-  try {
     await FirebaseAuth.instance.signInAnonymously();
-    print("Signed in anonymously");
-  } catch (e) {
-    print('Error signing in anonymously: $e');
-  }
   runApp(const MyApp());
 }
 
