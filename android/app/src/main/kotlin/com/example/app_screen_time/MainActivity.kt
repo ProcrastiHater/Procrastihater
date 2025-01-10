@@ -82,7 +82,6 @@ class MainActivity: FlutterActivity() {
 
     private fun getScreenTimeStats(): Map<String, Double> {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        val packageManager = packageManager
     
         val calendar = Calendar.getInstance()
         val endTime = calendar.timeInMillis
@@ -103,9 +102,8 @@ class MainActivity: FlutterActivity() {
             }
     
             try {
-                //val appInfo = packageManager.getApplicationInfo(stats.packageName, 0)
-                //val appName = packageManager.getApplicationLabel(appInfo).toString()
-                val appName =stats.packageName
+                val appInfo = packageManager.getApplicationInfo(stats.packageName, 0)
+                val appName = packageManager.getApplicationLabel(appInfo).toString()
                 val hoursUsed = "%.2f".format(stats.totalTimeInForeground / 3600000.0).toDouble() 
                 screenTimeMap[appName] = hoursUsed
                 
