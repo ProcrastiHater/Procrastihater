@@ -5,9 +5,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:device_apps/device_apps.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+// Refer the core package
+import 'package:syncfusion_flutter_core/core.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
     await Firebase.initializeApp();
   try {
     await FirebaseAuth.instance.signInAnonymously();
@@ -15,6 +21,7 @@ void main() async {
   } catch (e) {
     print('Error signing in anonymously: $e');
   }
+  //SyncfusionLicense.registerLicense("YOUR LICENSE KEY"); 
   runApp(const MyApp());
 }
 
