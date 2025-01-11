@@ -41,6 +41,8 @@ dependencies:
   device_apps: ^2.2.0
   syncfusion_flutter_charts: ^28.1.38
   syncfusion_flutter_core: ^28.1.38
+  graphic: ^2.5.0
+  quiver: ^3.2.2
 
 dev_dependencies:
   flutter_test:
