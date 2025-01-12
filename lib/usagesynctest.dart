@@ -45,7 +45,7 @@ class AppUsageSync extends StatefulWidget {
 class _AppUsageSyncState extends State<AppUsageSync> {
   static const screenTimeChannel = MethodChannel('kotlin.methods/screentime');
   
-  Map<String, double> _screenTimeData = {};
+  Map<String, Map<String, String>> _screenTimeData = {};
   Map<String, double> _firestoreScreenTimeData = {};
   bool _hasPermission = false;
 
@@ -84,31 +84,13 @@ class _AppUsageSyncState extends State<AppUsageSync> {
     try {
       final Map<dynamic, dynamic> result = await screenTimeChannel.invokeMethod('getScreenTime');
       setState(() {
-        _screenTimeData = Map<String, double>.from(
-          result.map((key, value) => MapEntry(key as String, (value as double))),
+        _screenTimeData = Map<String, Map<String, String>>.from(
+          result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
         );
       });
     } on PlatformException catch (e) {
       print("Failed to get screen time: ${e.message}");
     }
-  }
-
-  Future<Map<String,double>> _grabScreenTime() async{
-    if(!_hasPermission){
-      await _requestPermission();
-    }
-
-    try {
-      final Map<dynamic, dynamic> result = await screenTimeChannel.invokeMethod('getScreenTime');
-      setState(() {
-        _screenTimeData = Map<String, double>.from(
-          result.map((key, value) => MapEntry(key as String, (value as double))),
-        );
-      });
-    } on PlatformException catch (e) {
-      print("Failed to get screen time: ${e.message}");
-    }
-    return _screenTimeData;
   }
 
   Future<void> _fetchScreenTime() async {
@@ -148,7 +130,8 @@ class _AppUsageSyncState extends State<AppUsageSync> {
                     final entry = _screenTimeData.entries.elementAt(index);
                     return ListTile(
                       title: Text(entry.key),
-                      subtitle: Text('${entry.value} hours'),
+                      subtitle: Text('${entry.value["hours"]} hours'),
+                      trailing: Text('${entry.value["category"]}')
                     );
                   },
                 ),
