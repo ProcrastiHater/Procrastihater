@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'package:app_screen_time/usagesynctest.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:device_apps/device_apps.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,60 +96,60 @@ class _MyHomePageState extends State<MyHomePage> {
     await _writeScreenTimeData(_screenTimeData);
   }
 
- Future<void> _writeScreenTimeData(Map<String, double> data) async {
-  final userDB = db.collection("UID").doc("123").collection("appUsageCurrent");
-  
-  // Create a batch to handle multiple writes
-  final batch = db.batch();
-  
-  try {
-    // Iterate through each app and its screen time
-    for (final entry in data.entries) {
-      final appName = entry.key;
-      final screenTimeHours = entry.value;
-      
-      // Reference to the document with app name
-      final docRef = userDB.doc(appName);
-      
-      // Set the data with merge option to update existing documents
-      // or create new ones if they don't exist
-      batch.set(
-        docRef,
-        {
-          'dailyHours': screenTimeHours,
-          'lastUpdated': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
-    }
+  Future<void> _writeScreenTimeData(Map<String, double> data) async {
+    final userDB = db.collection("UID").doc("123").collection("appUsageCurrent");
     
-    // Commit the batch
-    await batch.commit();
-    print('Successfully wrote screen time data to Firestore');
-  } catch (e) {
-    print('Error writing screen time data to Firestore: $e');
-    rethrow;
-  }
-}
-
-Future<void> _fetchScreenTime() async {
-  try{
-    final snapshot = await db.collection("UID").doc("123").collection("appUsageCurrent").get();
-    Map<String, double> fetchedData = {};
-    for (var doc in snapshot.docs){
-      String docName = doc.id;
-      double? hours = doc['dailyHours']?.toDouble();
-      if (hours != null){
-        fetchedData[docName] = hours;
+    // Create a batch to handle multiple writes
+    final batch = db.batch();
+    
+    try {
+      // Iterate through each app and its screen time
+      for (final entry in data.entries) {
+        final appName = entry.key;
+        final screenTimeHours = entry.value;
+        
+        // Reference to the document with app name
+        final docRef = userDB.doc(appName);
+        
+        // Set the data with merge option to update existing documents
+        // or create new ones if they don't exist
+        batch.set(
+          docRef,
+          {
+            'dailyHours': screenTimeHours,
+            'lastUpdated': FieldValue.serverTimestamp(),
+          },
+          SetOptions(merge: true),
+        );
       }
+      
+      // Commit the batch
+      await batch.commit();
+      print('Successfully wrote screen time data to Firestore');
+    } catch (e) {
+      print('Error writing screen time data to Firestore: $e');
+      rethrow;
     }
-      setState(() {
-        _firestoreScreenTimeData = fetchedData;
-      });
-  } catch (e){
-    print("error fetching screentime data: $e");
   }
-}
+
+  Future<void> _fetchScreenTime() async {
+    try{
+      final snapshot = await db.collection("UID").doc("123").collection("appUsageCurrent").get();
+      Map<String, double> fetchedData = {};
+      for (var doc in snapshot.docs){
+        String docName = doc.id;
+        double? hours = doc['dailyHours']?.toDouble();
+        if (hours != null){
+          fetchedData[docName] = hours;
+        }
+      }
+        setState(() {
+          _firestoreScreenTimeData = fetchedData;
+        });
+    } catch (e){
+      print("error fetching screentime data: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,6 +161,14 @@ Future<void> _fetchScreenTime() async {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            ElevatedButton(
+              onPressed: (){
+                if(context.mounted){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const UsageSyncPage()));
+                }
+              },
+              child: const Text('To UsageSyncTestPage')
+            ),
             ElevatedButton(
               onPressed: _getScreenTime,
               child: const Text('Write Screentime'),
