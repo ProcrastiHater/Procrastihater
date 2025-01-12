@@ -132,7 +132,9 @@ class _AppUsageSyncState extends State<AppUsageSync> {
 
   @override
   Widget build(BuildContext context) {
+    if (_screenTimeData.isEmpty){
     _getScreenTime();
+    }
     return Material(
       child: Center(
         child: Column(
