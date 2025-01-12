@@ -89,7 +89,7 @@ class MainActivity: FlutterActivity() {
     * Description: Returns a long of midnight for the
     *              given Calendar instance
     **********************************************/
-    private fun getMidnight(curDate: Calendar!): Long {
+    private fun getMidnight(curDate: Calendar): Long {
         val today = curDate
         today.set(Calendar.HOUR_OF_DAY, 0)
         today.set(Calendar.MINUTE, 0)
