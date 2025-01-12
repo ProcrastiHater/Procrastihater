@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const screenTimeChannel = MethodChannel('kotlin.methods/screentime');
   final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  Map<String, double> _screenTimeData = {};
+  Map<String, Map<String, String>> _screenTimeData = {};
   Map<String, double> _firestoreScreenTimeData = {};
   bool _hasPermission = false;
 
@@ -86,8 +86,8 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       final Map<dynamic, dynamic> result = await screenTimeChannel.invokeMethod('getScreenTime');
       setState(() {
-        _screenTimeData = Map<String, double>.from(
-          result.map((key, value) => MapEntry(key as String, (value as double))),
+        _screenTimeData = Map<String, Map<String, String>>.from(
+          result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
         );
       });
     } on PlatformException catch (e) {
@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await _writeScreenTimeData(_screenTimeData);
   }
 
-  Future<void> _writeScreenTimeData(Map<String, double> data) async {
+  Future<void> _writeScreenTimeData(Map<String, Map<String, String>> data) async {
     final userDB = db.collection("UID").doc("123").collection("appUsageCurrent");
     
     // Create a batch to handle multiple writes
@@ -106,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // Iterate through each app and its screen time
       for (final entry in data.entries) {
         final appName = entry.key;
-        final screenTimeHours = entry.value;
+        final screenTimeHours = double.parse(entry.value["hours"]!);
         
         // Reference to the document with app name
         final docRef = userDB.doc(appName);

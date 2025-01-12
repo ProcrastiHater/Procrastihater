@@ -17,7 +17,8 @@
     <application
         android:label="app_screen_time"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:appCategory="productivity">
         <!-- Rest of your application configuration... -->
         <activity
             android:name=".MainActivity"
