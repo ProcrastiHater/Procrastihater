@@ -101,10 +101,11 @@ class MainActivity: FlutterActivity() {
     private fun getScreenTimeStats(): Map<String, Double> {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     
+        //Bridget: Changed data range to go from midnight today to midnight tonight
         val calendar = Calendar.getInstance()
-        val endTime = calendar.timeInMillis
-        calendar.add(Calendar.DAY_OF_YEAR, -1)
-        val startTime = calendar.timeInMillis
+        val startTime = getMidnight(calendar)
+        calendar.add(Calendar.DAY_OF_YEAR, 1)
+        val endTime = getMidnight(calendar)
     
         val queryUsageStats = usageStatsManager.queryUsageStats(
             UsageStatsManager.INTERVAL_DAILY,
