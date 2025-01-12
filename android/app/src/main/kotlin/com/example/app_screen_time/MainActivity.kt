@@ -13,6 +13,9 @@ import android.content.Intent
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import java.util.Calendar
+import java.util.TimeZone
+import java.util.Locale
+import java.util.Date
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "kotlin.methods/screentime"
@@ -78,6 +81,21 @@ class MainActivity: FlutterActivity() {
 
     private fun openUsageAccessSettings() {
         startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+    }
+
+    /*********************************************
+    * Name: getMidnight
+    * 
+    * Description: Returns a long of midnight for the
+    *              given Calendar instance
+    **********************************************/
+    private fun getMidnight(curDate: Calendar!): Long {
+        val today = curDate
+        today.set(Calendar.HOUR_OF_DAY, 0)
+        today.set(Calendar.MINUTE, 0)
+        today.set(Calendar.SECOND, 0)
+        today.set(Calendar.MILLISECOND, 0)
+        return today.time.time
     }
 
     private fun getScreenTimeStats(): Map<String, Double> {
