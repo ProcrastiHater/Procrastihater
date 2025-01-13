@@ -4,14 +4,16 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:device_apps/device_apps.dart';
 import 'app.dart';
+final FirebaseAuth auth = FirebaseAuth.instance;
+final uid = auth.currentUser?.uid;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
-    await FirebaseAuth.instance.signInAnonymously();
-  runApp(const MyApp());
+  runApp(const MyAppDart());
 }
 
 class MyApp extends StatelessWidget {
@@ -93,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
  Future<void> _writeScreenTimeData(Map<String, double> data) async {
-  final userDB = db.collection("UID").doc("123").collection("appUsageCurrent");
+  final userDB = db.collection("UID").doc(uid).collection("appUsageCurrent");
   
   // Create a batch to handle multiple writes
   final batch = db.batch();
@@ -130,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 Future<void> _fetchScreenTime() async {
   try{
-    final snapshot = await db.collection("UID").doc("123").collection("appUsageCurrent").get();
+    final snapshot = await db.collection("UID").doc(uid).collection("appUsageCurrent").get();
     Map<String, double> fetchedData = {};
     for (var doc in snapshot.docs){
       String docName = doc.id;
@@ -152,11 +154,35 @@ Future<void> _fetchScreenTime() async {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<ProfileScreen>(
+                  builder: (context) => ProfileScreen(
+                    actions: [
+                      SignedOutAction((context) {
+                        Navigator.of(context).pop();
+                      })
+                    ],
+                  ),
+                ),
+              );
+            },
+          )
+        ],
+        automaticallyImplyLeading: false,
+
+
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SignOutButton(),
             ElevatedButton(
               onPressed: _getScreenTime,
               child: const Text('Write Screentime'),

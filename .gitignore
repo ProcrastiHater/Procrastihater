@@ -30,8 +30,10 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-*/flutter/generated_plugin_registrant.*
-*/flutter/generated_plugins.cmake
+**/generated_plugin_registrant.*
+**/generated_plugins.cmake
+**/GeneratedPluginRegistrant.*
+**/Flutter/GeneratedPluginRegistrant.swift
 
 # Symbolication related
 app.*.symbols
