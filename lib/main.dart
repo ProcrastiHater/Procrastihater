@@ -6,6 +6,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+final FirebaseFirestore FIRESTORE = FirebaseFirestore.instance;
+final CollectionReference MAIN_COLLECTION = FIRESTORE.collection('UID');
+final DocumentReference USER_REF = MAIN_COLLECTION.doc('123');
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
@@ -133,18 +137,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _fetchScreenTime() async {
-    Map<String, Map<String, dynamic>> fetchedData = {};
     try{
-      final CURRENT = USER_REF.collection('appUsageCurrent');
-      final CUR_SNAPSHOT = await CURRENT.get();
-      for (var doc in CUR_SNAPSHOT.docs){
+      final snapshot = await db.collection("UID").doc("123").collection("appUsageCurrent").get();
+      Map<String, double> fetchedData = {};
+      for (var doc in snapshot.docs){
         String docName = doc.id;
         double? hours = doc['dailyHours']?.toDouble();
-        Timestamp timestamp = doc['lastUpdated'];
         if (hours != null){
-          fetchedData[docName] = {'dailyHours': hours, 'lastUpdated': timestamp};
+          fetchedData[docName] = hours;
         }
       }
+        setState(() {
+          _firestoreScreenTimeData = fetchedData;
+        });
     } catch (e){
       print("error fetching screentime data: $e");
     }
