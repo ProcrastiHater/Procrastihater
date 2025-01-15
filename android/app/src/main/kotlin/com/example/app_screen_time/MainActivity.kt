@@ -62,6 +62,13 @@ class MainActivity: FlutterActivity() {
         }
     }
 
+    /*********************************************
+    * Name: checkUsageStatsPermission
+    * 
+    * Description: Checks to see if the user has granted
+    *              permission for accessing screentime data
+    * 
+    **********************************************/
     private fun checkUsageStatsPermission(): Boolean {
         val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = if (VERSION.SDK_INT >= VERSION_CODES.Q) {
@@ -80,6 +87,13 @@ class MainActivity: FlutterActivity() {
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
+    /*********************************************
+    * Name: openUsageAccessSettings
+    * 
+    * Description: Opens the permissions page for accessing
+    *              screentime data
+    * 
+    **********************************************/
     private fun openUsageAccessSettings() {
         startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
     }
@@ -89,6 +103,7 @@ class MainActivity: FlutterActivity() {
     * 
     * Description: Returns a long of midnight for the
     *              given Calendar instance
+    *
     **********************************************/
     private fun getMidnight(curDate: Calendar): Long {
         val today = curDate
@@ -99,6 +114,16 @@ class MainActivity: FlutterActivity() {
         return today.time.time
     }
 
+    /*********************************************
+    * Name: getScreenTimeStats
+    * 
+    * Description: Returns a Map that uses app names as keys
+    *              and inner Maps as values. The inner Maps use
+    *              data labels such as "hours" and "category" as keys
+    *              and the values obtained for those from the screentime
+    *              data as values
+    *
+    ***********************************************/
     private fun getScreenTimeStats(): Map<String, Map<String, String>> {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     
@@ -126,8 +151,11 @@ class MainActivity: FlutterActivity() {
                 val appName = packageManager.getApplicationLabel(appInfo).toString()
                 screenTimeMap[appName] = mutableMapOf<String, String>()
                 screenTimeMap[appName]!!.put("hours", "%.2f".format(stats.totalTimeInForeground / 3600000.0).toString())
-                screenTimeMap[appName]!!.put("category", ApplicationInfo.getCategoryTitle(this, appInfo.category).toString())
-                
+                if(appInfo.category != -1) {
+                    screenTimeMap[appName]!!.put("category", ApplicationInfo.getCategoryTitle(this, appInfo.category).toString())
+                }else {
+                    screenTimeMap[appName]!!.put("category", "Other")
+                }
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error getting app info for ${stats.packageName}", e)
                 continue

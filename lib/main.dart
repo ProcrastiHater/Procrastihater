@@ -97,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _writeScreenTimeData(Map<String, Map<String, String>> data) async {
-    final userDB = db.collection("UID").doc("123").collection("appUsageCurrent");
+    final userDB = USER_REF.collection('appUsageCurrent');
     
     // Create a batch to handle multiple writes
     final batch = db.batch();
@@ -106,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // Iterate through each app and its screen time
       for (final entry in data.entries) {
         final appName = entry.key;
-        final screenTimeHours = double.parse(entry.value["hours"]!);
+        final screenTimeHours = double.parse(entry.value['hours']!);
         
         // Reference to the document with app name
         final docRef = userDB.doc(appName);
@@ -133,19 +133,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _fetchScreenTime() async {
+    Map<String, Map<String, dynamic>> fetchedData = {};
     try{
-      final snapshot = await db.collection("UID").doc("123").collection("appUsageCurrent").get();
-      Map<String, double> fetchedData = {};
-      for (var doc in snapshot.docs){
+      final CURRENT = USER_REF.collection('appUsageCurrent');
+      final CUR_SNAPSHOT = await CURRENT.get();
+      for (var doc in CUR_SNAPSHOT.docs){
         String docName = doc.id;
         double? hours = doc['dailyHours']?.toDouble();
+        Timestamp timestamp = doc['lastUpdated'];
         if (hours != null){
-          fetchedData[docName] = hours;
+          fetchedData[docName] = {'dailyHours': hours, 'lastUpdated': timestamp};
         }
       }
-        setState(() {
-          _firestoreScreenTimeData = fetchedData;
-        });
     } catch (e){
       print("error fetching screentime data: $e");
     }
