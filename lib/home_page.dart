@@ -1,101 +1,24 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:device_apps/device_apps.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_page.dart';
-import 'social_media_page.dart';
-import 'historical_data_page.dart';
-
-
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  try {
-    await FirebaseAuth.instance.signInAnonymously();
-    print("Signed in anonymously");
-  } catch (e) {
-    print('Error signin g in anonymously: $e');
-  }
-  runApp(const MyApp());
+  runApp(const HomePage());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: MyPageView(),
-    );
-  } 
-}
-
-class MyPageView extends StatefulWidget {
-  const MyPageView({super.key});
-  @override
-  State<MyPageView> createState() => _MyPageViewState();
-}
-
-class _MyPageViewState extends State<MyPageView> {
-  late PageController _pageController;
-
-  int _currentPage = 0;
-
-  @override
-  void initState() {
-    _pageController = PageController(initialPage: 1);
-    _currentPage = 1;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        controller: _pageController,
-          physics: const BouncingScrollPhysics(), // Allows natural swiping
-          onPageChanged: (index) {
-          setState(() {
-            _currentPage = index; 
-          });
-        },
-        children: const [
-          SocialMediaPage(),
-          HomePage(),
-          HistoricalDataPage(),
-        ],
-      )
-      
+    home: MyHomePage(title: 'Home Page'),
     );
   }
 }
-
-/*class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'User Data Grabber!',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Screentime Demo Home Page'),
-    );
-  }
-}
-
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -251,4 +174,4 @@ Future<void> _fetchScreenTime() async {
       ),
     );
   }
-}*/
+}
