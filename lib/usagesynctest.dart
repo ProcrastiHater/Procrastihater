@@ -1,4 +1,3 @@
-// ignore_for_file: slash_for_doc_comments
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,15 +10,15 @@ final FirebaseFirestore FIRESTORE = FirebaseFirestore.instance;
 final CollectionReference MAIN_COLLECTION = FIRESTORE.collection('UID');
 final DocumentReference USER_REF = MAIN_COLLECTION.doc('123');
 
-/*****************************************************
-* Name: UsageSyncPage
-*
-* Description: Page to test account-to-database synchronization
-*
-* Members: Inherited from StatelessWidget
-*
-* Methods: Inherited from StatelessWidget
-******************************************************/
+///*****************************************************
+/// Name: UsageSyncPage
+///
+/// Description: Page to test account-to-database synchronization
+///
+/// Members: Inherited from StatelessWidget
+///
+/// Methods: Inherited from StatelessWidget
+///******************************************************
 class UsageSyncPage extends StatelessWidget {
   const UsageSyncPage({super.key});
 
@@ -45,7 +44,6 @@ class AppUsageSync extends StatefulWidget {
 
 class _AppUsageSyncState extends State<AppUsageSync> {
   static const screenTimeChannel = MethodChannel('kotlin.methods/screentime');
-
   Map<String, Map<String, String>> _screenTimeData = {};
   Map<String, Map<String, dynamic>> _firestoreScreenTimeData = {};
   bool _hasPermission = false;
@@ -53,17 +51,16 @@ class _AppUsageSyncState extends State<AppUsageSync> {
   @override
   void initState() {
     super.initState();
-    //_currentToHistorical();
   }
 
-  /*********************************************************
-  * Name: _checkPermission
-  *
-  * Description: Calls the kotlin method for seeing
-  *              if the user has granted permission for accessing
-  *              screentime data
-  *
-  **********************************************************/
+  ///*******************************************************
+  /// Name: _checkPermission
+  ///
+  /// Description: Calls the kotlin method for seeing
+  ///              if the user has granted permission for accessing
+  ///              screentime data
+  ///
+  ///********************************************************
   Future<void> _checkPermission() async {
     try {
       final bool HAS_PERMISSION = await screenTimeChannel.invokeMethod('checkPermission');
@@ -75,13 +72,13 @@ class _AppUsageSyncState extends State<AppUsageSync> {
     }
   }
 
-  /*********************************************************
-  * Name: _requestPermission
-  *
-  * Description: Calls the kotlin method for requesting permission
-  *              to access the user's screentime data
-  *
-  **********************************************************/
+  ///*******************************************************
+  /// Name: _requestPermission
+  ///
+  /// Description: Calls the kotlin method for requesting permission
+  ///              to access the user's screentime data
+  ///
+  ///********************************************************
   Future<void> _requestPermission() async {
     try {
       await screenTimeChannel.invokeMethod('requestPermission');
@@ -91,13 +88,13 @@ class _AppUsageSyncState extends State<AppUsageSync> {
     }
   }
 
-  /*********************************************************
-  * Name: _getScreenTime
-  *
-  * Description: Calls the kotlin method for getting screentime
-  *              data and puts the result in a Map for later use
-  *
-  **********************************************************/
+  ///********************************************************
+  /// Name: _getScreenTime
+  ///
+  /// Description: Calls the kotlin method for getting screentime
+  ///              data and puts the result in a Map for later use
+  ///
+  ///********************************************************
   Future<void> _getScreenTime() async {
     if (!_hasPermission) {
       await _requestPermission();
@@ -116,13 +113,13 @@ class _AppUsageSyncState extends State<AppUsageSync> {
     }
   }
 
-  // /*********************************************************
-  // * Name: _fetchScreenTime
-  // *
-  // * Description: Gets the screentime data from the database and
-  // *              puts it in a Map for later use
-  // *
-  // **********************************************************/
+  ///*********************************************************
+  /// Name: _fetchScreenTime
+  ///
+  /// Description: Gets the screentime data from the database and
+  ///              puts it in a Map for later use
+  ///
+  ///**********************************************************
   // Future<void> _fetchScreenTime() async {
   //   try{
   //     final snapshot = await USER_REF.collection('appUsageCurrent').get();
@@ -142,13 +139,13 @@ class _AppUsageSyncState extends State<AppUsageSync> {
   //   }
   // }
 
-  /*********************************************************
-  * Name: _currentToHistorical
-  *
-  * Description: Moves data from appUsageCurrent to
-  *              appUsageHistory
-  *
-  **********************************************************/
+  ///*******************************************************
+  /// Name: _currentToHistorical
+  ///
+  /// Description: Moves data from appUsageCurrent to
+  ///              appUsageHistory
+  ///
+  ///********************************************************
   Future<void> _currentToHistorical() async {
     //Grab data from current
     Map<String, Map<String, dynamic>> fetchedData = {};
@@ -226,49 +223,80 @@ class _AppUsageSyncState extends State<AppUsageSync> {
     });
   }
 
-  /****************************************************/
+  ///**************************************************
+  /// Name: _closingWrite
+  ///
+  /// Description: Writes to the firestore database on close
+  ///***************************************************
+  Future<void> _closingWrite() async {
+    if(_screenTimeData.isNotEmpty){
+      final userDB = USER_REF.collection('appUsageCurrent');
+    
+    // Create a batch to handle multiple writes
+      final batch = FIRESTORE.batch();
+      
+      try {
+        // Iterate through each app and its screen time
+        for (final entry in _screenTimeData.entries) {
+          final appName = entry.key;
+          final screenTimeHours = double.parse(entry.value['hours']!);
+          
+          // Reference to the document with app name
+          final docRef = userDB.doc(appName);
+          
+          // Set the data with merge option to update existing documents
+          // or create new ones if they don't exist
+          batch.set(
+            docRef,
+            {
+              'dailyHours': screenTimeHours,
+              'lastUpdated': FieldValue.serverTimestamp(),
+            },
+            SetOptions(merge: true),
+          );
+        }
+        
+        // Commit the batch
+        await batch.commit();
+        print('Successfully wrote screen time data to Firestore');
+      } catch (e) {
+        print('Error writing screen time data to Firestore: $e');
+        rethrow;
+      }
+    }
+  }
+
+  ///*************************************************
   @override
   Widget build(BuildContext context) {
-    if (_firestoreScreenTimeData.isEmpty){
+    if (_screenTimeData.isEmpty){
       _currentToHistorical();
-      //_getScreenTime();
+      _getScreenTime();
     }
     return Material(
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // if (_screenTimeData.isNotEmpty)
-            //   Expanded(
-            //     child: ListView.builder(
-            //       itemCount: _screenTimeData.length,
-            //       itemBuilder: (context, index) {
-            //         final entry = _screenTimeData.entries.elementAt(index);
-            //         return ListTile(
-            //           title: Text(entry.key),
-            //           subtitle: Text('${entry.value['hours']} hours'),
-            //           trailing: Text('${entry.value['category']}')
-            //         );
-            //       },
-            //     ),
-            //   ),
-            if (_firestoreScreenTimeData.isNotEmpty)
+            if (_screenTimeData.isNotEmpty)
               Expanded(
                 child: ListView.builder(
-                  itemCount: _firestoreScreenTimeData.length,
+                  itemCount: _screenTimeData.length,
                   itemBuilder: (context, index) {
-                    final entry = _firestoreScreenTimeData.entries.elementAt(index);
+                    final entry = _screenTimeData.entries.elementAt(index);
                     return ListTile(
                       title: Text(entry.key),
-                      subtitle: Text('${entry.value['lastUpdated'].toString()}'),
-                      trailing: Text('${entry.value['dailyHours']} hours')
+                      subtitle: Text('${entry.value['hours']} hours'),
+                      trailing: Text('${entry.value['category']}')
                     );
                   },
                 ),
               ),
+            
           ],
         ),
       ),
     );
   }
+
 }

@@ -62,13 +62,13 @@ class MainActivity: FlutterActivity() {
         }
     }
 
-    /*********************************************
-    * Name: checkUsageStatsPermission
-    * 
-    * Description: Checks to see if the user has granted
-    *              permission for accessing screentime data
-    * 
-    **********************************************/
+    ///*********************************************
+    /// Name: checkUsageStatsPermission
+    ///
+    /// Description: Checks to see if the user has granted
+    ///              permission for accessing screentime data
+    /// 
+    ///**********************************************
     private fun checkUsageStatsPermission(): Boolean {
         val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = if (VERSION.SDK_INT >= VERSION_CODES.Q) {
@@ -87,24 +87,24 @@ class MainActivity: FlutterActivity() {
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
-    /*********************************************
-    * Name: openUsageAccessSettings
-    * 
-    * Description: Opens the permissions page for accessing
-    *              screentime data
-    * 
-    **********************************************/
+    ///*********************************************
+    /// Name: openUsageAccessSettings
+    /// 
+    /// Description: Opens the permissions page for accessing
+    ///              screentime data
+    /// 
+    ///**********************************************
     private fun openUsageAccessSettings() {
         startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
     }
 
-    /*********************************************
-    * Name: getMidnight
-    * 
-    * Description: Returns a long of midnight for the
-    *              given Calendar instance
-    *
-    **********************************************/
+    ///*********************************************
+    /// Name: getMidnight
+    /// 
+    /// Description: Returns a long of midnight for the
+    ///              given Calendar instance
+    ///
+    ///**********************************************
     private fun getMidnight(curDate: Calendar): Long {
         val today = curDate
         today.set(Calendar.HOUR_OF_DAY, 0)
@@ -114,16 +114,16 @@ class MainActivity: FlutterActivity() {
         return today.time.time
     }
 
-    /*********************************************
-    * Name: getScreenTimeStats
-    * 
-    * Description: Returns a Map that uses app names as keys
-    *              and inner Maps as values. The inner Maps use
-    *              data labels such as "hours" and "category" as keys
-    *              and the values obtained for those from the screentime
-    *              data as values
-    *
-    ***********************************************/
+    ///*********************************************
+    /// Name: getScreenTimeStats
+    /// 
+    /// Description: Returns a Map that uses app names as keys
+    ///              and inner Maps as values. The inner Maps use
+    ///              data labels such as "hours" and "category" as keys
+    ///              and the values obtained for those from the screentime
+    ///              data as values
+    ///
+    ///***********************************************
     private fun getScreenTimeStats(): Map<String, Map<String, String>> {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     
