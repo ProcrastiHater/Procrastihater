@@ -13,7 +13,7 @@ final DocumentReference USER_REF = MAIN_COLLECTION.doc('123');
 
 /*****************************************************
 * Name: UsageSyncPage
-* 
+*
 * Description: Page to test account-to-database synchronization
 *
 * Members: Inherited from StatelessWidget
@@ -45,9 +45,9 @@ class AppUsageSync extends StatefulWidget {
 
 class _AppUsageSyncState extends State<AppUsageSync> {
   static const screenTimeChannel = MethodChannel('kotlin.methods/screentime');
-  
+
   Map<String, Map<String, String>> _screenTimeData = {};
-  Map<String, double> _firestoreScreenTimeData = {};
+  Map<String, Map<String, dynamic>> _firestoreScreenTimeData = {};
   bool _hasPermission = false;
 
   @override
@@ -116,31 +116,31 @@ class _AppUsageSyncState extends State<AppUsageSync> {
     }
   }
 
-  /*********************************************************
-  * Name: _fetchScreenTime
-  *
-  * Description: Gets the screentime data from the database and 
-  *              puts it in a Map for later use
-  *
-  **********************************************************/
-  Future<void> _fetchScreenTime() async {
-    try{
-      final snapshot = await USER_REF.collection('appUsageCurrent').get();
-      Map<String, double> fetchedData = {};
-      for (var doc in snapshot.docs){
-        String docName = doc.id;
-        double? hours = doc['dailyHours']?.toDouble();
-        if (hours != null){
-          fetchedData[docName] = hours;
-        }
-      }
-        setState(() {
-          _firestoreScreenTimeData = fetchedData;
-        });
-    } catch (e){
-      print("error fetching screentime data: $e");
-    }
-  }
+  // /*********************************************************
+  // * Name: _fetchScreenTime
+  // *
+  // * Description: Gets the screentime data from the database and
+  // *              puts it in a Map for later use
+  // *
+  // **********************************************************/
+  // Future<void> _fetchScreenTime() async {
+  //   try{
+  //     final snapshot = await USER_REF.collection('appUsageCurrent').get();
+  //     Map<String, double> fetchedData = {};
+  //     for (var doc in snapshot.docs){
+  //       String docName = doc.id;
+  //       double? hours = doc['dailyHours']?.toDouble();
+  //       if (hours != null){
+  //         fetchedData[docName] = hours;
+  //       }
+  //     }
+  //       setState(() {
+  //         _firestoreScreenTimeData = fetchedData;
+  //       });
+  //   } catch (e){
+  //     print("error fetching screentime data: $e");
+  //   }
+  // }
 
   /*********************************************************
   * Name: _currentToHistorical
@@ -168,7 +168,7 @@ class _AppUsageSyncState extends State<AppUsageSync> {
     }
 
     var batch = FIRESTORE.batch();
-    
+
     try {
       // Iterate through each app and its screen time
       for (var entry in fetchedData.entries) {
@@ -178,14 +178,18 @@ class _AppUsageSyncState extends State<AppUsageSync> {
         // Reference to the document with app name
         DateTime dateUpdated = timestamp.toDate();
         DateTime currentTime = DateTime.now();
+        //Check if date has changed since database was updated
         if(dateUpdated.day != currentTime.day
-         && dateUpdated.month != currentTime.month 
-         && dateUpdated.year != currentTime.year){
+         || dateUpdated.month != currentTime.month
+         || dateUpdated.year != currentTime.year){
+          //Gets the number of the day of the week for the last update day
           int dayOfWeekNum = dateUpdated.weekday;
+          //Gets the name of the day of the week for last update day
           String dayOfWeekStr = DateFormat('EEEE').format(dateUpdated);
-          String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum+1)));
+          //Gets the start of that week
+          String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
           var historical = USER_REF.collection('appUsageHistory').doc(startOfWeek);
-          
+
           // Move data to historical
           batch.set(
             historical,
@@ -202,11 +206,12 @@ class _AppUsageSyncState extends State<AppUsageSync> {
         }
       }
       await batch.commit();
+      print('Successfully wrote screen time data to History');
 
       batch = FIRESTORE.batch();
       // Commit the batch
-      print('Successfully wrote screen time data to History');
       final CUR_SNAPSHOT = await USER_REF.collection('appUsageCurrent').get();
+      //Clear current app usage
       for(var doc in CUR_SNAPSHOT.docs)
       {
         await doc.reference.delete();
@@ -217,30 +222,46 @@ class _AppUsageSyncState extends State<AppUsageSync> {
       rethrow;
     }
     setState(() {
+      _firestoreScreenTimeData = fetchedData;
     });
   }
 
   /****************************************************/
   @override
   Widget build(BuildContext context) {
-    if (_screenTimeData.isEmpty){
-      _getScreenTime();
+    if (_firestoreScreenTimeData.isEmpty){
+      _currentToHistorical();
+      //_getScreenTime();
     }
     return Material(
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (_screenTimeData.isNotEmpty)
+            // if (_screenTimeData.isNotEmpty)
+            //   Expanded(
+            //     child: ListView.builder(
+            //       itemCount: _screenTimeData.length,
+            //       itemBuilder: (context, index) {
+            //         final entry = _screenTimeData.entries.elementAt(index);
+            //         return ListTile(
+            //           title: Text(entry.key),
+            //           subtitle: Text('${entry.value['hours']} hours'),
+            //           trailing: Text('${entry.value['category']}')
+            //         );
+            //       },
+            //     ),
+            //   ),
+            if (_firestoreScreenTimeData.isNotEmpty)
               Expanded(
                 child: ListView.builder(
-                  itemCount: _screenTimeData.length,
+                  itemCount: _firestoreScreenTimeData.length,
                   itemBuilder: (context, index) {
-                    final entry = _screenTimeData.entries.elementAt(index);
+                    final entry = _firestoreScreenTimeData.entries.elementAt(index);
                     return ListTile(
                       title: Text(entry.key),
-                      subtitle: Text('${entry.value['hours']} hours'),
-                      trailing: Text('${entry.value['category']}')
+                      subtitle: Text('${entry.value['lastUpdated'].toString()}'),
+                      trailing: Text('${entry.value['dailyHours']} hours')
                     );
                   },
                 ),
