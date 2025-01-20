@@ -17,10 +17,6 @@ import java.util.TimeZone
 import java.util.Locale
 import java.util.Date
 import android.content.pm.ApplicationInfo
-import java.util.TimeZone
-import java.util.Locale
-import java.util.Date
-import android.content.pm.ApplicationInfo
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "kotlin.methods/screentime"
@@ -131,12 +127,8 @@ class MainActivity: FlutterActivity() {
     private fun getScreenTimeStats(): Map<String, Map<String, String>> {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     
-        //Bridget: Changed data range to go from midnight today to midnight tonight
-        //Bridget: Changed data range to go from midnight today to midnight tonight
+        //Sets the time range for data to be from midnight this morning to midnight tonight
         val calendar = Calendar.getInstance()
-        val startTime = getMidnight(calendar)
-        calendar.add(Calendar.DAY_OF_YEAR, 1)
-        val endTime = getMidnight(calendar)
         val startTime = getMidnight(calendar)
         calendar.add(Calendar.DAY_OF_YEAR, 1)
         val endTime = getMidnight(calendar)
@@ -148,7 +140,6 @@ class MainActivity: FlutterActivity() {
         )
     
         val screenTimeMap = mutableMapOf<String, MutableMap<String, String>>()
-        val screenTimeMap = mutableMapOf<String, MutableMap<String, String>>()
     
         for (stats in queryUsageStats) {
             if (stats.totalTimeInForeground <= 0) {
@@ -158,13 +149,6 @@ class MainActivity: FlutterActivity() {
             try {
                 val appInfo = packageManager.getApplicationInfo(stats.packageName, 0)
                 val appName = packageManager.getApplicationLabel(appInfo).toString()
-                screenTimeMap[appName] = mutableMapOf<String, String>()
-                screenTimeMap[appName]!!.put("hours", "%.2f".format(stats.totalTimeInForeground / 3600000.0).toString())
-                if(appInfo.category != -1) {
-                    screenTimeMap[appName]!!.put("category", ApplicationInfo.getCategoryTitle(this, appInfo.category).toString())
-                }else {
-                    screenTimeMap[appName]!!.put("category", "Other")
-                }
                 screenTimeMap[appName] = mutableMapOf<String, String>()
                 screenTimeMap[appName]!!.put("hours", "%.2f".format(stats.totalTimeInForeground / 3600000.0).toString())
                 if(appInfo.category != -1) {
