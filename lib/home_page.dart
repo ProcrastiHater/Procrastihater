@@ -60,8 +60,6 @@ class MyHomePage extends StatefulWidget {
 /// permissions, reads/write from firebase
 ///*********************************
 class _MyHomePageState extends State<MyHomePage> {
-  //Timer for automatic writes
-  late Timer _timer;
   //Native Kotlin method channel
   static const screenTimeChannel = MethodChannel('kotlin.methods/screentime');
   //Maps for reading/writing data from the database
@@ -69,8 +67,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Map<String, Map<String, dynamic>> _firestoreScreenTimeData = {};
   //Permission variables for screen time usage permission
   bool _hasPermission = false;
-  //Variable for determining how often to write.
-  final Duration _writeInterval = Duration(seconds: 30);
 
   //Checks screen time usage permission on startup, starts timer for auto writing
   //Moves data from current to historical
@@ -78,7 +74,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState(){
     super.initState();
     _checkPermission();
-    _timer = Timer.periodic(_writeInterval, (Timer t) => _writeScreenTimeData());
     _currentToHistorical();
   }
 
@@ -86,7 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() async {
     print("**********Disposing...***************");
-    _timer.cancel();
     super.dispose();
   }
 
