@@ -17,9 +17,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-
 final FirebaseAuth auth = FirebaseAuth.instance;
-final uid = auth.currentUser?.uid;
+String? uid = auth.currentUser?.uid;
 
 ///*********************************
 /// Name: HomePage
@@ -142,6 +141,9 @@ class _MyHomePageState extends State<MyHomePage> {
   /// using batches for multiple writes
   ///*********************************
   Future<void> _writeScreenTimeData(Map<String, double> data) async {
+  // Regrab UID incase its changed
+  uid = auth.currentUser?.uid;
+
   final userDB = db.collection("UID").doc(uid).collection("appUsageCurrent");
   
   // Create a batch to handle multiple writes
@@ -185,6 +187,8 @@ class _MyHomePageState extends State<MyHomePage> {
   ///*********************************
   Future<void> _fetchScreenTime() async {
     try{
+      // Regrab UID incase its changed
+      uid = auth.currentUser?.uid;
       //Hard coded user for accessing data
       final snapshot = await db.collection("UID").doc(uid).collection("appUsageCurrent").get();
       //Temp map for saving data from database
