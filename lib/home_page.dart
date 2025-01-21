@@ -183,17 +183,17 @@ class _MyHomePageState extends State<MyHomePage> {
   ///   
   /// Description: Fetches screentime that has 
   /// been written into the Firestore database
-  /// by accessing a hardcoded user
+  /// by accessing a user
   ///*********************************
   Future<void> _fetchScreenTime() async {
     try{
       // Regrab UID incase its changed
       uid = auth.currentUser?.uid;
-      //Hard coded user for accessing data
+
       final snapshot = await db.collection("UID").doc(uid).collection("appUsageCurrent").get();
       //Temp map for saving data from database
       Map<String, double> fetchedData = {};
-      //Loop to access all screentime data from hard coded user
+      //Loop to access all screentime data from user
       for (var doc in snapshot.docs){
         String docName = doc.id;
         double? hours = doc['dailyHours']?.toDouble();
