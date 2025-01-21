@@ -3,7 +3,7 @@
 ///
 /// Description: Home page file for 
 /// application, currently holds
-/// previous prototype
+/// current app usage
 ///
 ///*******************************
 
@@ -16,7 +16,6 @@ import 'package:intl/intl.dart';
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 //Firestore Connection Constants
 final FirebaseFirestore FIRESTORE = FirebaseFirestore.instance;
@@ -38,6 +37,7 @@ class HomePage extends StatelessWidget {
     );
   }
 }
+
 ///*********************************
 /// Name: MyHomePage
 /// 
@@ -50,6 +50,7 @@ class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
+
 ///*********************************
 /// Name: MyHomePageState
 /// 
@@ -59,28 +60,33 @@ class MyHomePage extends StatefulWidget {
 /// permissions, reads/write from firebase
 ///*********************************
 class _MyHomePageState extends State<MyHomePage> {
-
+  //Timer for automatic writes
+  late Timer _timer;
   //Native Kotlin method channel
   static const screenTimeChannel = MethodChannel('kotlin.methods/screentime');
-
   //Maps for reading/writing data from the database
   Map<String, Map<String, String>> _screenTimeData = {};
   Map<String, Map<String, dynamic>> _firestoreScreenTimeData = {};
   //Permission variables for screen time usage permission
   bool _hasPermission = false;
+  //Variable for determining how often to write.
+  final Duration _writeInterval = Duration(seconds: 30);
 
-  //Checks screen time usage permission on startup
+  //Checks screen time usage permission on startup, starts timer for auto writing
+  //Moves data from current to historical
   @override
   void initState(){
     super.initState();
     _checkPermission();
+    _timer = Timer.periodic(_writeInterval, (Timer t) => _writeScreenTimeData());
     _currentToHistorical();
   }
 
+  //Cancels the timer
   @override
   void dispose() async {
     print("**********Disposing...***************");
-    //_closingWrite();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -139,52 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } on PlatformException catch (e) {
       print("Failed to get screen time: ${e.message}");
     }
-    //await _writeScreenTimeData(_screenTimeData);
   }
-
-  ///*********************************
-  /// Name: _writeScreenTimeData
-  ///   
-  /// Description: Takes the data 
-  /// that was accessed in _getScreenTime
-  /// and writes it to the Firestore database 
-  /// using batches for multiple writes
-  ///*********************************
-  //Future<void> _writeScreenTimeData(Map<String, Map<String, String>> data) async {
-  //   final userDB = USER_REF.collection("appUsageCurrent");
-    
-  //   // Create a batch to handle multiple writes
-  //   final batch = FIRESTORE.batch();
-    
-  //   try {
-  //     // Iterate through each app and its screen time
-  //     for (final entry in data.entries) {
-  //       final appName = entry.key;
-  //       final screenTimeHours = double.parse(entry.value['hours']!);
-        
-  //       // Reference to the document with app name
-  //       final docRef = userDB.doc(appName);
-        
-  //       // Set the data with merge option to update existing documents
-  //       // or create new ones if they don't exist
-  //       batch.set(
-  //         docRef,
-  //         {
-  //           'dailyHours': screenTimeHours,
-  //           'lastUpdated': FieldValue.serverTimestamp(),
-  //         },
-  //         SetOptions(merge: true),
-  //       );
-  //     }
-      
-  //     // Commit the batch
-  //     await batch.commit();
-  //     print('Successfully wrote screen time data to Firestore');
-  //   } catch (e) {
-  //     print('Error writing screen time data to Firestore: $e');
-  //     rethrow;
-  //   }
-  // }
 
   ///*********************************
   /// Name: _fetchScreenTime
@@ -219,9 +180,8 @@ class _MyHomePageState extends State<MyHomePage> {
   ///*******************************************************
   /// Name: _currentToHistorical
   ///
-  /// Description: Moves data from appUsageCurrent to
-  /// appUsageHistory in Firestore
-  ///
+  /// Description: Moves data from the current collection to
+  /// history in Firestore
   ///********************************************************
   Future<void> _currentToHistorical() async {
     //Grab data from current
@@ -241,6 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print("error fetching screentime data: $e");
     }
 
+    //Create batch
     var batch = FIRESTORE.batch();
 
     try {
@@ -279,12 +240,16 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         }
       }
+    
+      //Commit the batch
       await batch.commit();
       print('Successfully wrote screen time data to History');
 
+      //Create batch for clearing current data
       batch = FIRESTORE.batch();
-      // Commit the batch
+
       final CUR_SNAPSHOT = await USER_REF.collection('appUsageCurrent').get();
+      
       //Clear current app usage
       for(var doc in CUR_SNAPSHOT.docs)
       {
@@ -298,11 +263,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   
   ///**************************************************
-  /// Name: closingWrite
+  /// Name: _writeScreenTimeData
   ///
-  /// Description: Writes to the firestore database on close
+  /// Description: Takes the data 
+  /// that was accessed in _getScreenTime
+  /// and writes it to the Firestore database 
+  /// using batches for multiple writes
   ///***************************************************
-  Future<void> _closingWrite() async
+  Future<void> _writeScreenTimeData() async
   {
     if(_screenTimeData.isNotEmpty){
       final userDB = USER_REF.collection('appUsageCurrent');
@@ -332,7 +300,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         // Commit the batch
         await batch.commit();
-        print('Successfully wrote on close');
+        print('Successfully wrote screentime data');
       } catch (e) {
         print('Error writing screen time data to Firestore: $e');
         rethrow;
@@ -340,12 +308,24 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  ///**************************************************
+  /// Name: _exit
+  ///
+  /// Description: Calls _writeScreenTimeData before
+  /// exiting the app
+  ///***************************************************
   void _exit() async
   {
-    await _closingWrite();
+    await _writeScreenTimeData();
     SystemNavigator.pop();
   }  
 
+  ///**************************************************
+  /// Name: _showBackDialog
+  ///
+  /// Description: Allows the user to confirm that they
+  /// want to exit the app
+  ///***************************************************
   Future<bool?> _showBackDialog() {
     return showDialog<bool>(
       context: context,
@@ -381,49 +361,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ///********************************************************
   @override
   Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text(widget.title),
-  //     ),
-  //     body: Center(
-  //       child: Column(
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: [
-  //           //Button for writing screentime data to database
-  //           ElevatedButton(
-  //             onPressed: _getScreenTime,
-  //             child: const Text('Write Screentime'),
-  //           ),
-  //           if (!_hasPermission)
-  //             const Text('Permission required for screen time access'),
-  //             //Button for fetching data from database
-  //             ElevatedButton(
-  //               onPressed: _fetchScreenTime, 
-  //               child: const Text('Fetch Screentime')
-  //           ),
-  //           //Display list of data if map of data is not empty
-  //           if (_firestoreScreenTimeData.isNotEmpty)
-  //             Expanded(
-  //               //Listview for displaying a list of items
-  //               child: ListView.builder(
-  //                 itemCount: _firestoreScreenTimeData.length,
-  //                 //Item is built with app name and hours displayed
-  //                 itemBuilder: (context, index) {
-  //                   final entry = _firestoreScreenTimeData.entries.elementAt(index);
-  //                   return ListTile(
-  //                     title: Text(entry.key),
-  //                     subtitle: Text('${entry.value['hours']} hours'),
-  //                   );
-  //                 },
-  //               ),
-  //             ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-    
+    //Prevents request permission from being called dozens of times
     if(!_hasPermission)
     {
       return Material(
@@ -452,6 +390,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            //If screentime was grabbed, print it
             if (_screenTimeData.isNotEmpty)
               Expanded(
                 child: ListView.builder(
@@ -466,9 +405,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
               ),
+              //Ensure proper exit on back button pressed or exit button pressed.
               PopScope<Object?>
               (
-                canPop: false,
+                canPop: true,
                 onPopInvokedWithResult: (bool didPop, Object? result) async {
                   if (didPop) {
                     return;
@@ -479,7 +419,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                 },
                 child: ElevatedButton(
-                  onPressed: _exit, 
+                  onPressed: _showBackDialog, 
                   child: Text('Exit')
                 ),
               )

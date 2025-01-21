@@ -6,16 +6,20 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.content.Context
+//Screen time usage import
 import android.app.usage.UsageStatsManager
+//Permissions Settings imports
 import android.provider.Settings
 import android.app.AppOpsManager
 import android.content.Intent
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+//Used for time calculations
 import java.util.Calendar
 import java.util.TimeZone
 import java.util.Locale
 import java.util.Date
+//Allows access to category titles
 import android.content.pm.ApplicationInfo
 
 class MainActivity: FlutterActivity() {
@@ -26,10 +30,12 @@ class MainActivity: FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        
         channel.setMethodCallHandler { call, result ->
             try {
                 Log.d("MainActivity", "Method called: ${call.method}")
                 
+                //Kotlin equivalent of switch statement for which method channel we wish to use
                 when (call.method) {
                     "getScreenTime" -> {
                         if (checkUsageStatsPermission()) {
@@ -118,11 +124,10 @@ class MainActivity: FlutterActivity() {
     /// Name: getScreenTimeStats
     /// 
     /// Description: Returns a Map that uses app names as keys
-    ///              and inner Maps as values. The inner Maps use
-    ///              data labels such as "hours" and "category" as keys
-    ///              and the values obtained for those from the screentime
-    ///              data as values
-    ///
+    /// and inner Maps as values. The inner Maps use
+    /// data labels such as "hours" and "category" as keys
+    /// and the values obtained for those from the screentime
+    /// data as values
     ///***********************************************
     private fun getScreenTimeStats(): Map<String, Map<String, String>> {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
@@ -133,12 +138,14 @@ class MainActivity: FlutterActivity() {
         calendar.add(Calendar.DAY_OF_YEAR, 1)
         val endTime = getMidnight(calendar)
     
+        //Grabs the usage stats using the stats manager
         val queryUsageStats = usageStatsManager.queryUsageStats(
             UsageStatsManager.INTERVAL_DAILY,
             startTime,
             endTime
         )
-    
+        
+        //Create a map for transferring screen time to dart/flutter code
         val screenTimeMap = mutableMapOf<String, MutableMap<String, String>>()
     
         for (stats in queryUsageStats) {
@@ -149,7 +156,9 @@ class MainActivity: FlutterActivity() {
             try {
                 val appInfo = packageManager.getApplicationInfo(stats.packageName, 0)
                 val appName = packageManager.getApplicationLabel(appInfo).toString()
+                //Add apps' names as keys for the outer map
                 screenTimeMap[appName] = mutableMapOf<String, String>()
+                //Add hours and category as key-value pairs for the inner map
                 screenTimeMap[appName]!!.put("hours", "%.2f".format(stats.totalTimeInForeground / 3600000.0).toString())
                 if(appInfo.category != -1) {
                     screenTimeMap[appName]!!.put("category", ApplicationInfo.getCategoryTitle(this, appInfo.category).toString())
