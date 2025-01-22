@@ -16,11 +16,15 @@ import 'package:intl/intl.dart';
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
-//Firestore Connection Constants
+//Firestore Connection Variables
+final FirebaseAuth AUTH = FirebaseAuth.instance;
 final FirebaseFirestore FIRESTORE = FirebaseFirestore.instance;
 final CollectionReference MAIN_COLLECTION = FIRESTORE.collection('UID');
-final DocumentReference USER_REF = MAIN_COLLECTION.doc('123');
+String? uid = AUTH.currentUser?.uid;
+DocumentReference userRef = MAIN_COLLECTION.doc(uid);
 
 ///*********************************
 /// Name: HomePage
@@ -64,7 +68,6 @@ class _MyHomePageState extends State<MyHomePage> {
   static const screenTimeChannel = MethodChannel('kotlin.methods/screentime');
   //Maps for reading/writing data from the database
   Map<String, Map<String, String>> _screenTimeData = {};
-  Map<String, Map<String, dynamic>> _firestoreScreenTimeData = {};
   //Permission variables for screen time usage permission
   bool _hasPermission = false;
 
@@ -123,13 +126,16 @@ class _MyHomePageState extends State<MyHomePage> {
   /// by storing into a Map.
   ///*********************************
   Future<void> _getScreenTime() async {
+    //Checks if user has permission, if not it requests the permissions
     if (!_hasPermission) {
       await _requestPermission();
       return;
     }
 
     try {
+      //Raw data from screentime channel 
       final Map<dynamic, dynamic> result = await screenTimeChannel.invokeMethod('getScreenTime');
+      //State for writing raw data in formatted map
       setState(() {
         _screenTimeData = Map<String, Map<String, String>>.from(
           result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
@@ -141,36 +147,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  ///*********************************
-  /// Name: _fetchScreenTime
-  ///   
-  /// Description: Fetches screentime that has 
-  /// been written into the Firestore database
-  /// by accessing a hardcoded user
-  ///*********************************
-  // Future<void> _fetchScreenTime() async {
-  //   try{
-  //     //Hard coded user for accessing data
-  //     final snapshot = await USER_REF.collection("appUsageCurrent").get();
-  //     //Temp map for saving data from database
-  //     Map<String, Map<String, dynamic>> fetchedData = {};
-  //     //Loop to access all screentime data from hard coded user
-  //     for (var doc in snapshot.docs){
-  //       String docName = doc.id;
-  //       double? hours = doc['dailyHours']?.toDouble();
-  //       if (hours != null){
-  //         fetchedData[docName]={'hours' : hours};
-  //       }
-  //     }
-  //     //State for setting temp data to global map
-  //       setState(() {
-  //        _firestoreScreenTimeData = fetchedData;
-  //       });
-  //   } catch (e){
-  //    print("error fetching screentime data: $e");
-  //   }
-  // }
-
   ///*******************************************************
   /// Name: _currentToHistorical
   ///
@@ -178,11 +154,24 @@ class _MyHomePageState extends State<MyHomePage> {
   /// history in Firestore
   ///********************************************************
   Future<void> _currentToHistorical() async {
-    //Grab data from current
+    //Grab current UID
+    var curUid = uid;
+    //Regrab UID in case it's changed
+    uid = AUTH.currentUser?.uid;
+    //Update user reference if UID has changed
+    if(curUid != uid)
+    {
+      userRef = MAIN_COLLECTION.doc(uid);
+    }
+
+    //Temp map for saving current data from database
     Map<String, Map<String, dynamic>> fetchedData = {};
+
+    //Grab data from current
     try{
-      final CURRENT = USER_REF.collection('appUsageCurrent');
+      final CURRENT = userRef.collection('appUsageCurrent');
       final CUR_SNAPSHOT = await CURRENT.get();
+      //Loop to access all current screentime data from user
       for (var doc in CUR_SNAPSHOT.docs){
         String docName = doc.id;
         double? hours = doc['dailyHours']?.toDouble();
@@ -217,7 +206,7 @@ class _MyHomePageState extends State<MyHomePage> {
           String dayOfWeekStr = DateFormat('EEEE').format(dateUpdated);
           //Gets the start of that week
           String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
-          var historical = USER_REF.collection('appUsageHistory').doc(startOfWeek);
+          var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
 
           // Move data to historical
           batch.set(
@@ -242,7 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //Create batch for clearing current data
       batch = FIRESTORE.batch();
 
-      final CUR_SNAPSHOT = await USER_REF.collection('appUsageCurrent').get();
+      final CUR_SNAPSHOT = await userRef.collection('appUsageCurrent').get();
       
       //Clear current app usage
       for(var doc in CUR_SNAPSHOT.docs)
@@ -266,8 +255,18 @@ class _MyHomePageState extends State<MyHomePage> {
   ///***************************************************
   Future<void> _writeScreenTimeData() async
   {
+    //Grab current UID
+    var curUid = uid;
+    //Regrab UID in case it's changed
+    uid = AUTH.currentUser?.uid;
+    //Update user reference if UID has changed
+    if(curUid != uid)
+    {
+      userRef = MAIN_COLLECTION.doc(uid);
+    }
+
     if(_screenTimeData.isNotEmpty){
-      final userDB = USER_REF.collection('appUsageCurrent');
+      final current = userRef.collection('appUsageCurrent');
     
       // Create a batch to handle multiple writes
       final batch = FIRESTORE.batch();
@@ -279,7 +278,7 @@ class _MyHomePageState extends State<MyHomePage> {
           final screenTimeHours = double.parse(entry.value['hours']!);
           
           // Reference to the document with app name
-          final docRef = userDB.doc(appName);
+          final docRef = current.doc(appName);
           
           // Set the data with merge option to update existing documents
           // or create new ones if they don't exist
@@ -358,8 +357,31 @@ class _MyHomePageState extends State<MyHomePage> {
     //Prevents request permission from being called dozens of times
     if(!_hasPermission)
     {
-      return Material(
-        child: Center(
+      return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          // Creating little user icon you can press to view account info
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<ProfileScreen>(
+                  builder: (context) => ProfileScreen(
+                    actions: [
+                      SignedOutAction((context) {
+                        Navigator.of(context).pop();
+                      })
+                    ],
+                  ),
+                ),
+              );
+            },
+          )
+        ],
+      ),
+      body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -379,8 +401,31 @@ class _MyHomePageState extends State<MyHomePage> {
     if (_screenTimeData.isEmpty){
       _getScreenTime();
     }
-    return Material(
-      child: Center(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          // Creating little user icon you can press to view account info
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<ProfileScreen>(
+                  builder: (context) => ProfileScreen(
+                    actions: [
+                      SignedOutAction((context) {
+                        Navigator.of(context).pop();
+                      })
+                    ],
+                  ),
+                ),
+              );
+            },
+          )
+        ],
+      ),
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
