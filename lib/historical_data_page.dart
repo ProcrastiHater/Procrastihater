@@ -16,6 +16,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+//fl_chart imports
+import 'package:fl_chart/fl_chart.dart';
+
+
 ///*********************************
 /// Name: HistoricalDataPage
 /// 
@@ -23,40 +27,30 @@ import 'package:firebase_auth/firebase_auth.dart';
 /// the HistoricalDataPage, builds and displays 
 /// historical data page view
 ///*********************************
-/*class HistoricalDataPage extends StatelessWidget {
-  const HistoricalDataPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-      title: const Text("Historical Data Page"),
-      ),
-    body: const Center(
-      child: Text("Historical Data Graph")
-    )
-    );
-  }
-}*/
-
 class HistoricalDataPage extends StatelessWidget {
   const HistoricalDataPage({super.key});
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-    home: MyHistoricalDataPage(),
+    return MaterialApp(
+    home: Scaffold(
+      appBar: AppBar(title: const Text("Historical Data Page")),
+      body: MyHistoricalDataPage(),
+      ),      
     );
   }
 }
-
-class MyHistoricalDataPage {
-  const MyHistoricalDataPage();
-}
-class MyHistoriocalPage extends StatefulWidget {
-  //const MyHistoricalDataPage({super.key});
+class MyHistoricalDataPage extends StatefulWidget {
+  const MyHistoricalDataPage({super.key});
   @override
-  State<MyHistoriocalPage> createState() => _MyHistoricalDataPageState();
+  State<MyHistoricalDataPage> createState() => _MyHistoricalDataPageState();
 }
 class _MyHistoricalDataPageState extends State<MyHistoricalDataPage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+  
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
