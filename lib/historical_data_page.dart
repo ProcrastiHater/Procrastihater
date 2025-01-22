@@ -23,7 +23,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 /// the HistoricalDataPage, builds and displays 
 /// historical data page view
 ///*********************************
-class HistoricalDataPage extends StatelessWidget {
+/*class HistoricalDataPage extends StatelessWidget {
   const HistoricalDataPage({super.key});
   @override
   Widget build(BuildContext context) {
@@ -35,5 +35,31 @@ class HistoricalDataPage extends StatelessWidget {
       child: Text("Historical Data Graph")
     )
     );
+  }
+}*/
+
+class HistoricalDataPage extends StatelessWidget {
+  const HistoricalDataPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+    home: MyHistoricalDataPage(),
+    );
+  }
+}
+
+class MyHistoricalDataPage {
+  const MyHistoricalDataPage();
+}
+class MyHistoriocalPage extends StatefulWidget {
+  //const MyHistoricalDataPage({super.key});
+  @override
+  State<MyHistoriocalPage> createState() => _MyHistoricalDataPageState();
+}
+class _MyHistoricalDataPageState extends State<MyHistoricalDataPage> {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
   }
 }
