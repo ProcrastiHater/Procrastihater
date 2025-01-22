@@ -16,33 +16,28 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 //Page Imports
 import 'home_page.dart';
 import 'social_media_page.dart';
 import 'historical_data_page.dart';
+import 'login_screen.dart';
 
 
 ///*********************************
 /// Name: main
 /// 
 /// Description: Initializes Firebase,
-/// performs anonymous sign-in, and 
+/// 
 /// launches the main app
 ///*********************************
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase initialization
   await Firebase.initializeApp();
-  try {
-    //Perform anonymous sign-in
-    await FirebaseAuth.instance.signInAnonymously();
-    print("Signed in anonymously");
-  } catch (e) {
-    print('Error signing in anonymously: $e');
-  }
   //launch the main app
-  runApp(const MyApp());
+  runApp(const LoginScreen());
 }
 
 ///*********************************
