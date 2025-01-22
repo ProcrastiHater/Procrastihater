@@ -16,6 +16,9 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+final FirebaseAuth auth = FirebaseAuth.instance;
+String? uid = auth.currentUser?.uid;
 
 ///*********************************
 /// Name: HomePage
@@ -138,7 +141,10 @@ class _MyHomePageState extends State<MyHomePage> {
   /// using batches for multiple writes
   ///*********************************
   Future<void> _writeScreenTimeData(Map<String, double> data) async {
-  final userDB = db.collection("UID").doc("123").collection("appUsageCurrent");
+  // Regrab UID incase its changed
+  uid = auth.currentUser?.uid;
+
+  final userDB = db.collection("UID").doc(uid).collection("appUsageCurrent");
   
   // Create a batch to handle multiple writes
   final batch = db.batch();
@@ -177,15 +183,17 @@ class _MyHomePageState extends State<MyHomePage> {
   ///   
   /// Description: Fetches screentime that has 
   /// been written into the Firestore database
-  /// by accessing a hardcoded user
+  /// by accessing a user
   ///*********************************
   Future<void> _fetchScreenTime() async {
     try{
-      //Hard coded user for accessing data
-      final snapshot = await db.collection("UID").doc("123").collection("appUsageCurrent").get();
+      // Regrab UID incase its changed
+      uid = auth.currentUser?.uid;
+
+      final snapshot = await db.collection("UID").doc(uid).collection("appUsageCurrent").get();
       //Temp map for saving data from database
       Map<String, double> fetchedData = {};
-      //Loop to access all screentime data from hard coded user
+      //Loop to access all screentime data from user
       for (var doc in snapshot.docs){
         String docName = doc.id;
         double? hours = doc['dailyHours']?.toDouble();
@@ -207,6 +215,26 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          // Creating little user icon you can press to view account info
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<ProfileScreen>(
+                  builder: (context) => ProfileScreen(
+                    actions: [
+                      SignedOutAction((context) {
+                        Navigator.of(context).pop();
+                      })
+                    ],
+                  ),
+                ),
+              );
+            },
+          )
+        ],
       ),
       body: Center(
         child: Column(
@@ -240,6 +268,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
               ),
+            const SignOutButton(),
           ],
         ),
       ),
