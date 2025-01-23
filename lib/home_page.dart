@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ///*******************************
   @override
   void dispose() async {
-    print("**********Disposing...***************");
+    debugPrint("**********Disposing...***************");
     super.dispose();
   }
 
@@ -102,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
         _hasPermission = hasPermission;
       });
     } on PlatformException catch (e) {
-      print("Failed to check permission: ${e.message}");
+      debugPrint("Failed to check permission: ${e.message}");
     }
   }
 
@@ -117,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
       await screenTimeChannel.invokeMethod('requestPermission');
       await _checkPermission();
     } on PlatformException catch (e) {
-      print("Failed to request permission: ${e.message}");
+      debugPrint("Failed to request permission: ${e.message}");
     }
   }
   
@@ -143,9 +143,9 @@ class _MyHomePageState extends State<MyHomePage> {
           result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
         );
       });
-      print('Got screen time!');
+      debugPrint('Got screen time!');
     } on PlatformException catch (e) {
-      print("Failed to get screen time: ${e.message}");
+      debugPrint("Failed to get screen time: ${e.message}");
     }
   }
 
@@ -176,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
     } catch (e){
-      print("error fetching screentime data: $e");
+      debugPrint("error fetching screentime data: $e");
     }
 
     //Create batch
@@ -222,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
     
       //Commit the batch
       await batch.commit();
-      print('Successfully wrote screen time data to History');
+      debugPrint('Successfully wrote screen time data to History');
 
       //Create batch for clearing current data
       batch = FIRESTORE.batch();
@@ -236,7 +236,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       await batch.commit();
     } catch (e) {
-      print('Error writing screen time data to Firestore: $e');
+      debugPrint('Error writing screen time data to Firestore: $e');
       rethrow;
     }
   }
@@ -284,9 +284,9 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         // Commit the batch
         await batch.commit();
-        print('Successfully wrote screentime data');
+        debugPrint('Successfully wrote screentime data');
       } catch (e) {
-        print('Error writing screen time data to Firestore: $e');
+        debugPrint('Error writing screen time data to Firestore: $e');
         rethrow;
       }
     }
