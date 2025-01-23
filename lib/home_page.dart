@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _hasPermission = false;
 
   ///*******************************
-  ///Checks screen time usage permission on startup, starts timer for auto writing
+  ///Checks screen time usage permission on startup
   @override
   void initState(){
     super.initState();
