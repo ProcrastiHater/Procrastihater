@@ -4,7 +4,6 @@
 /// Description: Home page file for 
 /// application, currently holds
 /// current app usage
-///
 ///*******************************
 
 //Dart imports

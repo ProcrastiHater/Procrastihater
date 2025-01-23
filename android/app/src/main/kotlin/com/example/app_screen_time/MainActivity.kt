@@ -72,8 +72,7 @@ class MainActivity: FlutterActivity() {
     /// Name: checkUsageStatsPermission
     ///
     /// Description: Checks to see if the user has granted
-    ///              permission for accessing screentime data
-    /// 
+    /// permission for accessing screentime data
     ///**********************************************
     private fun checkUsageStatsPermission(): Boolean {
         val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
@@ -97,8 +96,7 @@ class MainActivity: FlutterActivity() {
     /// Name: openUsageAccessSettings
     /// 
     /// Description: Opens the permissions page for accessing
-    ///              screentime data
-    /// 
+    /// screentime data
     ///**********************************************
     private fun openUsageAccessSettings() {
         startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
@@ -108,8 +106,7 @@ class MainActivity: FlutterActivity() {
     /// Name: getMidnight
     /// 
     /// Description: Returns a long of midnight for the
-    ///              given Calendar instance
-    ///
+    /// given Calendar instance
     ///**********************************************
     private fun getMidnight(curDate: Calendar): Long {
         val today = curDate
