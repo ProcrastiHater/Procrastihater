@@ -24,6 +24,7 @@ final FirebaseAuth AUTH = FirebaseAuth.instance;
 final FirebaseFirestore FIRESTORE = FirebaseFirestore.instance;
 final CollectionReference MAIN_COLLECTION = FIRESTORE.collection('UID');
 String? uid = AUTH.currentUser?.uid;
+//Reference to user's document in Firestore
 DocumentReference userRef = MAIN_COLLECTION.doc(uid);
 
 ///*********************************
@@ -71,16 +72,17 @@ class _MyHomePageState extends State<MyHomePage> {
   //Permission variables for screen time usage permission
   bool _hasPermission = false;
 
-  //Checks screen time usage permission on startup, starts timer for auto writing
-  //Moves data from current to historical
+  ///*******************************
+  ///Checks screen time usage permission on startup, starts timer for auto writing
   @override
   void initState(){
     super.initState();
     _checkPermission();
+    //Moves data from current to historical
     _currentToHistorical();
   }
 
-  //Cancels the timer
+  ///*******************************
   @override
   void dispose() async {
     print("**********Disposing...***************");
@@ -154,15 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// history in Firestore
   ///********************************************************
   Future<void> _currentToHistorical() async {
-    //Grab current UID
-    var curUid = uid;
-    //Regrab UID in case it's changed
-    uid = AUTH.currentUser?.uid;
-    //Update user reference if UID has changed
-    if(curUid != uid)
-    {
-      userRef = MAIN_COLLECTION.doc(uid);
-    }
+    _updateUserRef();
 
     //Temp map for saving current data from database
     Map<String, Map<String, dynamic>> fetchedData = {};
@@ -176,8 +170,9 @@ class _MyHomePageState extends State<MyHomePage> {
         String docName = doc.id;
         double? hours = doc['dailyHours']?.toDouble();
         Timestamp timestamp = doc['lastUpdated'];
+        String category = doc['appType'];
         if (hours != null){
-          fetchedData[docName] = {'dailyHours': hours, 'lastUpdated': timestamp};
+          fetchedData[docName] = {'dailyHours': hours, 'lastUpdated': timestamp, 'appType': category};
         }
       }
     } catch (e){
@@ -189,10 +184,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     try {
       // Iterate through each app and its screen time
-      for (var entry in fetchedData.entries) {
-        var appName = entry.key;
-        var screenTimeHours = entry.value['dailyHours'];
-        Timestamp timestamp = entry.value['lastUpdated'];
+      for (var appMap in fetchedData.entries) {
+        double screenTimeHours = appMap.value['dailyHours'];
+        Timestamp timestamp = appMap.value['lastUpdated'];
+        String category = appMap.value['appType'];
         // Reference to the document with app name
         DateTime dateUpdated = timestamp.toDate();
         DateTime currentTime = DateTime.now();
@@ -213,9 +208,10 @@ class _MyHomePageState extends State<MyHomePage> {
             historical,
             {
               dayOfWeekStr: {
-                appName: {
-                  'dailyHours': screenTimeHours,
+                appMap.key: {
+                  'hours': screenTimeHours,
                   'lastUpdated': dateUpdated,
+                  'appType': category
                 }
               }
             },
@@ -255,15 +251,8 @@ class _MyHomePageState extends State<MyHomePage> {
   ///***************************************************
   Future<void> _writeScreenTimeData() async
   {
-    //Grab current UID
-    var curUid = uid;
-    //Regrab UID in case it's changed
-    uid = AUTH.currentUser?.uid;
-    //Update user reference if UID has changed
-    if(curUid != uid)
-    {
-      userRef = MAIN_COLLECTION.doc(uid);
-    }
+    //Update ref to user's doc if UID has changed
+    _updateUserRef();
 
     if(_screenTimeData.isNotEmpty){
       final current = userRef.collection('appUsageCurrent');
@@ -276,6 +265,7 @@ class _MyHomePageState extends State<MyHomePage> {
         for (final entry in _screenTimeData.entries) {
           final appName = entry.key;
           final screenTimeHours = double.parse(entry.value['hours']!);
+          final category = entry.value['category'];
           
           // Reference to the document with app name
           final docRef = current.doc(appName);
@@ -287,6 +277,7 @@ class _MyHomePageState extends State<MyHomePage> {
             {
               'dailyHours': screenTimeHours,
               'lastUpdated': FieldValue.serverTimestamp(),
+              'appType': category
             },
             SetOptions(merge: true),
           );
@@ -300,55 +291,35 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
   }
-
+ 
   ///**************************************************
-  /// Name: _exit
+  /// Name: _signOut
   ///
   /// Description: Calls _writeScreenTimeData before
-  /// exiting the app
+  /// signing user out of the app
   ///***************************************************
-  void _exit() async
+  void _signOut() async
   {
     await _writeScreenTimeData();
-    SystemNavigator.pop();
-  }  
+    AUTH.signOut();
+  }
 
   ///**************************************************
-  /// Name: _showBackDialog
+  /// Name: _updateUserRef
   ///
-  /// Description: Allows the user to confirm that they
-  /// want to exit the app
+  /// Description: Updates userRef to doc if the UID has changed
   ///***************************************************
-  Future<bool?> _showBackDialog() {
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Are you sure?'),
-          content: const Text('Are you sure you want to exit the app?'),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('Nevermind'),
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('Leave'),
-              onPressed: () {
-                _exit();
-              },
-            ),
-          ],
-        );
-      },
-    );
+  void _updateUserRef()
+  {
+    //Grab current UID
+    var curUid = uid;
+    //Regrab UID in case it's changed
+    uid = AUTH.currentUser?.uid;
+    //Update user reference if UID has changed
+    if(curUid != uid)
+    {
+      userRef = MAIN_COLLECTION.doc(uid);
+    }
   }
 
   ///********************************************************
@@ -389,15 +360,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: _requestPermission,
                 child: Text('Give Permissions')
               ),
-              ElevatedButton(
-                onPressed: SystemNavigator.pop, 
-                child: Text('Exit')
+              ElevatedButton.icon(
+                label: Text("Sign Out"),
+                onPressed: _signOut,
+                icon: Icon(
+                  Icons.logout,
+                  size: 24,
+                ),
               )
             ],
           ),
         ),
       );
     }
+    //Only grab screen time if the map for it is empty
     if (_screenTimeData.isEmpty){
       _getScreenTime();
     }
@@ -444,22 +420,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
               ),
-              //Ensure proper exit on back button pressed or exit button pressed.
-              PopScope<Object?>
-              (
-                canPop: true,
-                onPopInvokedWithResult: (bool didPop, Object? result) async {
-                  if (didPop) {
-                    return;
-                  }
-                  final bool shouldPop = await _showBackDialog() ?? false;
-                  if (context.mounted && shouldPop) {
-                    _exit();
-                  }
-                },
-                child: ElevatedButton(
-                  onPressed: _showBackDialog, 
-                  child: Text('Exit')
+              //Custom sign-out button
+              ElevatedButton.icon(
+                label: Text("Sign Out"),
+                onPressed: _signOut,
+                icon: Icon(
+                  Icons.logout,
+                  size: 24,
                 ),
               )
           ],
