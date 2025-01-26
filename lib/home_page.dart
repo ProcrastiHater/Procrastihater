@@ -75,10 +75,17 @@ class _MyHomePageState extends State<MyHomePage> {
   ///Checks screen time usage permission on startup
   @override
   void initState(){
-    super.initState();
-    _checkPermission();
     //Moves data from current to historical
-    _currentToHistorical();
+    _currentToHistorical().whenComplete(() {
+        _checkPermission().whenComplete((){
+            _getScreenTime().whenComplete((){
+              _writeScreenTimeData();
+            });
+          }
+        );
+      }
+    );
+    super.initState();
   }
 
   ///*******************************
@@ -160,6 +167,9 @@ class _MyHomePageState extends State<MyHomePage> {
     //Temp map for saving current data from database
     Map<String, Map<String, dynamic>> fetchedData = {};
 
+    DateTime currentTime = DateTime.now();
+    DateTime dateUpdated;
+    bool needToMoveData = false;
     //Grab data from current
     try{
       final CURRENT = userRef.collection('appUsageCurrent');
@@ -169,74 +179,90 @@ class _MyHomePageState extends State<MyHomePage> {
         String docName = doc.id;
         double? hours = doc['dailyHours']?.toDouble();
         Timestamp timestamp = doc['lastUpdated'];
+        dateUpdated = timestamp.toDate();
         String category = doc['appType'];
         if (hours != null){
           fetchedData[docName] = {'dailyHours': hours, 'lastUpdated': timestamp, 'appType': category};
+        }
+        //Check if any data needs to be written to history
+        if (dateUpdated.day != currentTime.day
+         || dateUpdated.month != currentTime.month
+         || dateUpdated.year != currentTime.year)
+        {
+          needToMoveData = true;
         }
       }
     } catch (e){
       debugPrint("error fetching screentime data: $e");
     }
 
-    //Create batch
-    var batch = FIRESTORE.batch();
+    //If any data needs to be written to history
+    if(needToMoveData)
+    {
+      //Create batch
+      var batch = FIRESTORE.batch();
 
-    try {
-      // Iterate through each app and its screen time
-      for (var appMap in fetchedData.entries) {
-        double screenTimeHours = appMap.value['dailyHours'];
-        Timestamp timestamp = appMap.value['lastUpdated'];
-        String category = appMap.value['appType'];
-        // Reference to the document with app name
-        DateTime dateUpdated = timestamp.toDate();
-        DateTime currentTime = DateTime.now();
-        //Check if date has changed since database was updated
-        if(dateUpdated.day != currentTime.day
-         || dateUpdated.month != currentTime.month
-         || dateUpdated.year != currentTime.year){
-          //Gets the number of the day of the week for the last update day
-          int dayOfWeekNum = dateUpdated.weekday;
-          //Gets the name of the day of the week for last update day
-          String dayOfWeekStr = DateFormat('EEEE').format(dateUpdated);
-          //Gets the start of that week
-          String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
-          var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
+      try {
+        // Iterate through each app and its screen time
+        for (var appMap in fetchedData.entries) {
+          double screenTimeHours = appMap.value['dailyHours'];
+          Timestamp timestamp = appMap.value['lastUpdated'];
+          String category = appMap.value['appType'];
+          // Reference to the document with app name
+          DateTime dateUpdated = timestamp.toDate();
+          DateTime currentTime = DateTime.now();
+          //Check if date has changed since database was updated
+          if(dateUpdated.day != currentTime.day
+          || dateUpdated.month != currentTime.month
+          || dateUpdated.year != currentTime.year){
+            //Gets the number of the day of the week for the last update day
+            int dayOfWeekNum = dateUpdated.weekday;
+            //Gets the name of the day of the week for last update day
+            String dayOfWeekStr = DateFormat('EEEE').format(dateUpdated);
+            //Gets the start of that week
+            String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
+            var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
 
-          // Move data to historical
-          batch.set(
-            historical,
-            {
-              dayOfWeekStr: {
-                appMap.key: {
-                  'hours': screenTimeHours,
-                  'lastUpdated': dateUpdated,
-                  'appType': category
+            // Move data to historical
+            batch.set(
+              historical,
+              {
+                dayOfWeekStr: {
+                  appMap.key: {
+                    'hours': screenTimeHours,
+                    'lastUpdated': dateUpdated,
+                    'appType': category
+                  }
                 }
-              }
-            },
-            SetOptions(merge: true),
-          );
+              },
+              SetOptions(merge: true),
+            );
+          }
         }
-      }
-    
-      //Commit the batch
-      await batch.commit();
-      debugPrint('Successfully wrote screen time data to History');
-
-      //Create batch for clearing current data
-      batch = FIRESTORE.batch();
-
-      final CUR_SNAPSHOT = await userRef.collection('appUsageCurrent').get();
       
-      //Clear current app usage
-      for(var doc in CUR_SNAPSHOT.docs)
-      {
-        await doc.reference.delete();
+        //Commit the batch
+        await batch.commit();
+        
+        debugPrint('Successfully wrote screen time data to History');
+        
+        //Create batch for clearing current data
+        batch = FIRESTORE.batch();
+
+        final CUR_SNAPSHOT = await userRef.collection('appUsageCurrent').get();
+        
+        //Clear current app usage
+        for(var doc in CUR_SNAPSHOT.docs)
+        {
+          await doc.reference.delete();
+        }
+        await batch.commit();
+      } catch (e) {
+        debugPrint('Error writing screen time data to Firestore: $e');
+        rethrow;
       }
-      await batch.commit();
-    } catch (e) {
-      debugPrint('Error writing screen time data to Firestore: $e');
-      rethrow;
+    }
+    else{
+      debugPrint('No data needed to be written to history');
     }
   }
   
@@ -324,58 +350,6 @@ class _MyHomePageState extends State<MyHomePage> {
   ///********************************************************
   @override
   Widget build(BuildContext context) {
-    //Prevents request permission from being called dozens of times
-    if(!_hasPermission)
-    {
-      return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          // Creating little user icon you can press to view account info
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<ProfileScreen>(
-                  builder: (context) => ProfileScreen(
-                    actions: [
-                      SignedOutAction((context) {
-                        Navigator.of(context).pop();
-                      })
-                    ],
-                  ),
-                ),
-              );
-            },
-          )
-        ],
-      ),
-      body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: _requestPermission,
-                child: Text('Give Permissions')
-              ),
-              ElevatedButton.icon(
-                label: Text("Sign Out"),
-                onPressed: _signOut,
-                icon: Icon(
-                  Icons.logout,
-                  size: 24,
-                ),
-              )
-            ],
-          ),
-        ),
-      );
-    }
-    //Only grab screen time if the map for it is empty
-    if (_screenTimeData.isEmpty){
-      _getScreenTime();
-    }
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
