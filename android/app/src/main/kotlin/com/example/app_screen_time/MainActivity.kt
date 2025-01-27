@@ -6,13 +6,21 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.content.Context
+//Screen time usage import
 import android.app.usage.UsageStatsManager
+//Permissions Settings imports
 import android.provider.Settings
 import android.app.AppOpsManager
 import android.content.Intent
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+//Used for time calculations
 import java.util.Calendar
+import java.util.TimeZone
+import java.util.Locale
+import java.util.Date
+//Allows access to category titles
+import android.content.pm.ApplicationInfo
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "kotlin.methods/screentime"
@@ -22,10 +30,12 @@ class MainActivity: FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        
         channel.setMethodCallHandler { call, result ->
             try {
                 Log.d("MainActivity", "Method called: ${call.method}")
                 
+                //Kotlin equivalent of switch statement for which method channel we wish to use
                 when (call.method) {
                     "getScreenTime" -> {
                         if (checkUsageStatsPermission()) {
@@ -58,6 +68,12 @@ class MainActivity: FlutterActivity() {
         }
     }
 
+    ///*********************************************
+    /// Name: checkUsageStatsPermission
+    ///
+    /// Description: Checks to see if the user has granted
+    /// permission for accessing screentime data
+    ///**********************************************
     private fun checkUsageStatsPermission(): Boolean {
         val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = if (VERSION.SDK_INT >= VERSION_CODES.Q) {
@@ -76,25 +92,58 @@ class MainActivity: FlutterActivity() {
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
+    ///*********************************************
+    /// Name: openUsageAccessSettings
+    /// 
+    /// Description: Opens the permissions page for accessing
+    /// screentime data
+    ///**********************************************
     private fun openUsageAccessSettings() {
         startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
     }
 
-    private fun getScreenTimeStats(): Map<String, Double> {
+    ///*********************************************
+    /// Name: getMidnight
+    /// 
+    /// Description: Returns a long of midnight for the
+    /// given Calendar instance
+    ///**********************************************
+    private fun getMidnight(curDate: Calendar): Long {
+        val today = curDate
+        today.set(Calendar.HOUR_OF_DAY, 0)
+        today.set(Calendar.MINUTE, 0)
+        today.set(Calendar.SECOND, 0)
+        today.set(Calendar.MILLISECOND, 0)
+        return today.time.time
+    }
+
+    ///*********************************************
+    /// Name: getScreenTimeStats
+    /// 
+    /// Description: Returns a Map that uses app names as keys
+    /// and inner Maps as values. The inner Maps use
+    /// data labels such as "hours" and "category" as keys
+    /// and the values obtained for those from the screentime
+    /// data as values
+    ///***********************************************
+    private fun getScreenTimeStats(): Map<String, Map<String, String>> {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     
+        //Sets the time range for data to be from midnight this morning to midnight tonight
         val calendar = Calendar.getInstance()
-        val endTime = calendar.timeInMillis
-        calendar.add(Calendar.DAY_OF_YEAR, -1)
-        val startTime = calendar.timeInMillis
+        val startTime = getMidnight(calendar)
+        calendar.add(Calendar.DAY_OF_YEAR, 1)
+        val endTime = getMidnight(calendar)
     
+        //Grabs the usage stats using the stats manager
         val queryUsageStats = usageStatsManager.queryUsageStats(
             UsageStatsManager.INTERVAL_DAILY,
             startTime,
             endTime
         )
-    
-        val screenTimeMap = mutableMapOf<String, Double>()
+        
+        //Create a map for transferring screen time to dart/flutter code
+        val screenTimeMap = mutableMapOf<String, MutableMap<String, String>>()
     
         for (stats in queryUsageStats) {
             if (stats.totalTimeInForeground <= 0) {
@@ -104,9 +153,15 @@ class MainActivity: FlutterActivity() {
             try {
                 val appInfo = packageManager.getApplicationInfo(stats.packageName, 0)
                 val appName = packageManager.getApplicationLabel(appInfo).toString()
-                val hoursUsed = "%.2f".format(stats.totalTimeInForeground / 3600000.0).toDouble() 
-                screenTimeMap[appName] = hoursUsed
-                
+                //Add apps' names as keys for the outer map
+                screenTimeMap[appName] = mutableMapOf<String, String>()
+                //Add hours and category as key-value pairs for the inner map
+                screenTimeMap[appName]!!.put("hours", "%.2f".format(stats.totalTimeInForeground / 3600000.0).toString())
+                if(appInfo.category != -1) {
+                    screenTimeMap[appName]!!.put("category", ApplicationInfo.getCategoryTitle(this, appInfo.category).toString())
+                }else {
+                    screenTimeMap[appName]!!.put("category", "Other")
+                }
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error getting app info for ${stats.packageName}", e)
                 continue
