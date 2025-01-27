@@ -3,7 +3,6 @@
 ///
 /// Description: Social Media page file for 
 /// application
-///
 ///*******************************
 
 //Dart Imports
