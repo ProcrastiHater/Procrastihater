@@ -31,19 +31,57 @@ class HistoricalDataPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(title: const Text("Historical Data Page")),
-      body: MyHistoricalDataPage(),
-      ),      
+    home: Container(
+      padding: EdgeInsets.all(4.0),
+      child: Column(
+        spacing: 4.0,
+        children: [
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(4.0),
+              color: Colors.blue,
+              child: GraphView(),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(4.0),
+              color: Colors.red,
+              child: ExpandedListView(),
+            ),
+          ),
+        ],
+      ),
+
+    )    
     );
   }
 }
-class MyHistoricalDataPage extends StatefulWidget {
-  const MyHistoricalDataPage({super.key});
+class GraphView extends StatefulWidget {
+  const GraphView({super.key});
   @override
-  State<MyHistoricalDataPage> createState() => _MyHistoricalDataPageState();
+  State<GraphView> createState() => _MyGraphViewState();
 }
-class _MyHistoricalDataPageState extends State<MyHistoricalDataPage> {
+class _MyGraphViewState extends State<GraphView> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
+  }
+}
+
+class ExpandedListView extends StatefulWidget {
+  const ExpandedListView({super.key});
+  @override
+  State<ExpandedListView> createState() => _MyExpandedListViewState();
+}
+class _MyExpandedListViewState extends State<ExpandedListView> {
   @override
   void initState() {
     // TODO: implement initState
