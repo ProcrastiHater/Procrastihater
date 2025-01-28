@@ -270,36 +270,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   ///**************************************************
-  /// Name: _fetchScreenTime
-  ///
-  /// Description: Takes the data
-  /// from the Firestore database
-  /// and returns a map of maps
-  /// of the user's current screentime
-  ///***************************************************
-  Future<Map<String, Map<String, dynamic>>> _fetchScreenTime() async {
-    _updateUserRef();
-    Map<String, Map<String, dynamic>> fetchedData = {};
-    try {
-      final CURRENT = userRef.collection("appUsageCurrent");
-      final CUR_SNAPSHOT = await CURRENT.get();
-      //Temp map for saving data from database
-      //Loop to access all screentime data from hard coded user
-      for (var doc in CUR_SNAPSHOT.docs) {
-        String docName = doc.id;
-        double? hours = doc['dailyHours']?.toDouble();
-        String category = doc['appType'];
-        if (hours != null) {
-          fetchedData[docName] = {'hours': hours, 'category': category};
-        }
-      }
-    } catch (e) {
-      print("error fetching screentime data: $e");
-    }
-    return fetchedData;
-  }
-
-  ///**************************************************
   /// Name: _writeScreenTimeData
   ///
   /// Description: Takes the data

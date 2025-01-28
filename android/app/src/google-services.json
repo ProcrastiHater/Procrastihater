@@ -1,0 +1,105 @@
+{
+  "project_info": {
+    "project_number": "25821703794",
+    "project_id": "database-prototype-da0c0",
+    "storage_bucket": "database-prototype-da0c0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25821703794:android:9c6fa54ecc4c9894addceb",
+        "android_client_info": {
+          "package_name": "com.example.app_screen_time"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE1gyZ3PjSPn8J8zkdwfC3OhElBCxNMYQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25821703794:android:1ddd70f232447dacaddceb",
+        "android_client_info": {
+          "package_name": "com.example.bridget_db_proto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE1gyZ3PjSPn8J8zkdwfC3OhElBCxNMYQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25821703794:android:b89a1f3a6ea07b52addceb",
+        "android_client_info": {
+          "package_name": "com.example.fluttergroupfirebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE1gyZ3PjSPn8J8zkdwfC3OhElBCxNMYQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25821703794:android:0cd8e4dd6e44b54caddceb",
+        "android_client_info": {
+          "package_name": "com.example.prototype"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE1gyZ3PjSPn8J8zkdwfC3OhElBCxNMYQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25821703794:android:027d2cece351e11faddceb",
+        "android_client_info": {
+          "package_name": "com.procrastihater.database_prototype"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE1gyZ3PjSPn8J8zkdwfC3OhElBCxNMYQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

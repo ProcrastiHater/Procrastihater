@@ -24,12 +24,11 @@ import 'social_media_page.dart';
 import 'historical_data_page.dart';
 import 'login_screen.dart';
 
-
 ///*********************************
 /// Name: main
-/// 
+///
 /// Description: Initializes Firebase,
-/// 
+///
 /// launches the main app
 ///*********************************
 void main() async {
@@ -42,8 +41,8 @@ void main() async {
 
 ///*********************************
 /// Name: MyApp
-/// 
-/// Description: Root stateless widget of 
+///
+/// Description: Root stateless widget of
 /// the app, builds and displays main page view
 ///*********************************
 class MyApp extends StatelessWidget {
@@ -54,13 +53,13 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       home: MyPageView(),
     );
-  } 
+  }
 }
 
 ///*********************************
 /// Name: MyPageView
-/// 
-/// Description: Stateful widget that 
+///
+/// Description: Stateful widget that
 /// manages the PageView for app navigation
 ///*********************************
 class MyPageView extends StatefulWidget {
@@ -68,17 +67,18 @@ class MyPageView extends StatefulWidget {
   @override
   State<MyPageView> createState() => _MyPageViewState();
 }
+
 ///*********************************
 /// Name: MyPageViewState
-/// 
-/// Description: Manages state for MyPageView, 
+///
+/// Description: Manages state for MyPageView,
 /// sets up PageView controller, tracks current
 /// page, and handles navigation
 ///*********************************
 class _MyPageViewState extends State<MyPageView> {
   //Controller for page navigation
   late PageController _pageController;
-  
+
   //Tracks current index
   int _currentPage = 0;
 
@@ -99,23 +99,21 @@ class _MyPageViewState extends State<MyPageView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //PageView widget for navigation
-      body: PageView(
-        controller: _pageController,
-        //Update current page index on page change
-        onPageChanged: (index) {
+        //PageView widget for navigation
+        body: PageView(
+      controller: _pageController,
+      //Update current page index on page change
+      onPageChanged: (index) {
         setState(() {
-          _currentPage = index; 
+          _currentPage = index;
         });
-        },
-        //Pages to display
-        children: const [
-          SocialMediaPage(),
-          HomePage(),
-          HistoricalDataPage(),
-        ],
-      )
-      
-    );
+      },
+      //Pages to display
+      children: const [
+        SocialMediaPage(),
+        HomePage(),
+        HistoricalDataPage(),
+      ],
+    ));
   }
 }
