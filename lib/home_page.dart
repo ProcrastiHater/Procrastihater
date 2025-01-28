@@ -201,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
     {
       //Create batch
       var batch = FIRESTORE.batch();
-
+      double totalDaily = 0;
       try {
         // Iterate through each app and its screen time
         for (var appMap in fetchedData.entries) {
@@ -222,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
             //Gets the start of that week
             String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
             var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
-
+            totalDaily += screenTimeHours;
             // Move data to historical
             batch.set(
               historical,
@@ -232,8 +232,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     'hours': screenTimeHours,
                     'lastUpdated': dateUpdated,
                     'appType': category
-                  }
-                }
+                  },
+                  'totalDailyHours': totalDaily
+                },
               },
               SetOptions(merge: true),
             );
@@ -284,7 +285,6 @@ class _MyHomePageState extends State<MyHomePage> {
     
       // Create a batch to handle multiple writes
       final batch = FIRESTORE.batch();
-      
       try {
         // Iterate through each app and its screen time
         for (final entry in _screenTimeData.entries) {
