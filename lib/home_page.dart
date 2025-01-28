@@ -1,7 +1,7 @@
 ///*********************************
 /// Name: home_page.dart
 ///
-/// Description: Home page file for 
+/// Description: Home page file for
 /// application, currently holds
 /// current app usage
 ///*******************************
@@ -28,8 +28,8 @@ DocumentReference userRef = MAIN_COLLECTION.doc(uid);
 
 ///*********************************
 /// Name: HomePage
-/// 
-/// Description: Root stateless widget of 
+///
+/// Description: Root stateless widget of
 /// the HomePage, builds and displays home page view
 ///*********************************
 class HomePage extends StatelessWidget {
@@ -37,15 +37,15 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-    home: MyHomePage(title: 'Home Page'),
+      home: MyHomePage(title: 'Home Page'),
     );
   }
 }
 
 ///*********************************
 /// Name: MyHomePage
-/// 
-/// Description: Stateful widget that 
+///
+/// Description: Stateful widget that
 /// manages the Firebase reading and writting
 ///*********************************
 class MyHomePage extends StatefulWidget {
@@ -57,10 +57,10 @@ class MyHomePage extends StatefulWidget {
 
 ///*********************************
 /// Name: MyHomePageState
-/// 
-/// Description: Manages state for MyHomePage, 
+///
+/// Description: Manages state for MyHomePage,
 /// accesses screentime of phone through method
-/// channels, checks and requests neccesary 
+/// channels, checks and requests neccesary
 /// permissions, reads/write from firebase
 ///*********************************
 class _MyHomePageState extends State<MyHomePage> {
@@ -74,17 +74,15 @@ class _MyHomePageState extends State<MyHomePage> {
   ///*******************************
   ///Checks screen time usage permission on startup
   @override
-  void initState(){
+  void initState() {
     //Moves data from current to historical
     _currentToHistorical().whenComplete(() {
-        _checkPermission().whenComplete((){
-            _getScreenTime().whenComplete((){
-              _writeScreenTimeData();
-            });
-          }
-        );
-      }
-    );
+      _checkPermission().whenComplete(() {
+        _getScreenTime().whenComplete(() {
+          _writeScreenTimeData();
+        });
+      });
+    });
     super.initState();
   }
 
@@ -97,13 +95,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   ///*********************************
   /// Name: _checkPermission
-  ///   
-  /// Description: Invokes method from screentime channel 
+  ///
+  /// Description: Invokes method from screentime channel
   /// to check for screetime usage permissions
   ///*********************************
   Future<void> _checkPermission() async {
     try {
-      final bool hasPermission = await screenTimeChannel.invokeMethod('checkPermission');
+      final bool hasPermission =
+          await screenTimeChannel.invokeMethod('checkPermission');
       setState(() {
         _hasPermission = hasPermission;
       });
@@ -114,8 +113,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   ///*********************************
   /// Name: _requestPermission
-  ///   
-  /// Description: Invokes method from screentime channel to 
+  ///
+  /// Description: Invokes method from screentime channel to
   /// send a request for screentime usage permissions
   ///*********************************
   Future<void> _requestPermission() async {
@@ -126,10 +125,10 @@ class _MyHomePageState extends State<MyHomePage> {
       debugPrint("Failed to request permission: ${e.message}");
     }
   }
-  
+
   ///*********************************
   /// Name: _getScreenTime
-  ///   
+  ///
   /// Description: Accesses screentime data
   /// by storing into a Map.
   ///*********************************
@@ -141,12 +140,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     try {
-      //Raw data from screentime channel 
-      final Map<dynamic, dynamic> result = await screenTimeChannel.invokeMethod('getScreenTime');
+      //Raw data from screentime channel
+      final Map<dynamic, dynamic> result =
+          await screenTimeChannel.invokeMethod('getScreenTime');
       //State for writing raw data in formatted map
       setState(() {
         _screenTimeData = Map<String, Map<String, String>>.from(
-          result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
+          result.map((key, value) =>
+              MapEntry(key as String, Map<String, String>.from(value))),
         );
       });
       debugPrint('Got screen time!');
@@ -171,34 +172,36 @@ class _MyHomePageState extends State<MyHomePage> {
     DateTime dateUpdated;
     bool needToMoveData = false;
     //Grab data from current
-    try{
+    try {
       final CURRENT = userRef.collection('appUsageCurrent');
       final CUR_SNAPSHOT = await CURRENT.get();
       //Loop to access all current screentime data from user
-      for (var doc in CUR_SNAPSHOT.docs){
+      for (var doc in CUR_SNAPSHOT.docs) {
         String docName = doc.id;
         double? hours = doc['dailyHours']?.toDouble();
         Timestamp timestamp = doc['lastUpdated'];
         dateUpdated = timestamp.toDate();
         String category = doc['appType'];
-        if (hours != null){
-          fetchedData[docName] = {'dailyHours': hours, 'lastUpdated': timestamp, 'appType': category};
+        if (hours != null) {
+          fetchedData[docName] = {
+            'dailyHours': hours,
+            'lastUpdated': timestamp,
+            'appType': category
+          };
         }
         //Check if any data needs to be written to history
-        if (dateUpdated.day != currentTime.day
-         || dateUpdated.month != currentTime.month
-         || dateUpdated.year != currentTime.year)
-        {
+        if (dateUpdated.day != currentTime.day ||
+            dateUpdated.month != currentTime.month ||
+            dateUpdated.year != currentTime.year) {
           needToMoveData = true;
         }
       }
-    } catch (e){
+    } catch (e) {
       debugPrint("error fetching screentime data: $e");
     }
 
     //If any data needs to be written to history
-    if(needToMoveData)
-    {
+    if (needToMoveData) {
       //Create batch
       var batch = FIRESTORE.batch();
 
@@ -212,16 +215,18 @@ class _MyHomePageState extends State<MyHomePage> {
           DateTime dateUpdated = timestamp.toDate();
           DateTime currentTime = DateTime.now();
           //Check if date has changed since database was updated
-          if(dateUpdated.day != currentTime.day
-          || dateUpdated.month != currentTime.month
-          || dateUpdated.year != currentTime.year){
+          if (dateUpdated.day != currentTime.day ||
+              dateUpdated.month != currentTime.month ||
+              dateUpdated.year != currentTime.year) {
             //Gets the number of the day of the week for the last update day
             int dayOfWeekNum = dateUpdated.weekday;
             //Gets the name of the day of the week for last update day
             String dayOfWeekStr = DateFormat('EEEE').format(dateUpdated);
             //Gets the start of that week
-            String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
-            var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
+            String startOfWeek = DateFormat('MM-dd-yyyy')
+                .format(dateUpdated.subtract(Duration(days: dayOfWeekNum - 1)));
+            var historical =
+                userRef.collection('appUsageHistory').doc(startOfWeek);
 
             // Move data to historical
             batch.set(
@@ -239,20 +244,19 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           }
         }
-      
+
         //Commit the batch
         await batch.commit();
-        
+
         debugPrint('Successfully wrote screen time data to History');
-        
+
         //Create batch for clearing current data
         batch = FIRESTORE.batch();
 
         final CUR_SNAPSHOT = await userRef.collection('appUsageCurrent').get();
-        
+
         //Clear current app usage
-        for(var doc in CUR_SNAPSHOT.docs)
-        {
+        for (var doc in CUR_SNAPSHOT.docs) {
           await doc.reference.delete();
         }
         await batch.commit();
@@ -260,41 +264,69 @@ class _MyHomePageState extends State<MyHomePage> {
         debugPrint('Error writing screen time data to Firestore: $e');
         rethrow;
       }
-    }
-    else{
+    } else {
       debugPrint('No data needed to be written to history');
     }
   }
-  
+
+  ///**************************************************
+  /// Name: _fetchScreenTime
+  ///
+  /// Description: Takes the data
+  /// from the Firestore database
+  /// and returns a map of maps
+  /// of the user's current screentime
+  ///***************************************************
+  Future<Map<String, Map<String, dynamic>>> _fetchScreenTime() async {
+    _updateUserRef();
+    Map<String, Map<String, dynamic>> fetchedData = {};
+    try {
+      final CURRENT = userRef.collection("appUsageCurrent");
+      final CUR_SNAPSHOT = await CURRENT.get();
+      //Temp map for saving data from database
+      //Loop to access all screentime data from hard coded user
+      for (var doc in CUR_SNAPSHOT.docs) {
+        String docName = doc.id;
+        double? hours = doc['dailyHours']?.toDouble();
+        String category = doc['appType'];
+        if (hours != null) {
+          fetchedData[docName] = {'hours': hours, 'category': category};
+        }
+      }
+    } catch (e) {
+      print("error fetching screentime data: $e");
+    }
+    return fetchedData;
+  }
+
   ///**************************************************
   /// Name: _writeScreenTimeData
   ///
-  /// Description: Takes the data 
+  /// Description: Takes the data
   /// that was accessed in _getScreenTime
-  /// and writes it to the Firestore database 
+  /// and writes it to the Firestore database
   /// using batches for multiple writes
   ///***************************************************
-  Future<void> _writeScreenTimeData() async
-  {
+  Future<void> _writeScreenTimeData() async {
     //Update ref to user's doc if UID has changed
     _updateUserRef();
 
-    if(_screenTimeData.isNotEmpty){
+    if (_screenTimeData.isNotEmpty) {
       final current = userRef.collection('appUsageCurrent');
-    
+
       // Create a batch to handle multiple writes
       final batch = FIRESTORE.batch();
-      
+
       try {
         // Iterate through each app and its screen time
         for (final entry in _screenTimeData.entries) {
           final appName = entry.key;
           final screenTimeHours = double.parse(entry.value['hours']!);
           final category = entry.value['category'];
-          
+
           // Reference to the document with app name
           final docRef = current.doc(appName);
-          
+
           // Set the data with merge option to update existing documents
           // or create new ones if they don't exist
           batch.set(
@@ -316,15 +348,14 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
   }
- 
+
   ///**************************************************
   /// Name: _signOut
   ///
   /// Description: Calls _writeScreenTimeData before
   /// signing user out of the app
   ///***************************************************
-  void _signOut() async
-  {
+  void _signOut() async {
     await _writeScreenTimeData();
     AUTH.signOut();
   }
@@ -334,15 +365,13 @@ class _MyHomePageState extends State<MyHomePage> {
   ///
   /// Description: Updates userRef to doc if the UID has changed
   ///***************************************************
-  void _updateUserRef()
-  {
+  void _updateUserRef() {
     //Grab current UID
     var curUid = uid;
     //Regrab UID in case it's changed
     uid = AUTH.currentUser?.uid;
     //Update user reference if UID has changed
-    if(curUid != uid)
-    {
+    if (curUid != uid) {
       userRef = MAIN_COLLECTION.doc(uid);
     }
   }
@@ -386,22 +415,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemBuilder: (context, index) {
                     final entry = _screenTimeData.entries.elementAt(index);
                     return ListTile(
-                      title: Text(entry.key),
-                      subtitle: Text('${entry.value['hours']} hours'),
-                      trailing: Text('${entry.value['category']}')
-                    );
+                        title: Text(entry.key),
+                        subtitle: Text('${entry.value['hours']} hours'),
+                        trailing: Text('${entry.value['category']}'));
                   },
                 ),
               ),
-              //Custom sign-out button
-              ElevatedButton.icon(
-                label: Text("Sign Out"),
-                onPressed: _signOut,
-                icon: Icon(
-                  Icons.logout,
-                  size: 24,
-                ),
-              )
+            //Custom sign-out button
+            ElevatedButton.icon(
+              label: Text("Sign Out"),
+              onPressed: _signOut,
+              icon: Icon(
+                Icons.logout,
+                size: 24,
+              ),
+            )
           ],
         ),
       ),
