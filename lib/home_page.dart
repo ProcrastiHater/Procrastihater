@@ -202,6 +202,8 @@ class _MyHomePageState extends State<MyHomePage> {
       //Create batch
       var batch = FIRESTORE.batch();
       double totalDaily = 0;
+      double totalWeekly = 0.0;
+      DocumentSnapshot<Map<String, dynamic>>? histSnapshot;
       try {
         // Iterate through each app and its screen time
         for (var appMap in fetchedData.entries) {
@@ -222,7 +224,13 @@ class _MyHomePageState extends State<MyHomePage> {
             //Gets the start of that week
             String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
             var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
+            histSnapshot ??= await historical.get();
+            if(totalWeekly == 0 && histSnapshot.data()!.containsKey('totalWeeklyHours'))
+            {
+              totalWeekly = histSnapshot['totalWeeklyHours'];
+            }
             totalDaily += screenTimeHours;
+            totalWeekly += screenTimeHours;
             // Move data to historical
             batch.set(
               historical,
@@ -235,6 +243,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   'totalDailyHours': totalDaily
                 },
+                'totalWeeklyHours': (totalWeekly * 100).round() / 100
               },
               SetOptions(merge: true),
             );
@@ -246,17 +255,17 @@ class _MyHomePageState extends State<MyHomePage> {
         
         debugPrint('Successfully wrote screen time data to History');
         
-        //Create batch for clearing current data
-        batch = FIRESTORE.batch();
+        // //Create batch for clearing current data
+        // batch = FIRESTORE.batch();
 
-        final CUR_SNAPSHOT = await userRef.collection('appUsageCurrent').get();
+        // final CUR_SNAPSHOT = await userRef.collection('appUsageCurrent').get();
         
-        //Clear current app usage
-        for(var doc in CUR_SNAPSHOT.docs)
-        {
-          await doc.reference.delete();
-        }
-        await batch.commit();
+        // //Clear current app usage
+        // for(var doc in CUR_SNAPSHOT.docs)
+        // {
+        //   await doc.reference.delete();
+        // }
+        // await batch.commit();
       } catch (e) {
         debugPrint('Error writing screen time data to Firestore: $e');
         rethrow;
