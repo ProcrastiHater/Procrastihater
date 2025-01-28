@@ -34,7 +34,7 @@ class SocialMediaPage extends StatefulWidget {
   State<SocialMediaPage> createState() => _SocialMediaPageState();
 }
 
-//TODO: loadData and building the chart
+//TODO: restrict the size of the chart
 class _SocialMediaPageState extends State<SocialMediaPage> {
   List<Map<String, dynamic>> chartData = [];
   bool isLoading = true;
@@ -45,16 +45,22 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
     _loadData();
   }
 
+  ///**************************************************
+  /// Name: _loadData
+  ///
+  /// Description: calls _fetchscreentime and converts
+  /// screentime data into a list of maps to be used by
+  /// the graphic plugin
+  ///***************************************************
   Future<void> _loadData() async {
     try {
       final data = await _fetchScreenTime();
 
-      // Transform the data into the format needed for the chart
       final transformedData = data.entries
           .map((entry) => {
-                'App Name': entry.key, // App name
-                'Hours': entry.value['Hours'], // Hours spent
-                'category': entry.value['category'] // App category
+                'App Name': entry.key,
+                'Hours': entry.value['Hours'],
+                'category': entry.value['category']
               })
           .toList();
 
@@ -81,19 +87,19 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
       width: 350,
       height: 300,
       child: Chart(
-        data: basicData,
+        data: chartData,
         variables: {
-          'genre': Variable(
-            accessor: (Map map) => map['genre'] as String,
+          'App Name': Variable(
+            accessor: (Map map) => map['App Name'] as String,
           ),
-          'hours': Variable(
-            accessor: (Map map) => map['hours'] as num,
+          'Hours': Variable(
+            accessor: (Map map) => map['Hours'] as num,
           ),
         },
         marks: [
           IntervalMark(
             label: LabelEncode(
-              encoder: (tuple) => Label(tuple['hours'].toString()),
+              encoder: (tuple) => Label(tuple['Hours'].toString()),
             ),
             elevation: ElevationEncode(
               value: 0,
