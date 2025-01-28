@@ -33,6 +33,7 @@ class SocialMediaPage extends StatefulWidget {
   @override
   State<SocialMediaPage> createState() => _SocialMediaPageState();
 }
+
 //TODO: loadData and building the chart
 class _SocialMediaPageState extends State<SocialMediaPage> {
   List<Map<String, dynamic>> chartData = [];
@@ -45,11 +46,79 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
   }
 
   Future<void> _loadData() async {
+    try {
+      final data = await _fetchScreenTime();
+
+      // Transform the data into the format needed for the chart
+      final transformedData = data.entries
+          .map((entry) => {
+                'App Name': entry.key, // App name
+                'Hours': entry.value['Hours'], // Hours spent
+                'category': entry.value['category'] // App category
+              })
+          .toList();
+
+      setState(() {
+        chartData = transformedData;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading screen time data: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      width: 350,
+      height: 300,
+      child: Chart(
+        data: basicData,
+        variables: {
+          'genre': Variable(
+            accessor: (Map map) => map['genre'] as String,
+          ),
+          'hours': Variable(
+            accessor: (Map map) => map['hours'] as num,
+          ),
+        },
+        marks: [
+          IntervalMark(
+            label: LabelEncode(
+              encoder: (tuple) => Label(tuple['hours'].toString()),
+            ),
+            elevation: ElevationEncode(
+              value: 0,
+              updaters: {
+                'tap': {true: (_) => 5}
+              },
+            ),
+            color: ColorEncode(
+              value: const Color(0xFFFF8C00),
+              updaters: {
+                'tap': {false: (color) => color.withAlpha(100)},
+              },
+            ),
+          ),
+        ],
+        axes: [
+          Defaults.horizontalAxis,
+          Defaults.verticalAxis,
+        ],
+        selections: {'tap': PointSelection(dim: Dim.x)},
+        tooltip: TooltipGuide(),
+        crosshair: CrosshairGuide(),
+      ),
+    );
+  }
 }
 
 ///**************************************************
