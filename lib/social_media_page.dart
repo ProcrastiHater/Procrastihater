@@ -54,6 +54,7 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
   ///***************************************************
   Future<void> _loadData() async {
     try {
+      //Get screentime data
       final data = await _fetchScreenTime();
 
       final transformedData = data.entries
@@ -82,48 +83,53 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Container(
-      margin: const EdgeInsets.only(top: 10),
-      width: 350,
-      height: 300,
-      child: Chart(
-        data: chartData,
-        variables: {
-          'App Name': Variable(
-            accessor: (Map map) => map['App Name'] as String,
-          ),
-          'Hours': Variable(
-            accessor: (Map map) => map['Hours'] as num,
-          ),
-        },
-        marks: [
-          IntervalMark(
-            label: LabelEncode(
-              encoder: (tuple) => Label(tuple['Hours'].toString()),
+    return MaterialApp(
+        home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Daily App Usage'),
             ),
-            elevation: ElevationEncode(
-              value: 0,
-              updaters: {
-                'tap': {true: (_) => 5}
-              },
-            ),
-            color: ColorEncode(
-              value: const Color(0xFFFF8C00),
-              updaters: {
-                'tap': {false: (color) => color.withAlpha(100)},
-              },
-            ),
-          ),
-        ],
-        axes: [
-          Defaults.horizontalAxis,
-          Defaults.verticalAxis,
-        ],
-        selections: {'tap': PointSelection(dim: Dim.x)},
-        tooltip: TooltipGuide(),
-        crosshair: CrosshairGuide(),
-      ),
-    );
+            body: Container(
+              margin: const EdgeInsets.only(top: 10),
+              width: 400,
+              height: 400,
+              child: Chart(
+                data: chartData,
+                variables: {
+                  'App Name': Variable(
+                    accessor: (Map map) => map['App Name'] as String,
+                  ),
+                  'Hours': Variable(
+                    accessor: (Map map) => map['Hours'] as num,
+                  ),
+                },
+                marks: [
+                  IntervalMark(
+                    label: LabelEncode(
+                      encoder: (tuple) => Label(tuple['Hours'].toString()),
+                    ),
+                    elevation: ElevationEncode(
+                      value: 0,
+                      updaters: {
+                        'tap': {true: (_) => 5}
+                      },
+                    ),
+                    color: ColorEncode(
+                      value: const Color(0xFFFF8C00),
+                      updaters: {
+                        'tap': {false: (color) => color.withAlpha(100)},
+                      },
+                    ),
+                  ),
+                ],
+                axes: [
+                  Defaults.horizontalAxis,
+                  Defaults.verticalAxis,
+                ],
+                selections: {'tap': PointSelection(dim: Dim.x)},
+                tooltip: TooltipGuide(),
+                crosshair: CrosshairGuide(),
+              ),
+            )));
   }
 }
 
