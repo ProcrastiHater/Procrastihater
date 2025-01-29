@@ -34,7 +34,6 @@ class SocialMediaPage extends StatefulWidget {
   State<SocialMediaPage> createState() => _SocialMediaPageState();
 }
 
-//TODO: restrict the size of the chart
 class _SocialMediaPageState extends State<SocialMediaPage> {
   List<Map<String, dynamic>> chartData = [];
   bool isLoading = true;
@@ -70,7 +69,7 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error loading screen time data: $e');
+      debugPrint('Error loading screen time data: $e');
       setState(() {
         isLoading = false;
       });
@@ -158,7 +157,7 @@ Future<Map<String, Map<String, dynamic>>> _fetchScreenTime() async {
       }
     }
   } catch (e) {
-    print("error fetching screentime data: $e");
+    debugPrint("error fetching screentime data: $e");
   }
   return fetchedData;
 }
