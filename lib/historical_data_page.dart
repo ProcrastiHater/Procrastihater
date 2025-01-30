@@ -23,6 +23,10 @@ import 'package:fl_chart/fl_chart.dart';
 //Page imports
 import 'home_page.dart';
 
+Map<String, Color> appNameToColor = {}; 
+const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+Map<String, Map<String, Map<String, dynamic>>> data = {};
+
 
 ///*********************************
 /// Name: HistoricalDataPage
@@ -31,45 +35,58 @@ import 'home_page.dart';
 /// the HistoricalDataPage, builds and displays 
 /// historical data page view
 ///*********************************
-class HistoricalDataPage extends StatelessWidget {
+class HistoricalDataPage extends StatefulWidget {
   const HistoricalDataPage({super.key});
+  
+  @override
+  State<HistoricalDataPage> createState() => _HistoricalDataPageState();
+}
+class _HistoricalDataPageState extends State<HistoricalDataPage> {
+  String selectedDay = "null";
+
+  void updateSelectedDay(String day) {
+    setState(() {
+      selectedDay = day;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-    home: Container(
-      padding: EdgeInsets.all(4.0),
-      child: Column(
-        spacing: 4.0,
-        children: [
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.all(4.0),
-              color: Colors.indigo,
-              child: GraphView(),
+      home: Container(
+        padding: const EdgeInsets.all(4.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(4.0),
+                color: Colors.indigo.shade50,
+                child: GraphView(onDaySelected: updateSelectedDay),
+              ),
             ),
-          ),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.all(4.0),
-              color: Colors.teal,
-              //child: ExpandedListView(),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(4.0),
+                color: Colors.indigo.shade100,
+                child: ExpandedListView(selectedDay: selectedDay, appColors: appNameToColor),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-
-    )    
     );
   }
 }
+
 class GraphView extends StatefulWidget {
-  const GraphView({super.key});
+  final Function(String) onDaySelected;
+  const GraphView({super.key, required this.onDaySelected});
+
   @override
   State<GraphView> createState() => _MyGraphViewState();
 }
 class _MyGraphViewState extends State<GraphView> {
-  static const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  Map<String, Map<String, Map<String, dynamic>>> data = {};
+      List<String> availableDays = data.keys.toList(); 
+
   void _updateUserRef()
   {
     //Grab current UID
@@ -120,20 +137,20 @@ Future<void> _fetchScreenTime() async {
   
   BarChartGroupData generatedGroupData(int index, Map<String, Map<String, dynamic>> dailyData) {
     final List<Color> appColors = [
-    Colors.red,
-    Colors.blue,
-    Colors.green,
-    Colors.orange,
-    Colors.purple,
-    Colors.cyan,
-    Colors.teal,
-    Colors.pink,
+    Colors.deepPurple.shade300,
+    Colors.red.shade300,
+    Colors.green.shade300,
+    Colors.orange.shade200,
+    Colors.indigo.shade400,
+    Colors.cyan.shade300,
+    Colors.tealAccent,
+    Colors.pink.shade400,
     ];
     final appNames = dailyData.keys.toList();
-    final appNameToColor = {
-      for (int i = 0; i < appNames.length; i++)
-        appNames[i]: appColors[i % appColors.length]
-    };
+    for (int i = 0; i < appNames.length; i++) {
+      appNameToColor[appNames[i]] = appColors[i % appColors.length];
+    } 
+
 
   List<BarChartRodStackItem> rodStackItems = [];
   double cumulativeHeight = 0;
@@ -165,60 +182,60 @@ Future<void> _fetchScreenTime() async {
 }
   List<BarChartGroupData> generateWeeklyChart(Map<String, Map<String, Map<String, dynamic>>> data) {
     return [
-      for (int i = 0; i < days.length; i++)
-        if (data.containsKey(days[i]))
-          generatedGroupData(i, data[days[i]]!)
+      for (int i = 0; i < availableDays.length; i++)
+        generatedGroupData(i, data[availableDays[i]]!)
     ]; 
   }
   Widget bottomTitles(double value, TitleMeta meta) {
     const style = TextStyle(
+      decoration: TextDecoration.none,
       fontSize: 10.0, 
-      color: Colors.white
+      color: Colors.black,
       );
-    String text = days[value.toInt()].substring(0,3);
+    String text = availableDays[value.toInt()].substring(0,3);
     return SideTitleWidget(
       meta: meta,
       child: Text(
         text, 
-        style: style)
-      );
+        style: style
+      )
+    );
   }
   BarTouchData getBarTouch(Map<String, Map<String, Map<String, dynamic>>> data) {
     return BarTouchData(
       enabled: true,
+      touchCallback: (event, response){
+        if (response != null && response.spot != null) {
+          int dayIndex = response.spot!.touchedBarGroupIndex;
+          String day = availableDays[dayIndex];
+          widget.onDaySelected(day);
+        }
+      },
       touchTooltipData: BarTouchTooltipData(
         getTooltipColor: (_) => Colors.blueGrey,
         tooltipPadding: const EdgeInsets.all(8.0),
         tooltipMargin: 8.0,
-        getTooltipItem: (group, groupItem, rod, rodIndex) {
-          String day = days[group.x];
-          Map<String, dynamic> appData = data[day]!.values.elementAt(rodIndex);
-          String appName = data[day]!.keys.elementAt(rodIndex);
-          double hours = appData['hours'];
-          String appType = appData['appType'];
+        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+          double totalHours = rod.toY;
           return BarTooltipItem(
-            '$appName\n',
+            'Total Hours\n',
             const TextStyle(
+              decoration: TextDecoration.none,
               color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 12,
             ),
             children: [
               TextSpan(
-                text: 'Type: $appType\n',
-                style: const TextStyle(
-                  color: Colors.white,
+              text: '${totalHours.toStringAsFixed(1)} hrs',
+              style: const TextStyle(
+                decoration: TextDecoration.none,
+                color: Colors.white
                 ),
-              ),
-              TextSpan(
-                text: 'Hours: $hours\n',
-                style: const TextStyle(
-                 color: Colors.white, 
-                )
-              )
-            ]
-          );
-        }
+            ),
+          ],
+        );
+      },
       )
     );
   }
@@ -231,8 +248,10 @@ Future<void> _fetchScreenTime() async {
           const Text(
             'Historical Data',
             style: TextStyle(
+              decoration: TextDecoration.none,
               fontSize: 25,
               fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
           const SizedBox(height: 25),
@@ -251,8 +270,9 @@ Future<void> _fetchScreenTime() async {
                       return Text(
                         value.toStringAsFixed(1),
                         style: const TextStyle(
+                          decoration: TextDecoration.none,
                           fontSize: 10,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       );
                     }
@@ -267,8 +287,9 @@ Future<void> _fetchScreenTime() async {
                       return Text(
                         value.toStringAsFixed(1),
                         style: const TextStyle(
+                          decoration: TextDecoration.none,
                           fontSize: 10,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       );
                     }
@@ -287,7 +308,7 @@ Future<void> _fetchScreenTime() async {
               borderData: FlBorderData(show: true),    
               gridData: FlGridData(show: true),
               barGroups: generateWeeklyChart(data),   
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: Colors.white,
             )
           )
           ),
@@ -298,20 +319,65 @@ Future<void> _fetchScreenTime() async {
 }
 
 class ExpandedListView extends StatefulWidget {
-  const ExpandedListView({super.key});
+  final String selectedDay;
+  final Map<String, Color> appColors;
+  const ExpandedListView({super.key, required this.selectedDay, required this.appColors});
   @override
   State<ExpandedListView> createState() => _MyExpandedListViewState();
 }
+
 class _MyExpandedListViewState extends State<ExpandedListView> {
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-  
-  @override
+ @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    if (widget.selectedDay == "null") {
+      return Center(
+        child: Text(
+          "Select a day to view",
+          style: const TextStyle(
+            decoration: TextDecoration.none,
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          )
+        ),
+      );
+    }
+
+    if (!data.containsKey(widget.selectedDay)) {
+      return Center(
+        child: Text(
+          "No data available for ${widget.selectedDay}",
+          style: const TextStyle(
+              decoration: TextDecoration.none,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            )
+          )
+        );
+    }
+
+    final dayData = data[widget.selectedDay]!;
+
+    return ListView.builder(
+      itemCount: dayData.length,
+      itemBuilder: (context, index) {
+        final entry = dayData.entries.elementAt(index);
+        final appName = entry.key;
+        final appHours = entry.value['hours'];
+        final appType = entry.value['appType'];
+        return ListTile(
+          title: Text(
+            appName, 
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: widget.appColors[appName],
+            ),
+          ),
+          subtitle: Text('$appHours hours'),
+          trailing: Text(appType),
+        );
+      },
+    );
   }
 }
