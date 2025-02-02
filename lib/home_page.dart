@@ -356,7 +356,12 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           // Creating little user icon you can press to view account info
           IconButton(
-            icon: const Icon(Icons.person),
+            icon: CircleAvatar(
+                 backgroundImage: NetworkImage(
+                // Use user's pfp as icon image if there is no pfp use this link as a default
+                FirebaseAuth.instance.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
+                    ),
+            ),
             onPressed: () {
               Navigator.push(
                 context,
