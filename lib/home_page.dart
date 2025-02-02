@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'profile_settings.dart';
 
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
@@ -337,6 +338,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _updateUserRef()
   {
     //Grab current UID
+   
     var curUid = uid;
     //Regrab UID in case it's changed
     uid = AUTH.currentUser?.uid;
@@ -359,20 +361,14 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: CircleAvatar(
                  backgroundImage: NetworkImage(
                 // Use user's pfp as icon image if there is no pfp use this link as a default
-                FirebaseAuth.instance.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
+                AUTH.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
                     ),
             ),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute<ProfileScreen>(
-                  builder: (context) => ProfileScreen(
-                    actions: [
-                      SignedOutAction((context) {
-                        Navigator.of(context).pop();
-                      })
-                    ],
-                  ),
+                MaterialPageRoute(
+                builder: (context) => ProfileSettings(),
                 ),
               );
             },
