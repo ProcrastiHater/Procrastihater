@@ -187,8 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
         //Check if any data needs to be written to history
         if (dateUpdated.day != currentTime.day
          || dateUpdated.month != currentTime.month
-         || dateUpdated.year != currentTime.year)
-        {
+         || dateUpdated.year != currentTime.year) {
           needToMoveData = true;
         }
       }
@@ -197,8 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     //If any data needs to be written to history
-    if(needToMoveData)
-    {
+    if(needToMoveData) {
       //Create batch
       var batch = FIRESTORE.batch();
       double totalDaily = 0.0;
@@ -216,7 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
           //Check if date has changed since database was updated
           if(dateUpdated.day != currentTime.day
           || dateUpdated.month != currentTime.month
-          || dateUpdated.year != currentTime.year){
+          || dateUpdated.year != currentTime.year) {
             //Gets the number of the day of the week for the last update day
             int dayOfWeekNum = dateUpdated.weekday;
             //Gets the name of the day of the week for last update day
@@ -225,8 +223,7 @@ class _MyHomePageState extends State<MyHomePage> {
             String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
             var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
             histSnapshot ??= await historical.get();
-            if(totalWeekly == 0 && histSnapshot.data()!.containsKey('totalWeeklyHours'))
-            {
+            if(totalWeekly == 0 && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
               totalWeekly = histSnapshot['totalWeeklyHours'];
             }
             totalDaily += screenTimeHours;
@@ -284,8 +281,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// and writes it to the Firestore database 
   /// using batches for multiple writes
   ///***************************************************
-  Future<void> _writeScreenTimeData() async
-  {
+  Future<void> _writeScreenTimeData() async {
     //Update ref to user's doc if UID has changed
     _updateUserRef();
 
@@ -332,8 +328,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Description: Calls _writeScreenTimeData before
   /// signing user out of the app
   ///***************************************************
-  void _signOut() async
-  {
+  void _signOut() async {
     await _writeScreenTimeData();
     AUTH.signOut();
   }
@@ -343,15 +338,13 @@ class _MyHomePageState extends State<MyHomePage> {
   ///
   /// Description: Updates userRef to doc if the UID has changed
   ///***************************************************
-  void _updateUserRef()
-  {
+  void _updateUserRef() {
     //Grab current UID
     var curUid = uid;
     //Regrab UID in case it's changed
     uid = AUTH.currentUser?.uid;
     //Update user reference if UID has changed
-    if(curUid != uid)
-    {
+    if(curUid != uid){
       userRef = MAIN_COLLECTION.doc(uid);
     }
   }
