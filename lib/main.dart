@@ -20,7 +20,7 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 //Page Imports
 import 'home_page.dart';
-import 'social_media_page.dart';
+import 'friends_list.dart';
 import 'historical_data_page.dart';
 import 'login_screen.dart';
 
@@ -110,7 +110,7 @@ class _MyPageViewState extends State<MyPageView> {
         },
         //Pages to display
         children: const [
-          SocialMediaPage(),
+          FriendsList(),
           HomePage(),
           HistoricalDataPage(),
         ],

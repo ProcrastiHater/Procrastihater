@@ -1,5 +1,5 @@
 ///*********************************
-/// Name: social_media_page.dart
+/// Name: friends_list.dart
 ///
 /// Description: Social Media page file for 
 /// application
@@ -22,13 +22,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 /// the SocialMediaPage, builds and displays 
 /// social media page view
 ///*********************************
-class SocialMediaPage extends StatelessWidget {
-  const SocialMediaPage({super.key});
+class FriendsList extends StatelessWidget {
+  const FriendsList({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      title: const Text("Social Media Page"),
+      title: const Text("Friends List"),
       ),
     body: const Center(
       child: Text("Friend Icons")
