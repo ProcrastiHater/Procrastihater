@@ -45,7 +45,7 @@ class HomePage extends StatelessWidget {
 
 ///*********************************
 /// Name: MyHomePage
-/// 
+///   
 /// Description: Stateful widget that 
 /// manages the Firebase reading and writting
 ///*********************************
@@ -364,13 +364,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 AUTH.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
                     ),
             ),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+             await Navigator.push(
                 context,
                 MaterialPageRoute(
                 builder: (context) => ProfileSettings(),
                 ),
               );
+              // Reload the user in case anything changed
+              await AUTH.currentUser?.reload();
+              // Reload UI in case things changed
+              setState(() {});
+
             },
           )
         ],
