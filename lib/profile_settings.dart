@@ -90,7 +90,8 @@ class ProfileSettingsState extends State<ProfileSettings> {
 ///***************************************************
   Future<void> _signOut() async {
     await _auth.signOut();
-    Navigator.of(context).pop(); // Go back to the previous screen
+    // Go back to the previous screen
+    Navigator.of(context).pop(); 
   }
 
 ///***************************************************
@@ -102,7 +103,8 @@ class ProfileSettingsState extends State<ProfileSettings> {
   Future<void> _deleteAccount() async {
     try {
       await _auth.currentUser!.delete();
-      Navigator.of(context).pop(); // Go back to the previous screen
+      // Go back to the previous screen
+      Navigator.of(context).pop(); 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to delete account. Please try again.')),

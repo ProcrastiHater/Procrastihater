@@ -1,3 +1,11 @@
+///********************************************************************************
+/// Name: profile_picture_selection.dart
+///
+/// Description: Shows 6 images a user can select and change their profile picture
+/// too
+///********************************************************************************
+
+// Dart imports
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -15,6 +23,7 @@ class ProfilePictureSelectionScreen extends StatelessWidget {
   const ProfilePictureSelectionScreen({super.key});
 
 
+//********************************************************************************
    @override
   Widget build(BuildContext context) {
     return Scaffold(
