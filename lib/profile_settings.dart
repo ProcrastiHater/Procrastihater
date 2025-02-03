@@ -119,7 +119,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
       appBar: AppBar(
         title: Text('Profile Settings'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
