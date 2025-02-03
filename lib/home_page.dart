@@ -201,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
     {
       //Create batch
       var batch = FIRESTORE.batch();
-      double totalDaily = 0;
+      double totalDaily = 0.0;
       double totalWeekly = 0.0;
       DocumentSnapshot<Map<String, dynamic>>? histSnapshot;
       try {
