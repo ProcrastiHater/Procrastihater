@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'profile_settings.dart';
 
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
@@ -44,7 +45,7 @@ class HomePage extends StatelessWidget {
 
 ///*********************************
 /// Name: MyHomePage
-/// 
+///   
 /// Description: Stateful widget that 
 /// manages the Firebase reading and writting
 ///*********************************
@@ -337,6 +338,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _updateUserRef()
   {
     //Grab current UID
+   
     var curUid = uid;
     //Regrab UID in case it's changed
     uid = AUTH.currentUser?.uid;
@@ -356,20 +358,24 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           // Creating little user icon you can press to view account info
           IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.push(
+            icon: CircleAvatar(
+                 backgroundImage: NetworkImage(
+                // Use user's pfp as icon image if there is no pfp use this link as a default
+                AUTH.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
+                    ),
+            ),
+            onPressed: () async {
+             await Navigator.push(
                 context,
-                MaterialPageRoute<ProfileScreen>(
-                  builder: (context) => ProfileScreen(
-                    actions: [
-                      SignedOutAction((context) {
-                        Navigator.of(context).pop();
-                      })
-                    ],
-                  ),
+                MaterialPageRoute(
+                builder: (context) => ProfileSettings(),
                 ),
               );
+              // Reload the user in case anything changed
+              await AUTH.currentUser?.reload();
+              // Reload UI in case things changed
+              setState(() {});
+
             },
           )
         ],
