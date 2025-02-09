@@ -87,48 +87,51 @@ class GraphView extends StatefulWidget {
 class _MyGraphViewState extends State<GraphView> {
       List<String> availableDays = data.keys.toList(); 
 
-  void _updateUserRef()
-  {
+  void _updateUserRef() {
     //Grab current UID
     var curUid = uid;
     //Regrab UID in case it's changed
     uid = AUTH.currentUser?.uid;
     //Update user reference if UID has changed
-    if(curUid != uid)
-    {
+    if(curUid != uid) {
       userRef = MAIN_COLLECTION.doc(uid);
     }
   }
-Future<void> _fetchScreenTime() async {
-  _updateUserRef();
-  final CURRENT = userRef.collection("appUsageHistory");
-  DateTime lastMonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday + 7));
-  String fortmattedLastMonday = DateFormat('MM-dd-yyyy').format(lastMonday);
-  try{
-    DocumentSnapshot doc = await CURRENT.doc(fortmattedLastMonday).get();
-    if (doc.exists) {
-      Map<String, dynamic> weeklyData = doc.data() as Map<String, dynamic>;
-      Map<String, Map<String, Map<String, dynamic>>> fetchedData = {};
-      for (String day in weeklyData.keys) {
-        Map<String, dynamic> dailyData = weeklyData[day];
-        fetchedData[day] = {};
-        for (String appName in dailyData.keys) {
-          Map<String, dynamic> appData = dailyData[appName];
-          fetchedData[day]![appName] = {
-            'hours': appData['hours'].toDouble(),
-            'appType': appData['appType'],
-            'lastUpdated': appData['lastUpdated']
-          };
+
+  Future<void> _fetchScreenTime() async {
+    _updateUserRef();
+    final CURRENT = userRef.collection("appUsageHistory");
+    DateTime lastMonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday + 7));
+    String fortmattedLastMonday = DateFormat('MM-dd-yyyy').format(lastMonday);
+    try{
+      DocumentSnapshot doc = await CURRENT.doc(fortmattedLastMonday).get();
+      if (doc.exists) {
+        Map<String, dynamic> weeklyData = doc.data() as Map<String, dynamic>;
+        Map<String, Map<String, Map<String, dynamic>>> fetchedData = {};
+        for (String day in weeklyData.keys) {
+          if (day != 'totalWeeklyHours'){
+            Map<String, dynamic> dailyData = weeklyData[day];
+            fetchedData[day] = {};
+            for (String appName in dailyData.keys) {
+              if (appName != 'totalDailyHours'){
+                Map<String, dynamic> appData = dailyData[appName];
+                fetchedData[day]![appName] = {
+                  'hours': appData['hours'].toDouble(),
+                  'appType': appData['appType'],
+                  'lastUpdated': appData['lastUpdated']
+                };
+              }
+            }
+          }
         }
+        setState(() {
+          data = fetchedData;
+        });
       }
-      setState(() {
-        data = fetchedData;
-      });
+    } catch (e){
+      print("error fetching screentime data: $e");
     }
-  } catch (e){
-    print("error fetching screentime data: $e");
   }
-}
   @override
   void initState() {
     _fetchScreenTime();
@@ -137,14 +140,57 @@ Future<void> _fetchScreenTime() async {
   
   BarChartGroupData generatedGroupData(int index, Map<String, Map<String, dynamic>> dailyData) {
     final List<Color> appColors = [
-    Colors.deepPurple.shade300,
-    Colors.red.shade300,
-    Colors.green.shade300,
-    Colors.orange.shade200,
-    Colors.indigo.shade400,
-    Colors.cyan.shade300,
-    Colors.tealAccent,
-    Colors.pink.shade400,
+    Colors.deepPurple.shade400,
+    Colors.red.shade400,
+    Colors.green.shade400,
+    Colors.orange.shade400,
+    Colors.indigo.shade500,
+    Colors.cyan.shade400,
+    Colors.teal,
+    Colors.pink.shade500,
+    Colors.blue.shade500,
+    Colors.amber.shade400,
+    Colors.lime.shade400,
+    Colors.brown.shade400,
+    Colors.deepOrange.shade500,
+    Colors.purple.shade400,
+    Colors.lightBlue.shade400,
+    Colors.yellow.shade600,
+    Colors.grey.shade600,
+    Colors.lightGreen.shade500,
+    Colors.blueGrey.shade500,
+    Colors.redAccent.shade700,
+    Colors.greenAccent.shade700,
+    Colors.orangeAccent.shade700,
+    Colors.purpleAccent.shade700,
+    Colors.cyanAccent.shade700,
+    Colors.pinkAccent.shade700,
+    Colors.tealAccent.shade700,
+    Colors.indigoAccent.shade700,
+    Colors.blueAccent.shade700,
+    Colors.amberAccent.shade700,
+    Colors.deepOrangeAccent.shade700,
+    Colors.lightGreenAccent.shade700,
+    Colors.limeAccent.shade700,
+    Colors.deepPurpleAccent.shade700,
+    Colors.brown.shade600,
+    Colors.grey.shade800,
+    Colors.blueGrey.shade800,
+    Colors.red.shade800,
+    Colors.green.shade800,
+    Colors.orange.shade800,
+    Colors.purple.shade800,
+    Colors.cyan.shade800,
+    Colors.pink.shade800,
+    Colors.teal.shade800,
+    Colors.indigo.shade800,
+    Colors.blue.shade800,
+    Colors.amber.shade800,
+    Colors.lightBlue.shade800,
+    Colors.deepOrange.shade800,
+    Colors.lime.shade800,
+    Colors.deepPurple.shade800,
+    Colors.lightGreen.shade800,
     ];
     final appNames = dailyData.keys.toList();
     for (int i = 0; i < appNames.length; i++) {

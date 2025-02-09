@@ -146,7 +146,7 @@ class MainActivity: FlutterActivity() {
         val screenTimeMap = mutableMapOf<String, MutableMap<String, String>>()
     
         for (stats in queryUsageStats) {
-            if (stats.totalTimeInForeground <= 0) {
+            if (stats.totalTimeInForeground / 3600000.0 < 0.05) {
                 continue
             }
     

@@ -188,8 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
         //Check if any data needs to be written to history
         if (dateUpdated.day != currentTime.day
          || dateUpdated.month != currentTime.month
-         || dateUpdated.year != currentTime.year)
-        {
+         || dateUpdated.year != currentTime.year) {
           needToMoveData = true;
         }
       }
@@ -198,11 +197,12 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     //If any data needs to be written to history
-    if(needToMoveData)
-    {
+    if(needToMoveData) {
       //Create batch
       var batch = FIRESTORE.batch();
-
+      double totalDaily = 0.0;
+      double totalWeekly = 0.0;
+      DocumentSnapshot<Map<String, dynamic>>? histSnapshot;
       try {
         // Iterate through each app and its screen time
         for (var appMap in fetchedData.entries) {
@@ -215,7 +215,7 @@ class _MyHomePageState extends State<MyHomePage> {
           //Check if date has changed since database was updated
           if(dateUpdated.day != currentTime.day
           || dateUpdated.month != currentTime.month
-          || dateUpdated.year != currentTime.year){
+          || dateUpdated.year != currentTime.year) {
             //Gets the number of the day of the week for the last update day
             int dayOfWeekNum = dateUpdated.weekday;
             //Gets the name of the day of the week for last update day
@@ -223,7 +223,12 @@ class _MyHomePageState extends State<MyHomePage> {
             //Gets the start of that week
             String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
             var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
-
+            histSnapshot ??= await historical.get();
+            if(totalWeekly == 0 && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
+              totalWeekly = histSnapshot['totalWeeklyHours'];
+            }
+            totalDaily += screenTimeHours;
+            totalWeekly += screenTimeHours;
             // Move data to historical
             batch.set(
               historical,
@@ -233,8 +238,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     'hours': screenTimeHours,
                     'lastUpdated': dateUpdated,
                     'appType': category
-                  }
-                }
+                  },
+                  'totalDailyHours': totalDaily
+                },
+                'totalWeeklyHours': (totalWeekly * 100).round() / 100
               },
               SetOptions(merge: true),
             );
@@ -246,17 +253,17 @@ class _MyHomePageState extends State<MyHomePage> {
         
         debugPrint('Successfully wrote screen time data to History');
         
-        //Create batch for clearing current data
-        batch = FIRESTORE.batch();
+        // //Create batch for clearing current data
+        // batch = FIRESTORE.batch();
 
-        final CUR_SNAPSHOT = await userRef.collection('appUsageCurrent').get();
+        // final CUR_SNAPSHOT = await userRef.collection('appUsageCurrent').get();
         
-        //Clear current app usage
-        for(var doc in CUR_SNAPSHOT.docs)
-        {
-          await doc.reference.delete();
-        }
-        await batch.commit();
+        // //Clear current app usage
+        // for(var doc in CUR_SNAPSHOT.docs)
+        // {
+        //   await doc.reference.delete();
+        // }
+        // await batch.commit();
       } catch (e) {
         debugPrint('Error writing screen time data to Firestore: $e');
         rethrow;
@@ -275,8 +282,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// and writes it to the Firestore database 
   /// using batches for multiple writes
   ///***************************************************
-  Future<void> _writeScreenTimeData() async
-  {
+  Future<void> _writeScreenTimeData() async {
     //Update ref to user's doc if UID has changed
     _updateUserRef();
 
@@ -285,7 +291,6 @@ class _MyHomePageState extends State<MyHomePage> {
     
       // Create a batch to handle multiple writes
       final batch = FIRESTORE.batch();
-      
       try {
         // Iterate through each app and its screen time
         for (final entry in _screenTimeData.entries) {
@@ -324,8 +329,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Description: Calls _writeScreenTimeData before
   /// signing user out of the app
   ///***************************************************
-  void _signOut() async
-  {
+  void _signOut() async {
     await _writeScreenTimeData();
     AUTH.signOut();
   }
@@ -335,16 +339,14 @@ class _MyHomePageState extends State<MyHomePage> {
   ///
   /// Description: Updates userRef to doc if the UID has changed
   ///***************************************************
-  void _updateUserRef()
-  {
+  void _updateUserRef() {
     //Grab current UID
    
     var curUid = uid;
     //Regrab UID in case it's changed
     uid = AUTH.currentUser?.uid;
     //Update user reference if UID has changed
-    if(curUid != uid)
-    {
+    if(curUid != uid){
       userRef = MAIN_COLLECTION.doc(uid);
     }
   }
