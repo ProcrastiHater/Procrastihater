@@ -8,7 +8,6 @@
 //Dart Imports
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
@@ -109,6 +108,13 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
     }
   }
 
+  ///**************************************************
+  /// Name: _handleChartTap
+  ///
+  /// Description: gets the coordinates of the tapped bar
+  /// and sets selectedCategory as the name of the currently
+  /// selected app category
+  ///***************************************************
   void _handleChartTap(TapDownDetails details, BoxConstraints constraints) {
     // Convert tap position to chart coordinates
     final RenderBox box = context.findRenderObject() as RenderBox;
