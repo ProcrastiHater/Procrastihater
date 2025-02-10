@@ -42,35 +42,34 @@ class _FriendsListState extends State<FriendsList>{
     super.initState();
   }
 
-  // TODO ADD CHECK FOR IF FRIEND HAS ALREADY BEEN ADDED
-  // TODO FIGURE OUT WHY FRIEND DOC ISN'T BEING VALIDATED
+  
   void _addFriend(String friendUID) async {
-  DocumentSnapshot friendDocRef = await _firestore.collection('UID').doc(friendUID).get();
-  print('FriendUID: ${friendUID}');
-  print('Friend Document Exists: ${friendDocRef.exists}');
-  print('Friend Document as string?: ${friendDocRef.data()}');
+  CollectionReference uidCollection = _firestore.collection('UID');
 
-    if (friendDocRef.exists) {
-         DocumentReference userDocRef = _firestore.collection('UID').doc(_auth.currentUser?.uid);
-         // Adding friend UID to friends field in UID document
-         await userDocRef.set({
-          'friends': FieldValue.arrayUnion([friendUID])
-         }, SetOptions(merge: true));
-        
-         
-        await userDocRef.collection('friends').doc(friendUID).set({
-            'UID': friendUID
-        });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-         const SnackBar(content: Text('Friend added!'))
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User not found')),
-        );
-      }
-    }
+  DocumentSnapshot friendDocRef = await uidCollection.doc(friendUID).get();
+    print(friendDocRef.exists);
+
+  if (friendDocRef.exists) { // This will be true even if the document has no fields
+    DocumentReference userDocRef = _firestore.collection('UID').doc(_auth.currentUser?.uid);
+
+    await userDocRef.set({
+      'friends': FieldValue.arrayUnion([friendUID])
+    }, SetOptions(merge: true));
+
+    await userDocRef.collection('friends').doc(friendUID).set({
+      'UID': friendUID
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Friend added!'))
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('User not found')),
+    );
+  }
+}
+
   
 
 
@@ -82,7 +81,6 @@ class _FriendsListState extends State<FriendsList>{
       ),
       body: Column(
       children: [
-        
         Padding(
           padding: const EdgeInsets.all(8),
           child:TextField(
@@ -95,8 +93,26 @@ class _FriendsListState extends State<FriendsList>{
               ),
             ),
           )
-        )
+        ),
+        Expanded(
+          child: StreamBuilder<DocumentSnapshot>(
+            stream: _firestore.collection('UID').doc(_auth.currentUser?.uid).snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const CircularProgressIndicator();
 
+              List<dynamic> friends = (snapshot.data?.data() as Map<String, dynamic>)?['friends'] ?? [];
+
+              return ListView.builder(
+                itemCount: friends.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(friends[index]),
+                  );
+                },
+              );
+            },
+          ),
+        ),
        ],
       )
     );
