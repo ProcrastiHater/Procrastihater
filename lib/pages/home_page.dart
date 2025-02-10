@@ -11,7 +11,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'profile_settings.dart';
+import '../profile/profile_settings.dart';
 
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';

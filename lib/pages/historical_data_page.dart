@@ -21,12 +21,13 @@ import 'package:fl_chart/fl_chart.dart';
 
 
 //Page imports
-import 'home_page.dart';
+import '/pages/home_page.dart';
+import '/pages/graph/colors.dart';
 
-Map<String, Color> appNameToColor = {}; 
+//Global variables
+//Map<String, Color> appNameToColor = {}; 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 Map<String, Map<String, Map<String, dynamic>>> data = {};
-
 
 ///*********************************
 /// Name: HistoricalDataPage
@@ -85,7 +86,7 @@ class GraphView extends StatefulWidget {
   State<GraphView> createState() => _MyGraphViewState();
 }
 class _MyGraphViewState extends State<GraphView> {
-      List<String> availableDays = data.keys.toList(); 
+  List<String> availableDays = data.keys.toList(); 
 
   void _updateUserRef() {
     //Grab current UID
@@ -139,65 +140,6 @@ class _MyGraphViewState extends State<GraphView> {
   }
   
   BarChartGroupData generatedGroupData(int index, Map<String, Map<String, dynamic>> dailyData) {
-    final List<Color> appColors = [
-    Colors.deepPurple.shade400,
-    Colors.red.shade400,
-    Colors.green.shade400,
-    Colors.orange.shade400,
-    Colors.indigo.shade500,
-    Colors.cyan.shade400,
-    Colors.teal,
-    Colors.pink.shade500,
-    Colors.blue.shade500,
-    Colors.amber.shade400,
-    Colors.lime.shade400,
-    Colors.brown.shade400,
-    Colors.deepOrange.shade500,
-    Colors.purple.shade400,
-    Colors.lightBlue.shade400,
-    Colors.yellow.shade600,
-    Colors.grey.shade600,
-    Colors.lightGreen.shade500,
-    Colors.blueGrey.shade500,
-    Colors.redAccent.shade700,
-    Colors.greenAccent.shade700,
-    Colors.orangeAccent.shade700,
-    Colors.purpleAccent.shade700,
-    Colors.cyanAccent.shade700,
-    Colors.pinkAccent.shade700,
-    Colors.tealAccent.shade700,
-    Colors.indigoAccent.shade700,
-    Colors.blueAccent.shade700,
-    Colors.amberAccent.shade700,
-    Colors.deepOrangeAccent.shade700,
-    Colors.lightGreenAccent.shade700,
-    Colors.limeAccent.shade700,
-    Colors.deepPurpleAccent.shade700,
-    Colors.brown.shade600,
-    Colors.grey.shade800,
-    Colors.blueGrey.shade800,
-    Colors.red.shade800,
-    Colors.green.shade800,
-    Colors.orange.shade800,
-    Colors.purple.shade800,
-    Colors.cyan.shade800,
-    Colors.pink.shade800,
-    Colors.teal.shade800,
-    Colors.indigo.shade800,
-    Colors.blue.shade800,
-    Colors.amber.shade800,
-    Colors.lightBlue.shade800,
-    Colors.deepOrange.shade800,
-    Colors.lime.shade800,
-    Colors.deepPurple.shade800,
-    Colors.lightGreen.shade800,
-    ];
-    final appNames = dailyData.keys.toList();
-    for (int i = 0; i < appNames.length; i++) {
-      appNameToColor[appNames[i]] = appColors[i % appColors.length];
-    } 
-
-
   List<BarChartRodStackItem> rodStackItems = [];
   double cumulativeHeight = 0;
 
@@ -227,8 +169,11 @@ class _MyGraphViewState extends State<GraphView> {
   );
 }
   List<BarChartGroupData> generateWeeklyChart(Map<String, Map<String, Map<String, dynamic>>> data) {
+    for (int i = 0; i < availableDays.length; i++) {
+      mapColors(data[availableDays[i]]!);
+    }
     return [
-      for (int i = 0; i < availableDays.length; i++)
+      for (int i = 0; i < availableDays.length; i++) 
         generatedGroupData(i, data[availableDays[i]]!)
     ]; 
   }

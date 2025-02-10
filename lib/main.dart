@@ -19,10 +19,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 //Page Imports
-import 'home_page.dart';
-import 'social_media_page.dart';
-import 'historical_data_page.dart';
-import 'login_screen.dart';
+import 'pages/home_page.dart';
+import 'pages/social_media_page.dart';
+import 'pages/historical_data_page.dart';
+import 'profile/login_screen.dart';
 
 
 ///*********************************
