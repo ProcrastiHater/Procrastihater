@@ -36,7 +36,9 @@ class SocialMediaPage extends StatefulWidget {
 
 class _SocialMediaPageState extends State<SocialMediaPage> {
   List<Map<String, dynamic>> chartData = [];
+  Map<String, List<Map<String, dynamic>>> categoryData = {};
   bool isLoading = true;
+  String? selectedCategory;
 
   @override
   void initState() {
