@@ -23,9 +23,9 @@ import 'package:fl_chart/fl_chart.dart';
 //Page imports
 import '/pages/home_page.dart';
 import '/pages/graph/colors.dart';
+import '/pages/graph/fetchHistorical.dart';
 
 //Global variables
-//Map<String, Color> appNameToColor = {}; 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 Map<String, Map<String, Map<String, dynamic>>> data = {};
 
@@ -88,54 +88,16 @@ class GraphView extends StatefulWidget {
 class _MyGraphViewState extends State<GraphView> {
   List<String> availableDays = data.keys.toList(); 
 
-  void _updateUserRef() {
-    //Grab current UID
-    var curUid = uid;
-    //Regrab UID in case it's changed
-    uid = AUTH.currentUser?.uid;
-    //Update user reference if UID has changed
-    if(curUid != uid) {
-      userRef = MAIN_COLLECTION.doc(uid);
-    }
+  Future<void> _initializeData() async {
+    final result = await fetchScreenTime();
+    setState(() {
+      data = result;
+    });
   }
 
-  Future<void> _fetchScreenTime() async {
-    _updateUserRef();
-    final CURRENT = userRef.collection("appUsageHistory");
-    DateTime lastMonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday + 7));
-    String fortmattedLastMonday = DateFormat('MM-dd-yyyy').format(lastMonday);
-    try{
-      DocumentSnapshot doc = await CURRENT.doc(fortmattedLastMonday).get();
-      if (doc.exists) {
-        Map<String, dynamic> weeklyData = doc.data() as Map<String, dynamic>;
-        Map<String, Map<String, Map<String, dynamic>>> fetchedData = {};
-        for (String day in weeklyData.keys) {
-          if (day != 'totalWeeklyHours'){
-            Map<String, dynamic> dailyData = weeklyData[day];
-            fetchedData[day] = {};
-            for (String appName in dailyData.keys) {
-              if (appName != 'totalDailyHours'){
-                Map<String, dynamic> appData = dailyData[appName];
-                fetchedData[day]![appName] = {
-                  'hours': appData['hours'].toDouble(),
-                  'appType': appData['appType'],
-                  'lastUpdated': appData['lastUpdated']
-                };
-              }
-            }
-          }
-        }
-        setState(() {
-          data = fetchedData;
-        });
-      }
-    } catch (e){
-      print("error fetching screentime data: $e");
-    }
-  }
   @override
   void initState() {
-    _fetchScreenTime();
+    _initializeData();
     super.initState();
   }
   
