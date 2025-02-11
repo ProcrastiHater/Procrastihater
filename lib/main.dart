@@ -8,6 +8,7 @@
 
 //Dart Imports
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 //Page Imports
 import 'home_page.dart';
@@ -24,6 +26,7 @@ import 'social_media_page.dart';
 import 'historical_data_page.dart';
 import 'login_screen.dart';
 
+final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
 
 ///*********************************
 /// Name: main
@@ -36,6 +39,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase initialization
   await Firebase.initializeApp();
+
   //launch the main app
   runApp(const LoginScreen());
 }
@@ -82,11 +86,46 @@ class _MyPageViewState extends State<MyPageView> {
   //Tracks current index
   int _currentPage = 0;
 
+  bool _notificationsEnabled = false;
+
   //Initialize page controller and set initial page
   @override
   void initState() {
     _pageController = PageController(initialPage: 1);
     _currentPage = 1;
+
+    const InitializationSettings initSettings = InitializationSettings(
+      android: AndroidInitializationSettings("@mipmap/ic_launcher")
+    );
+
+    notificationsPlugin.initialize(
+      initSettings
+    );
+
+    Future<void> _isAndroidPermissionGranted() async {
+      final bool granted = await notificationsPlugin
+              .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+              ?.areNotificationsEnabled() ??
+          false;
+
+      setState(() {
+        _notificationsEnabled = granted;
+      });
+    }
+
+    Future<void> _requestPermissions() async {
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation = 
+        notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+      final bool? grantedNotificationPermission =
+        await androidImplementation?.requestNotificationsPermission();
+      setState(() {
+        _notificationsEnabled = grantedNotificationPermission ?? false;
+      });
+    }
+
+    _isAndroidPermissionGranted();
+    _requestPermissions();
     super.initState();
   }
 

@@ -8,6 +8,8 @@
 
 //Dart imports
 import 'dart:async';
+import 'package:app_screen_time/main.dart';
+import 'package:app_screen_time/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -79,9 +81,9 @@ class _MyHomePageState extends State<MyHomePage> {
     //Moves data from current to historical
     _currentToHistorical().whenComplete(() {
         _checkPermission().whenComplete((){
-            _getScreenTime().whenComplete((){
-              _writeScreenTimeData();
-            });
+            _getScreenTime();//.whenComplete((){
+              //_writeScreenTimeData();
+            //});
           }
         );
       }
@@ -151,6 +153,12 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       });
       debugPrint('Got screen time!');
+      await notificationsPlugin.show(
+        0,
+        'Screen Time',
+        'Got screen time from user\'s phone',
+        totalUsage
+      );
     } on PlatformException catch (e) {
       debugPrint("Failed to get screen time: ${e.message}");
     }
@@ -253,17 +261,6 @@ class _MyHomePageState extends State<MyHomePage> {
         
         debugPrint('Successfully wrote screen time data to History');
         
-        // //Create batch for clearing current data
-        // batch = FIRESTORE.batch();
-
-        // final CUR_SNAPSHOT = await userRef.collection('appUsageCurrent').get();
-        
-        // //Clear current app usage
-        // for(var doc in CUR_SNAPSHOT.docs)
-        // {
-        //   await doc.reference.delete();
-        // }
-        // await batch.commit();
       } catch (e) {
         debugPrint('Error writing screen time data to Firestore: $e');
         rethrow;
