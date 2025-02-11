@@ -130,13 +130,27 @@ class _MyHomePageState extends State<MyHomePage> {
       debugPrint("Failed to request permission: ${e.message}");
     }
   }
+
+  ///*********************************************
+  /// Name: _getDailyTotal
+  ///   
+  /// Description: Returns total daily hours
+  ///*********************************************
+  double _getDailyTotal(){
+    double dailyHours = 0.0;
+    for(final entry in _screenTimeData.entries){
+      final screenTimeHours = double.parse(entry.value['hours']!);
+      dailyHours += screenTimeHours;
+    }
+    return (dailyHours * 100).round() / 100;
+  }
   
-  ///*********************************
+  ///**********************************************
   /// Name: _getScreenTime
   ///   
   /// Description: Accesses screentime data
   /// by storing into a Map.
-  ///*********************************
+  ///**********************************************
   Future<void> _getScreenTime() async {
     //Checks if user has permission, if not it requests the permissions
     if (!_hasPermission) {
@@ -157,7 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
       await notificationsPlugin.show(
         0,
         'Screen Time',
-        'Got screen time from user\'s phone',
+        'You have spent ${_getDailyTotal()} hours on your phone today',
         totalUsage
       );
     } on PlatformException catch (e) {
@@ -248,7 +262,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'lastUpdated': dateUpdated,
                     'appType': category
                   },
-                  'totalDailyHours': totalDaily
+                  'totalDailyHours': (totalDaily * 100).round() / 100
                 },
                 'totalWeeklyHours': (totalWeekly * 100).round() / 100
               },
