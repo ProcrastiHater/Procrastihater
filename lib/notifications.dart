@@ -1,3 +1,10 @@
+///*********************************
+/// Name: notifications.dart
+///
+/// Description: Dart file for storing 
+/// notification details
+///*******************************
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 NotificationDetails totalUsage = NotificationDetails(
