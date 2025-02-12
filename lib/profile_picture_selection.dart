@@ -4,6 +4,7 @@
 /// Description: Shows 6 images a user can select and change their profile picture
 /// too
 ///********************************************************************************
+library;
 
 // Dart imports
 import 'package:flutter/material.dart';
