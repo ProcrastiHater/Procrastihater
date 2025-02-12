@@ -306,7 +306,7 @@ class _MyHomePageState extends State<MyHomePage> {
         batch.set(
           userRef,
           {
-            'totalDailyHours': totalDaily,
+            'totalDailyHours': (totalDaily * 100).round() / 100,
             'lastUpdated': FieldValue.serverTimestamp()
           },
           SetOptions(merge:true),
