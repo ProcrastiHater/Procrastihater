@@ -1,8 +1,8 @@
 ///*********************************
-/// Name: fetchHistorical.dart
+/// Name: widget.dart
 ///
-/// Description: Map colors to specific
-/// app names for consistency
+/// Description: Holds all the neccesary 
+/// widgets for the building of graphs
 ///*******************************
 library;
 
@@ -17,15 +17,22 @@ import '/pages/graph/fetch_historical.dart';
 import '/pages/graph/colors.dart';
 import '/pages/historical_data_page.dart';
 
-
 //Global Variables
 List<String> availableDays = data.keys.toList(); 
 
-
+///*********************************
+/// Name: generateWeeklyChart
+/// 
+/// Description: Generate a chart in 
+/// week long segments with stacked bar
+/// charts and colors for specific apps
+///*********************************
 List<BarChartGroupData> generateWeeklyChart(Map<String, Map<String, Map<String, dynamic>>> data) {
+  //Loop through each day and make sure the proper color is assigned to proper app
   for (int i = 0; i < availableDays.length; i++) {
     mapColors(data[availableDays[i]]!);
   }
+  
   return [
     for (int i = 0; i < availableDays.length; i++) 
       generatedGroupData(i, data[availableDays[i]]!)
