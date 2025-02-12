@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'profile_settings.dart';
+import 'dart:math';
 
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
@@ -76,6 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ///Checks screen time usage permission on startup
   @override
   void initState(){
+    _checkUserInfo();
     //Moves data from current to historical
     _currentToHistorical().whenComplete(() {
         _checkPermission().whenComplete((){
@@ -95,6 +97,40 @@ class _MyHomePageState extends State<MyHomePage> {
     debugPrint("**********Disposing...***************");
     super.dispose();
   }
+
+  ///*********************************
+  ///Name: _checkUserInfo
+  ///
+  /// Description: If a account is newly created
+  /// it writes the user info of the account like 
+  /// pfp link, display name, etc
+  ///***********************************
+  Future<void> _checkUserInfo() async {
+      DocumentSnapshot userData = await userRef.get();
+       if (userData.exists) {
+      Map<String, dynamic> userInfo = userData.data() as Map<String, dynamic>;
+      if(!userInfo.containsKey('pfp'))
+      {
+        await userRef.set({
+          "pfp":  "https://picsum.photos/id/237/200/300"
+        }, SetOptions(merge: true));
+
+        await AUTH.currentUser?.updateDisplayName("https://picsum.photos/id/237/200/300");
+      }
+      
+      if(!userInfo.containsKey('displayName'))
+      {
+        int randomNumber = Random().nextInt(1000000); // Probably won't have user's with a default name
+        String defaultDisplayName = "User$randomNumber"; // This could be better but *shrug* it works
+        await userRef.set({
+          "displayName": defaultDisplayName
+        }, SetOptions(merge: true));
+        await AUTH.currentUser?.updateDisplayName(defaultDisplayName);
+      }
+
+      }
+  } 
+
 
   ///*********************************
   /// Name: _checkPermission

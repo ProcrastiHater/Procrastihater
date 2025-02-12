@@ -9,6 +9,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'profile_picture_selection.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+
+final CollectionReference MAIN_COLLECTION = FirebaseFirestore.instance.collection('UID');
+String? uid = FirebaseAuth.instance.currentUser?.uid;
+//Reference to user's document in Firestore
+DocumentReference userRef = MAIN_COLLECTION.doc(uid);
 
 ///***************************************************
 /// Name: ProfileSettings
@@ -52,7 +60,11 @@ class ProfileSettingsState extends State<ProfileSettings> {
   Future<void> _updateDisplayName() async {
     if (_user != null) {
       await _user!.updateDisplayName(_displayNameController.text);
+            await userRef.set({
+          "displayName": _displayNameController.text
+        }, SetOptions(merge: true));
       await _user!.reload();
+     
       setState(() {
         _user = _auth.currentUser;
       });

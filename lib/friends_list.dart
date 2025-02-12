@@ -94,25 +94,41 @@ class _FriendsListState extends State<FriendsList>{
             ),
           )
         ),
-        Expanded(
-          child: StreamBuilder<DocumentSnapshot>(
-            stream: _firestore.collection('UID').doc(_auth.currentUser?.uid).snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const CircularProgressIndicator();
+         Expanded(
+            child: StreamBuilder<DocumentSnapshot>(
+              stream: _firestore.collection('UID').doc(_auth.currentUser?.uid).snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const CircularProgressIndicator();
 
-              List<dynamic> friends = (snapshot.data?.data() as Map<String, dynamic>)?['friends'] ?? [];
+                List<dynamic> friends = (snapshot.data?.data() as Map<String, dynamic>)['friends'] ?? [];
 
-              return ListView.builder(
-                itemCount: friends.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(friends[index]),
-                  );
-                },
-              );
-            },
+                return ListView.builder(
+                  itemCount: friends.length,
+                  itemBuilder: (context, index) {
+                    String friendUID = friends[index];
+
+                    return FutureBuilder<DocumentSnapshot>(
+                      future: _firestore.collection('UID').doc(friendUID).get(),
+                      builder: (context, friendSnapshot) {
+                        if (!friendSnapshot.hasData) return const SizedBox.shrink(); // Show nothing if no data
+
+                        var friendData = friendSnapshot.data!.data() as Map<String, dynamic>;
+                        String displayName = friendData['displayName'] ?? 'Unknown';
+                        String photoUrl = friendData['pfp'] ?? 'https://picsum.photos/200/200';
+
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage(photoUrl),
+                          ),
+                          title: Text(displayName),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
        ],
       )
     );
