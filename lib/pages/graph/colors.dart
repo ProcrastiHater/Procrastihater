@@ -4,6 +4,7 @@
 /// Description: Map colors to specific
 /// app names for consistency
 ///*******************************
+library;
 
 //Dart Imports
 import 'package:flutter/material.dart';

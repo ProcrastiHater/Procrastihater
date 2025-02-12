@@ -4,6 +4,7 @@
 /// Description: Creates a page to render the auth_gate on which will manage
 /// user sign-in state and allow for account creation/sign-in 
 ///**************************************************************************
+library;
 
 // Dart imports
 import 'package:flutter/material.dart';

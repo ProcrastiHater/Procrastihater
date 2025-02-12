@@ -5,6 +5,7 @@
 /// initializes firebase, handles authentication
 /// and sets up main structure of app
 ///*******************************
+library;
 
 //Dart Imports
 import 'dart:async';

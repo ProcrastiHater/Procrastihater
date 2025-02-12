@@ -4,6 +4,7 @@
 /// Description: Historical Data page file for 
 /// application
 ///*******************************
+library;
 
 //Dart Imports
 import 'dart:async';
@@ -16,7 +17,7 @@ import 'package:fl_chart/fl_chart.dart';
 //Page imports
 import '/pages/home_page.dart';
 import '/pages/graph/colors.dart';
-import '/pages/graph/fetchHistorical.dart';
+import '/pages/graph/fetch_historical.dart';
 import '/pages/graph/widget.dart';
 
 //Global variables

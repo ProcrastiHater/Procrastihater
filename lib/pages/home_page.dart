@@ -5,6 +5,7 @@
 /// application, currently holds
 /// current app usage
 ///*******************************
+library;
 
 //Dart imports
 import 'dart:async';
@@ -173,10 +174,10 @@ class _MyHomePageState extends State<MyHomePage> {
     bool needToMoveData = false;
     //Grab data from current
     try{
-      final CURRENT = userRef.collection('appUsageCurrent');
-      final CUR_SNAPSHOT = await CURRENT.get();
+      final current = userRef.collection('appUsageCurrent');
+      final curSnapshot = await current.get();
       //Loop to access all current screentime data from user
-      for (var doc in CUR_SNAPSHOT.docs){
+      for (var doc in curSnapshot.docs){
         String docName = doc.id;
         double? hours = doc['dailyHours']?.toDouble();
         Timestamp timestamp = doc['lastUpdated'];

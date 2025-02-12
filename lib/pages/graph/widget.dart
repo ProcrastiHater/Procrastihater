@@ -4,6 +4,7 @@
 /// Description: Map colors to specific
 /// app names for consistency
 ///*******************************
+library;
 
 //Dart Imports
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 //Page Imports
-import '/pages/graph/fetchHistorical.dart';
+import '/pages/graph/fetch_historical.dart';
 import '/pages/graph/colors.dart';
 import '/pages/historical_data_page.dart';
 

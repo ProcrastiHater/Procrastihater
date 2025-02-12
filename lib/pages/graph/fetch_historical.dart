@@ -1,9 +1,10 @@
 ///*********************************
-/// Name: fetchHistorical.dart
+/// Name: fetch_historical.dart
 ///
 /// Description: Map colors to specific
 /// app names for consistency
 ///*******************************
+library;
 
 //Dart Imports
 import 'package:flutter/material.dart';
@@ -32,11 +33,11 @@ void _updateUserRef() {
 Future<Map<String, Map<String, Map<String, dynamic>>>> fetchScreenTime() async {
   _updateUserRef();
   Map<String, Map<String, Map<String, dynamic>>> fetchedData = {};
-  final CURRENT = userRef.collection("appUsageHistory");
+  final current = userRef.collection("appUsageHistory");
   DateTime lastMonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
   String fortmattedLastMonday = DateFormat('MM-dd-yyyy').format(lastMonday);
   try{
-    DocumentSnapshot doc = await CURRENT.doc(fortmattedLastMonday).get();
+    DocumentSnapshot doc = await current.doc(fortmattedLastMonday).get();
     if (doc.exists) {
       Map<String, dynamic> weeklyData = doc.data() as Map<String, dynamic>;
       for (String day in weeklyData.keys) {
