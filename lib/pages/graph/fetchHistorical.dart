@@ -6,9 +6,11 @@
 ///*******************************
 
 //Dart Imports
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+//Firebase Imports
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 //Page Imports
 import '/pages/home_page.dart';
@@ -31,7 +33,7 @@ Future<Map<String, Map<String, Map<String, dynamic>>>> fetchScreenTime() async {
   _updateUserRef();
   Map<String, Map<String, Map<String, dynamic>>> fetchedData = {};
   final CURRENT = userRef.collection("appUsageHistory");
-  DateTime lastMonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday + 7));
+  DateTime lastMonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
   String fortmattedLastMonday = DateFormat('MM-dd-yyyy').format(lastMonday);
   try{
     DocumentSnapshot doc = await CURRENT.doc(fortmattedLastMonday).get();

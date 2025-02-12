@@ -8,26 +8,19 @@
 //Dart Imports
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-
-//Firebase Imports
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 //fl_chart imports
 import 'package:fl_chart/fl_chart.dart';
-
 
 //Page imports
 import '/pages/home_page.dart';
 import '/pages/graph/colors.dart';
 import '/pages/graph/fetchHistorical.dart';
+import '/pages/graph/widget.dart';
 
 //Global variables
-const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-Map<String, Map<String, Map<String, dynamic>>> data = {};
+//const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 ///*********************************
 /// Name: HistoricalDataPage
@@ -86,7 +79,6 @@ class GraphView extends StatefulWidget {
   State<GraphView> createState() => _MyGraphViewState();
 }
 class _MyGraphViewState extends State<GraphView> {
-  List<String> availableDays = data.keys.toList(); 
 
   Future<void> _initializeData() async {
     final result = await fetchScreenTime();
@@ -95,105 +87,21 @@ class _MyGraphViewState extends State<GraphView> {
     });
   }
 
+  BarTouchData loadTouch(Map<String, Map<String, Map<String, dynamic>>> data) {
+    return getBarTouch(data, widget.onDaySelected);
+  }
+
   @override
   void initState() {
-    _initializeData();
     super.initState();
+    _initializeData();
   }
   
-  BarChartGroupData generatedGroupData(int index, Map<String, Map<String, dynamic>> dailyData) {
-  List<BarChartRodStackItem> rodStackItems = [];
-  double cumulativeHeight = 0;
-
-  for (var appName in dailyData.keys) {
-    double hours = dailyData[appName]?['hours'] ?? 0.0;
-    rodStackItems.add(
-      BarChartRodStackItem(
-        cumulativeHeight, 
-        cumulativeHeight + hours, 
-        appNameToColor[appName]!, 
-      ),
-    );
-    cumulativeHeight += hours; 
-  }
-  
-  return BarChartGroupData(
-    x: index,
-    barRods: [
-      BarChartRodData(
-        fromY: 0,
-        toY: cumulativeHeight, 
-        rodStackItems: rodStackItems, 
-        width: 15, 
-        borderRadius: BorderRadius.circular(4),
-      ),
-    ],
-  );
-}
-  List<BarChartGroupData> generateWeeklyChart(Map<String, Map<String, Map<String, dynamic>>> data) {
-    for (int i = 0; i < availableDays.length; i++) {
-      mapColors(data[availableDays[i]]!);
-    }
-    return [
-      for (int i = 0; i < availableDays.length; i++) 
-        generatedGroupData(i, data[availableDays[i]]!)
-    ]; 
-  }
-  Widget bottomTitles(double value, TitleMeta meta) {
-    const style = TextStyle(
-      decoration: TextDecoration.none,
-      fontSize: 10.0, 
-      color: Colors.black,
-      );
-    String text = availableDays[value.toInt()].substring(0,3);
-    return SideTitleWidget(
-      meta: meta,
-      child: Text(
-        text, 
-        style: style
-      )
-    );
-  }
-  BarTouchData getBarTouch(Map<String, Map<String, Map<String, dynamic>>> data) {
-    return BarTouchData(
-      enabled: true,
-      touchCallback: (event, response){
-        if (response != null && response.spot != null) {
-          int dayIndex = response.spot!.touchedBarGroupIndex;
-          String day = availableDays[dayIndex];
-          widget.onDaySelected(day);
-        }
-      },
-      touchTooltipData: BarTouchTooltipData(
-        getTooltipColor: (_) => Colors.blueGrey,
-        tooltipPadding: const EdgeInsets.all(8.0),
-        tooltipMargin: 8.0,
-        getTooltipItem: (group, groupIndex, rod, rodIndex) {
-          double totalHours = rod.toY;
-          return BarTooltipItem(
-            'Total Hours\n',
-            const TextStyle(
-              decoration: TextDecoration.none,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-            children: [
-              TextSpan(
-              text: '${totalHours.toStringAsFixed(1)} hrs',
-              style: const TextStyle(
-                decoration: TextDecoration.none,
-                color: Colors.white
-                ),
-            ),
-          ],
-        );
-      },
-      )
-    );
-  }
   @override
   Widget build(BuildContext context) {
+    if (data.isEmpty) {
+    return Center(child: CircularProgressIndicator());
+    }
     return Padding(
       padding: EdgeInsets.all(10.0),
       child: Column(
@@ -257,7 +165,7 @@ class _MyGraphViewState extends State<GraphView> {
                   ) 
                 ),
               ),  
-              barTouchData: getBarTouch(data),
+              barTouchData: loadTouch(data),
               borderData: FlBorderData(show: true),    
               gridData: FlGridData(show: true),
               barGroups: generateWeeklyChart(data),   
@@ -297,6 +205,9 @@ class _MyExpandedListViewState extends State<ExpandedListView> {
     }
 
     if (!data.containsKey(widget.selectedDay)) {
+      if (data.isEmpty) {
+        return Center(child: CircularProgressIndicator());
+      }
       return Center(
         child: Text(
           "No data available for ${widget.selectedDay}",
