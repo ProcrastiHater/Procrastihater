@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'profile_picture_selection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 
 final CollectionReference MAIN_COLLECTION = FirebaseFirestore.instance.collection('UID');
@@ -157,6 +158,21 @@ class ProfileSettingsState extends State<ProfileSettings> {
               child: Text('Change Profile Picture')
             ),
             SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () async {
+                  try {
+                    await Clipboard.setData(ClipboardData(text: _user?.uid as String));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Copied to Clipboard!')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to copy to clipboard.')),
+                    );
+                  }
+              },
+              child: const Text('Copy to Clipboard'),
+            ),
             // Button to sign out
             ElevatedButton(
               onPressed: _signOut,

@@ -44,10 +44,18 @@ class _FriendsListState extends State<FriendsList>{
 
   
   void _addFriend(String friendUID) async {
+  
+  if(friendUID == _auth.currentUser?.uid as String)
+  {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Cannot add self as friend'))
+    );
+    return; // Not AI code just bad code. Would be better to throw error in here but *shrug* it works
+  }
+ 
   CollectionReference uidCollection = _firestore.collection('UID');
 
   DocumentSnapshot friendDocRef = await uidCollection.doc(friendUID).get();
-    print(friendDocRef.exists);
 
   if (friendDocRef.exists) { // This will be true even if the document has no fields
     DocumentReference userDocRef = _firestore.collection('UID').doc(_auth.currentUser?.uid);
