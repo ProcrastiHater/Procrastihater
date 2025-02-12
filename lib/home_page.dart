@@ -302,10 +302,15 @@ class _MyHomePageState extends State<MyHomePage> {
             SetOptions(merge: true),
           );
         }
-        batch.set(userRef, {
-          'totalDailyHours': totalDaily,
-          'lastUpdated': FieldValue.serverTimestamp()
-        });
+        //Put user's daily hours in their doc
+        batch.set(
+          userRef,
+          {
+            'totalDailyHours': totalDaily,
+            'lastUpdated': FieldValue.serverTimestamp()
+          },
+          SetOptions(merge:true),
+        );
         // Commit the batch
         await batch.commit();
         debugPrint('Successfully wrote screentime data');
