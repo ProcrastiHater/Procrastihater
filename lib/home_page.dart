@@ -82,9 +82,9 @@ class _MyHomePageState extends State<MyHomePage> {
     //Moves data from current to historical
     _currentToHistorical().whenComplete(() {
         _checkPermission().whenComplete((){
-            _getScreenTime();//.whenComplete((){
-              //_writeScreenTimeData();
-            //});
+            _getScreenTime().whenComplete((){
+              _writeScreenTimeData();
+            });
           }
         );
       }
@@ -145,6 +145,31 @@ class _MyHomePageState extends State<MyHomePage> {
     return (dailyHours * 100).round() / 100;
   }
   
+  ///*********************************************
+  /// Name: _screenTimeNotification
+  ///   
+  /// Description: Displays different notification
+  /// messages based on user's total daily hours
+  ///*********************************************
+  void _screenTimeNotification() async{
+    double dailyTotal = _getDailyTotal();
+    String notificationMsg = 'You have spent ${dailyTotal} hours on your phone today.';
+    if (dailyTotal < 3){
+    }
+    else if (dailyTotal < 7){
+      notificationMsg += ' Generic';
+    }
+    else{
+      notificationMsg += ' Wow. You\'ve clocked a full work day on your phone';
+    }
+    await notificationsPlugin.show(
+      0,
+      'Screen Time',
+      notificationMsg,
+      totalUsage
+    );
+  }
+
   ///**********************************************
   /// Name: _getScreenTime
   ///   
@@ -168,12 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       });
       debugPrint('Got screen time!');
-      await notificationsPlugin.show(
-        0,
-        'Screen Time',
-        'You have spent ${_getDailyTotal()} hours on your phone today',
-        totalUsage
-      );
+      _screenTimeNotification();
     } on PlatformException catch (e) {
       debugPrint("Failed to get screen time: ${e.message}");
     }
@@ -247,7 +267,7 @@ class _MyHomePageState extends State<MyHomePage> {
             String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
             var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
             histSnapshot ??= await historical.get();
-            if(totalWeekly == 0 && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
+            if(totalWeekly == 0.0 && histSnapshot.data() != null && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
               totalWeekly = histSnapshot['totalWeeklyHours'];
             }
             totalDaily += screenTimeHours;
