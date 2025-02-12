@@ -4,6 +4,7 @@
 /// Description: Social Media page file for 
 /// application
 ///*******************************
+library;
 
 //Dart Imports
 import 'dart:async';

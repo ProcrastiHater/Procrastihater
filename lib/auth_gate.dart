@@ -4,6 +4,7 @@
 /// Description: Creates widget that handles user sign in, account creation,
 /// and tracking if user is currently signed in.
 ///**************************************************************************
+library;
 
 //Firebase Imports
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;

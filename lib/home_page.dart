@@ -4,7 +4,8 @@
 /// Description: Home page file for 
 /// application, currently holds
 /// current app usage
-///*******************************
+///********l***********************
+library;
 
 //Dart imports
 import 'dart:async';
@@ -224,7 +225,7 @@ class _MyHomePageState extends State<MyHomePage> {
             String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
             var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
             histSnapshot ??= await historical.get();
-            if(totalWeekly == 0 && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
+            if(totalWeekly == 0 && histSnapshot.data() != null && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
               totalWeekly = histSnapshot['totalWeeklyHours'];
             }
             totalDaily += screenTimeHours;
@@ -239,7 +240,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'lastUpdated': dateUpdated,
                     'appType': category
                   },
-                  'totalDailyHours': totalDaily
+                  'totalDailyHours': (totalDaily * 100).round() / 100
                 },
                 'totalWeeklyHours': (totalWeekly * 100).round() / 100
               },
@@ -252,18 +253,6 @@ class _MyHomePageState extends State<MyHomePage> {
         await batch.commit();
         
         debugPrint('Successfully wrote screen time data to History');
-        
-        // //Create batch for clearing current data
-        // batch = FIRESTORE.batch();
-
-        // final CUR_SNAPSHOT = await userRef.collection('appUsageCurrent').get();
-        
-        // //Clear current app usage
-        // for(var doc in CUR_SNAPSHOT.docs)
-        // {
-        //   await doc.reference.delete();
-        // }
-        // await batch.commit();
       } catch (e) {
         debugPrint('Error writing screen time data to Firestore: $e');
         rethrow;
@@ -285,10 +274,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _writeScreenTimeData() async {
     //Update ref to user's doc if UID has changed
     _updateUserRef();
-
     if(_screenTimeData.isNotEmpty){
+      double totalDaily = 0.0;
       final current = userRef.collection('appUsageCurrent');
-    
       // Create a batch to handle multiple writes
       final batch = FIRESTORE.batch();
       try {
@@ -297,6 +285,7 @@ class _MyHomePageState extends State<MyHomePage> {
           final appName = entry.key;
           final screenTimeHours = double.parse(entry.value['hours']!);
           final category = entry.value['category'];
+          totalDaily += screenTimeHours;
           
           // Reference to the document with app name
           final docRef = current.doc(appName);
@@ -313,6 +302,10 @@ class _MyHomePageState extends State<MyHomePage> {
             SetOptions(merge: true),
           );
         }
+        batch.set(userRef, {
+          'totalDailyHours': totalDaily,
+          'lastUpdated': FieldValue.serverTimestamp()
+        });
         // Commit the batch
         await batch.commit();
         debugPrint('Successfully wrote screentime data');
