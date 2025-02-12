@@ -158,20 +158,22 @@ class ProfileSettingsState extends State<ProfileSettings> {
               child: Text('Change Profile Picture')
             ),
             SizedBox(height: 10),
+            // Button to copy your UID to clipboard
+            // This could be prettier
             ElevatedButton(
               onPressed: () async {
                   try {
                     await Clipboard.setData(ClipboardData(text: _user?.uid as String));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Copied to Clipboard!')),
+                      SnackBar(content: Text('Copied UID Clipboard!')),
                     );
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to copy to clipboard.')),
+                      SnackBar(content: Text('Failed to copy to clipboard')),
                     );
                   }
               },
-              child: const Text('Copy to Clipboard'),
+              child: const Text('Copy UID Clipboard'),
             ),
             // Button to sign out
             ElevatedButton(
