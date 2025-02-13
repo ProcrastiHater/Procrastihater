@@ -21,6 +21,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:workmanager/workmanager.dart';
 
 //Page Imports
 import 'home_page.dart';
@@ -39,7 +40,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase initialization
   await Firebase.initializeApp();
-
+  Workmanager().initialize(callbackDispatcher);
   //launch the main app
   runApp(const LoginScreen());
 }
@@ -93,6 +94,11 @@ class _MyPageViewState extends State<MyPageView> {
     _currentPage = 1;
     NotificationService.initialize();
     super.initState();
+    Workmanager().registerOneOffTask(
+      'taskName',
+      'exampleTask',
+      initialDelay: Duration(seconds: 10)
+    );
   }
 
   @override
@@ -123,4 +129,19 @@ class _MyPageViewState extends State<MyPageView> {
       
     );
   }
+}
+
+///*********************************
+/// Name: callbackDispatcher
+/// 
+/// Description: Helper function for
+/// initializing Workmanager
+///*********************************
+void callbackDispatcher()
+{
+  Workmanager().executeTask((taskName, inputData) {
+      debugPrint('Task Executed: $taskName');
+      return Future.value(true);
+    }
+  );
 }
