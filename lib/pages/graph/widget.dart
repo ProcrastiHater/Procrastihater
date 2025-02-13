@@ -28,13 +28,9 @@ List<String> availableDays = historicalData.keys.toList();
 /// charts and colors for specific apps
 ///*********************************
 List<BarChartGroupData> generateWeeklyChart(Map<String, Map<String, Map<String, dynamic>>> data) {
-  //Loop through each day and make sure the proper color is assigned to proper app
-  for (int i = 0; i < availableDays.length; i++) {
-    mapColors(data[availableDays[i]]!);
-  }
   //Return a list of bars for each day contain daily data
   return [
-    for (int i = 0; i < availableDays.length; i++) 
+    for (int i= 0; i < availableDays.length; i++) 
       generatedGroupData(i, data[availableDays[i]]!)
   ]; 
 }

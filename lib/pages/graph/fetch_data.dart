@@ -23,24 +23,6 @@ Map<String, Map<String, Map<String, dynamic>>> historicalData = {};
 DateTime currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
 List<String> availableWeekKeys = [];
 
-
-///*********************************
-/// Name: _updateUserRef
-/// 
-/// Description: Private function for 
-/// accessing reference to users' doc
-///*********************************
-void _updateUserRef() {
-  //Grab current UID
-  var curUid = uid;
-  //Regrab UID in case it's changed
-  uid = auth.currentUser?.uid;
-  //Update user reference if UID has changed
-  if(curUid != uid) {
-    userRef = mainCollection.doc(uid);
-  }
-}
-
 ///*********************************
 /// Name: getAvailableWeeks
 /// 
@@ -50,7 +32,7 @@ void _updateUserRef() {
 ///*********************************
 Future<List<String>> getAvailableWeeks() async{
    //Update the reference to the user doc before accessing
-  _updateUserRef();
+  updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
 
@@ -76,7 +58,7 @@ Future<List<String>> getAvailableWeeks() async{
 ///*********************************
 Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime() async {
   //Update the reference to the user doc before accessing
-  _updateUserRef();
+  updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
 

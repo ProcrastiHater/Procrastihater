@@ -63,6 +63,7 @@ void main() async {
       );
     }
   );
+  
   runApp(const LoginScreen());
 }
 
@@ -151,7 +152,7 @@ class _MyPageViewState extends State<MyPageView> {
 ///
 /// Description: Updates userRef to doc if the UID has changed
 ///***************************************************
-void _updateUserRef() {
+void updateUserRef() {
   //Grab current UID
   
   var curUid = uid;
@@ -170,7 +171,7 @@ void _updateUserRef() {
 /// history in Firestore
 ///********************************************************
 Future<void> _currentToHistorical() async {
-  _updateUserRef();
+  updateUserRef();
 
   //Temp map for saving current data from database
   Map<String, Map<String, dynamic>> fetchedData = {};
@@ -339,7 +340,7 @@ Future<void> _getScreenTime() async {
 ///***************************************************
 Future<void> _writeScreenTimeData() async {
   //Update ref to user's doc if UID has changed
-  _updateUserRef();
+  updateUserRef();
   if(_screenTimeData.isNotEmpty){
     double totalDaily = 0.0;
     final current = userRef.collection('appUsageCurrent');

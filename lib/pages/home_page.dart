@@ -168,6 +168,7 @@ class _GraphViewState extends State<GraphView> {
   @override
   void initState() {
     super.initState();
+    initializeAppNameColorMapping();
     _initializeData();
   }
 

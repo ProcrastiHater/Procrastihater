@@ -7,45 +7,84 @@
 library;
 
 //Dart Imports
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+//Page Imports
+import 'package:app_screen_time/main.dart';
 
 //Global variables
 Map<String, Color> appNameToColor = {}; 
 
 ///*********************************
-/// Name: mapColors
-/// 
-/// Description: Takes the apps passed in through
-/// dailyData and maps it to a list of 20 
-/// distinct colors
+/// Name: generateDistinctColors
+///
+/// Description: Generates a list of 
+/// colors based on the amount of total
+/// apps that the user has in database.
+/// Uses goldenRatio constant and hue
+/// to ensure distinctness
+///*******************************
+List<Color> generateDistinctColors(int count) {
+  final List<Color> colors = [];
+  const double goldenRatioConjugate = 0.618033988749895;
+  double hue = 0;
+  //Loop through every app user has in database
+  for (int i = 0; i < count; i++) {
+    //Increment hue by golden ratio and ensure in bounds
+    hue = (hue + goldenRatioConjugate) % 1;
+    //Use HSL with hue and fixed saturation/lightness
+    final color = HSLColor.fromAHSL(1.0, hue * 360, 1.0, 0.5).toColor();
+    colors.add(color);
+  }
+  return colors;
+}
+
 ///*********************************
-void mapColors(Map<String, Map<String, dynamic>> dailyData) {
-  final List<Color> appColors = [
-      Colors.red,
-      Colors.blue,
-      Colors.green,
-      Colors.yellow,
-      Colors.orange,
-      Colors.purple,
-      Colors.pink.shade300,
-      Colors.brown,
-      Colors.grey,
-      Colors.cyan,
-      Colors.indigo,
-      Colors.lime,
-      Colors.teal,
-      Colors.amber,
-      Colors.deepOrange,
-      Colors.deepPurple,
-      Colors.lightBlue,
-      Colors.lightGreen,
-      Colors.blueGrey,
-      Colors.black,
-    ];
-    //Creates a list of app names from dailyData map
-    final appNames = dailyData.keys.toList();
-    //Maps colors to app names in the order of the list and map
-    for (int i = 0; i < appNames.length; i++) {
-      appNameToColor[appNames[i]] = appColors[i % appColors.length];
-    } 
+/// Name: initializeAppNameColorMapping
+///
+/// Description: Loads all apps the user
+/// has stored in the database before
+/// mapping all apps to a distinct color
+/// provided by generateDistinctColor()
+///*******************************
+Future<void> initializeAppNameColorMapping() async {
+  updateUserRef();
+  //Attempt to connect to database
+  try {
+    final current = userRef.collection('appUsageHistory');
+    //Take a snapshot of all docs in appUsageHistory
+    QuerySnapshot snapshot = await current.get();
+    //Set for holding app Names
+    Set<String> allAppNames = {};
+    //Loop through each doc
+    for (var doc in snapshot.docs) {
+      //Extract weekly data from each doc
+      Map<String, dynamic> weeklyData = doc.data() as Map<String, dynamic>;
+      //Loop through weekly data
+      weeklyData.forEach((dayKey, dailyValue) {
+        //Skip totalWeeklyHours memeber
+        if (dayKey != 'totalWeeklyHours') {
+          //Extract daily data from each weekly data
+          Map<String, dynamic> dailyData = dailyValue as Map<String, dynamic>;
+          //Loop through dail data
+          dailyData.forEach((appName, appData) {
+            //Skip totalDailyHours memeber
+            if (appName != 'totalDailyHours') {
+              //Add app names to set
+              allAppNames.add(appName);
+            }
+          });
+        }
+      });
+    }
+    //Sort 
+    List<String> sortedAppNames = allAppNames.toList()..sort();
+    List<Color> distinctColors = generateDistinctColors(sortedAppNames.length);
+    for (int i = 0; i < sortedAppNames.length; i++) {
+      appNameToColor[sortedAppNames[i]] = distinctColors[i];
+    }
+  } catch (e) {
+    debugPrint("Error in initalizeAppNamesColorMapping: $e");
+  }
 }
