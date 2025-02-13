@@ -45,8 +45,8 @@ class HomePage extends StatelessWidget {
 ///*********************************
 /// Name: MyHomePage
 ///
-/// Description: Stateful widget that
-/// manages the Firebase reading and writting
+/// Description: Stateful widget for
+/// root stateless widget
 ///*********************************
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -55,16 +55,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 ///*********************************
-/// Name: MyHomePageState
+/// Name: _MyHomePageState
 ///
-/// Description: Manages state for MyHomePage,
-/// accesses screentime of phone through method
-/// channels, checks and requests neccesary
-/// permissions, reads/write from firebase
+/// Description: State for MyHomePage,
+/// holds main layout widget for page
 ///*********************************
 class _MyHomePageState extends State<MyHomePage> {
+  //State management for loading list view
   String selectedDay = "null";
-
   void updateSelectedDay(String day) {
     setState(() {
       selectedDay = day;
@@ -106,6 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [
           Expanded(
+            //Container holding graph in top portion of screen
             child: Container(
               padding: const EdgeInsets.all(4.0),
               color: Colors.indigo.shade50,
@@ -114,6 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           const SizedBox(height: 4.0),
           Expanded(
+            //Container holding list view in bottom portion of screen
             child: Container(
               padding: const EdgeInsets.all(4.0),
               color: Colors.indigo.shade100,
@@ -127,16 +127,31 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+///*********************************
+/// Name: GraphView
+/// 
+/// Description: Root stateful widget
+/// for GraphView
+///*********************************
 class GraphView extends StatefulWidget {
   final Function(String) onDaySelected;
   const GraphView({super.key, required this.onDaySelected});
 
   @override
-  State<GraphView> createState() => _MyGraphViewState();
+  State<GraphView> createState() => _GraphViewState();
 }
 
-class _MyGraphViewState extends State<GraphView> {
+///*********************************
+/// Name: _MyGraphViewState
+/// 
+/// Description: State for GraphView,
+/// builds graph and displays the current
+/// week of data with ability to see
+/// previous weeks
+///*********************************
+class _GraphViewState extends State<GraphView> {
   String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
+  //Fetch data from the database and intialize to global variable
   Future<void> _initializeData() async {
     final result = await fetchHistoricalScreenTime();
     setState(() {
@@ -144,6 +159,7 @@ class _MyGraphViewState extends State<GraphView> {
     });
   }
 
+  //Wrapper for loading bar touch, 
   BarTouchData loadTouch(Map<String, Map<String, Map<String, dynamic>>> data) {
     return getBarTouch(data, widget.onDaySelected);
   }
@@ -156,6 +172,7 @@ class _MyGraphViewState extends State<GraphView> {
 
   @override
   Widget build(BuildContext context) {
+    //Display loading screen if data is not present
     if (historicalData.isEmpty) {
       return Center(child: CircularProgressIndicator());
     }
@@ -167,8 +184,10 @@ class _MyGraphViewState extends State<GraphView> {
             Expanded(
               child: AspectRatio(
                   aspectRatio: 1.25,
+                  //Bar chart 
                   child: BarChart(BarChartData(
                     alignment: BarChartAlignment.center,
+                    //Title Widgets
                     titlesData: FlTitlesData(
                       leftTitles: AxisTitles(
                           sideTitles: SideTitles(
@@ -194,31 +213,37 @@ class _MyGraphViewState extends State<GraphView> {
                         reservedSize: 20,
                       )),
                     ),
-                    barTouchData: loadTouch(historicalData),
-                    borderData: FlBorderData(show: true),
-                    gridData: FlGridData(show: true),
-                    barGroups: generateWeeklyChart(historicalData),
+                    //Style Widgets
                     backgroundColor: Colors.white,
+                    borderData: FlBorderData(show: true),
+                    gridData: FlGridData(
+                      drawVerticalLine: false,
+                      show: true,
+                    ),
+                    //Functionality Widgets
+                    barTouchData: loadTouch(historicalData),
+                    barGroups: generateWeeklyChart(historicalData),
                   ))),
             ),
             Row(
+              //Equal spacing between children
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                //Previous arrow button
                 IconButton(
                   onPressed: hasPreviousDataset
                       ? () async {
-                          currentDataset =
-                              currentDataset.subtract(Duration(days: 7));
+                          currentDataset = currentDataset.subtract(Duration(days: 7));
                           historicalData = await fetchHistoricalScreenTime();
                           availableDays = historicalData.keys.toList();
-                          currentWeek =
-                              DateFormat('MM-dd-yyyy').format(currentDataset);
+                          currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
                           setState(() {});
                         }
                       : null,
                   icon: Icon(Icons.arrow_back),
                 ),
                 Text(currentWeek),
+                //Next arrow button
                 IconButton(
                   onPressed: hasNextDataSet
                       ? () async {
@@ -240,17 +265,30 @@ class _MyGraphViewState extends State<GraphView> {
   }
 }
 
+///*********************************
+/// Name: ExpandedListView
+/// 
+/// Description: Root stateful widget
+/// for ExpandedListView
+///*********************************
 class ExpandedListView extends StatefulWidget {
   final String selectedDay;
   final Map<String, Color> appColors;
   const ExpandedListView(
       {super.key, required this.selectedDay, required this.appColors});
   @override
-  State<ExpandedListView> createState() => _MyExpandedListViewState();
+  State<ExpandedListView> createState() => _ExpandedListViewState();
 }
 
-class _MyExpandedListViewState extends State<ExpandedListView> {
+///*********************************
+/// Name: _MyExpandedListViewState
+/// 
+/// Description: Root stateful widget
+/// for ExpandedListView
+///*********************************
+class _ExpandedListViewState extends State<ExpandedListView> {
   @override
+  //Load text as placeholder while waiting for bar touch
   Widget build(BuildContext context) {
     if (widget.selectedDay == "null") {
       return Center(
@@ -264,10 +302,11 @@ class _MyExpandedListViewState extends State<ExpandedListView> {
       );
     }
 
+    //Load loading screen if data is empty
     if (!historicalData.containsKey(widget.selectedDay)) {
       if (historicalData.isEmpty) {
         return Center(child: CircularProgressIndicator());
-      }
+      }  
       return Center(
           child: Text("No data available for ${widget.selectedDay}",
               style: const TextStyle(
@@ -275,11 +314,13 @@ class _MyExpandedListViewState extends State<ExpandedListView> {
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
-              )));
-    }
+              )
+           )
+        );
+      }
 
+    //List view built of daily data from bar touch
     final dayData = historicalData[widget.selectedDay]!;
-
     return ListView.builder(
       itemCount: dayData.length,
       itemBuilder: (context, index) {

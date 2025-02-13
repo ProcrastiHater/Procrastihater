@@ -19,14 +19,12 @@ import 'package:app_screen_time/main.dart';
 
 //Global Variables
 Map<String, Map<String, Map<String, dynamic>>> historicalData = {};
+//Variables for multi-week view
 DateTime currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
 DateTime previousDataset = currentDataset.subtract(Duration(days: 7));
 DateTime nextDataset = currentDataset.add(Duration(days: 7));
 bool hasNextDataSet = false;
 bool hasPreviousDataset = true;
-//
-//VARIABLE FOR CURRENTDATA
-//
 
 ///*********************************
 /// Name: _updateUserRef
@@ -61,12 +59,16 @@ Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime
   Map<String, Map<String, Map<String, dynamic>>> fetchedData = {};
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
+  //Update previous and next dataset based on current
   previousDataset = currentDataset.subtract(Duration(days: 7));
   nextDataset = currentDataset.add(Duration(days: 7));
+  //Format previous and next dataset the same way Firebase formats
   String formattedPrevious = DateFormat('MM-dd-yyyy').format(previousDataset);
   String formattedNext = DateFormat('MM-dd-yyyy').format(nextDataset);
+  //Get document snapshot of previous and next dataset
   DocumentSnapshot previousDoc = await current.doc(formattedPrevious).get();
   DocumentSnapshot nextDoc = await current.doc(formattedNext).get();
+  //Update flags based on previous and next dataset existing
   if (previousDoc.exists) {
     hasPreviousDataset = true;
   } else {
