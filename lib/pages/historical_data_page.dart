@@ -35,7 +35,7 @@ class HistoricalDataPage extends StatefulWidget {
   
   @override
   State<HistoricalDataPage> createState() => _HistoricalDataPageState();
-}
+  }
 class _HistoricalDataPageState extends State<HistoricalDataPage> {
   String selectedDay = "null";
 

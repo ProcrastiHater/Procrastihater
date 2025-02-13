@@ -14,7 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 //Page Imports
-import '/pages/home_page.dart';
+import 'package:app_screen_time/main.dart';
 
 
 //Global Variables

@@ -29,7 +29,7 @@ class SocialMediaPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      title: const Text("Social Media Page"),
+      title: const Text("ProcrastiLeaderboards"),
       ),
     body: const Center(
       child: Text("Friend Icons")
