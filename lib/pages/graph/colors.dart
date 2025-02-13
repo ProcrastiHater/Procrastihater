@@ -27,7 +27,7 @@ void mapColors(Map<String, Map<String, dynamic>> dailyData) {
       Colors.yellow,
       Colors.orange,
       Colors.purple,
-      Colors.pink,
+      Colors.pink.shade300,
       Colors.brown,
       Colors.grey,
       Colors.cyan,

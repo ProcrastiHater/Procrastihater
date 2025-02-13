@@ -82,8 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: CircleAvatar(
               backgroundImage: NetworkImage(
                 // Use user's pfp as icon image if there is no pfp use this link as a default
-                auth.currentUser?.photoURL ??
-                    'https://picsum.photos/id/237/200/300',
+                auth.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
               ),
             ),
             onPressed: () async {
@@ -117,8 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               padding: const EdgeInsets.all(4.0),
               color: Colors.indigo.shade100,
-              child: ExpandedListView(
-                  selectedDay: selectedDay, appColors: appNameToColor),
+              child: ExpandedListView(selectedDay: selectedDay, appColors: appNameToColor),
             ),
           ),
         ],
@@ -154,8 +152,10 @@ class _GraphViewState extends State<GraphView> {
   //Fetch data from the database and intialize to global variable
   Future<void> _initializeData() async {
     currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
+    final weeksToView = await getAvailableWeeks();
     final result = await fetchHistoricalScreenTime();
     setState(() {
+      availableWeekKeys = weeksToView;
       historicalData = result;
     });
   }
@@ -191,7 +191,7 @@ class _GraphViewState extends State<GraphView> {
                     //Title Widgets
                     titlesData: FlTitlesData(
                       leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
+                        sideTitles: SideTitles(
                         maxIncluded: false,
                         showTitles: true,
                         interval: 1,
@@ -199,7 +199,7 @@ class _GraphViewState extends State<GraphView> {
                         getTitlesWidget: sideTitles,
                       )),
                       rightTitles: AxisTitles(
-                          sideTitles: SideTitles(
+                        sideTitles: SideTitles(
                         maxIncluded: false,
                         showTitles: true,
                         interval: 1,
@@ -208,16 +208,16 @@ class _GraphViewState extends State<GraphView> {
                       )),
                       topTitles: const AxisTitles(),
                       bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
+                        sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: bottomTitles,
                         reservedSize: 20,
                       )),
                     ),
-                    //Style Widgets
-                    backgroundColor: Colors.white,
-                    borderData: FlBorderData(show: true),
-                    gridData: FlGridData(
+                      //Style Widgets
+                      backgroundColor: Colors.white,
+                      borderData: FlBorderData(show: true),
+                      gridData: FlGridData(
                       drawVerticalLine: false,
                       show: true,
                     ),
@@ -232,37 +232,36 @@ class _GraphViewState extends State<GraphView> {
               children: [
                 //Previous arrow button
                 IconButton(
-                  onPressed: hasPreviousDataset
+                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) > 0
                       ? () async {
-                          currentDataset = currentDataset.subtract(Duration(days: 7));
+                          int currentIndex = availableWeekKeys.indexOf(currentWeek);
+                          currentWeek = availableWeekKeys[currentIndex - 1];
+                          currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
                           historicalData = await fetchHistoricalScreenTime();
                           availableDays = historicalData.keys.toList();
-                          currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
                           setState(() {});
-                        }
-                      : null,
+                        } : null,
                   icon: Icon(Icons.arrow_back),
                 ),
                 Text(currentWeek),
                 //Next arrow button
                 IconButton(
-                  onPressed: hasNextDataSet
+                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) < availableWeekKeys.length - 1
                       ? () async {
-                          currentDataset =
-                              currentDataset.add(Duration(days: 7));
+                          int currentIndex = availableWeekKeys.indexOf(currentWeek);
+                          currentWeek = availableWeekKeys[currentIndex + 1];
+                          currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
                           historicalData = await fetchHistoricalScreenTime();
                           availableDays = historicalData.keys.toList();
-                          currentWeek =
-                              DateFormat('MM-dd-yyyy').format(currentDataset);
                           setState(() {});
-                        }
-                      : null,
+                        } : null,
                   icon: Icon(Icons.arrow_forward),
                 ),
               ],
             ),
           ],
-        ));
+        )
+    );
   }
 }
 
@@ -322,10 +321,12 @@ class _ExpandedListViewState extends State<ExpandedListView> {
 
     //List view built of daily data from bar touch
     final dayData = historicalData[widget.selectedDay]!;
+    final reversedEntries = dayData.entries.toList().reversed.toList();
     return ListView.builder(
+      padding: EdgeInsets.zero,
       itemCount: dayData.length,
       itemBuilder: (context, index) {
-        final entry = dayData.entries.elementAt(index);
+        final entry = reversedEntries.elementAt(index);
         final appName = entry.key;
         final appHours = entry.value['hours'];
         final appType = entry.value['appType'];

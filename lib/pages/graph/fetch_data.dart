@@ -21,10 +21,8 @@ import 'package:app_screen_time/main.dart';
 Map<String, Map<String, Map<String, dynamic>>> historicalData = {};
 //Variables for multi-week view
 DateTime currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
-DateTime previousDataset = currentDataset.subtract(Duration(days: 7));
-DateTime nextDataset = currentDataset.add(Duration(days: 7));
-bool hasNextDataSet = false;
-bool hasPreviousDataset = true;
+List<String> availableWeekKeys = [];
+
 
 ///*********************************
 /// Name: _updateUserRef
@@ -43,6 +41,26 @@ void _updateUserRef() {
   }
 }
 
+
+Future<List<String>> getAvailableWeeks() async{
+   //Update the reference to the user doc before accessing
+  _updateUserRef();
+  //Variable for scoping into the users appUsageHistory collection
+  final current = userRef.collection("appUsageHistory");
+
+  //String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
+
+  // Get all documents from the collection (assuming the total number is small)
+  QuerySnapshot querySnapshot = await current.get();
+  // Extract the document IDs (week keys in 'MM-dd-yyyy' format)
+  List<String> availableWeeks = querySnapshot.docs.map((doc) => doc.id).toList();
+
+  // Sort the week keys by date
+  final DateFormat formatter = DateFormat('MM-dd-yyyy');
+  availableWeeks.sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
+  return availableWeeks;
+}
+
 ///*********************************
 /// Name: fetchScreenTime
 /// 
@@ -55,32 +73,14 @@ void _updateUserRef() {
 Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime() async {
   //Update the reference to the user doc before accessing
   _updateUserRef();
-  //Variable for holding week long segments of data
-  Map<String, Map<String, Map<String, dynamic>>> fetchedData = {};
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
-  //Update previous and next dataset based on current
-  previousDataset = currentDataset.subtract(Duration(days: 7));
-  nextDataset = currentDataset.add(Duration(days: 7));
-  //Format previous and next dataset the same way Firebase formats
-  String formattedPrevious = DateFormat('MM-dd-yyyy').format(previousDataset);
-  String formattedNext = DateFormat('MM-dd-yyyy').format(nextDataset);
-  //Get document snapshot of previous and next dataset
-  DocumentSnapshot previousDoc = await current.doc(formattedPrevious).get();
-  DocumentSnapshot nextDoc = await current.doc(formattedNext).get();
-  //Update flags based on previous and next dataset existing
-  if (previousDoc.exists) {
-    hasPreviousDataset = true;
-  } else {
-    hasPreviousDataset = false;
-  }
-  if (nextDoc.exists) {
-    hasNextDataSet = true;
-  } else {
-    hasNextDataSet = false;
-  }
-  //Variable for holding weeks begin data(Monday), formatted same way as Firebase formats
+
+  // Format the current dataset's date to match the document ID format
   String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
+
+  //Variable for holding week long segments of data
+  Map<String, Map<String, Map<String, dynamic>>> fetchedData = {};
   //Try block for accessing collection in users document, try/catch because of async
   try{
     //Get a 'snapshot' of a doucment where its name is equal to the formatted string
