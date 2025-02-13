@@ -18,7 +18,10 @@ import '/pages/home_page.dart';
 
 
 //Global Variables
-Map<String, Map<String, Map<String, dynamic>>> data = {};
+Map<String, Map<String, Map<String, dynamic>>> historicalData = {};
+//
+//VARIABLE FOR CURRENTDATA
+//
 
 ///*********************************
 /// Name: _updateUserRef
@@ -46,7 +49,7 @@ void _updateUserRef() {
 /// database. Data is fetched using a map
 /// of map of maps and is returned.
 ///*********************************
-Future<Map<String, Map<String, Map<String, dynamic>>>> fetchScreenTime() async {
+Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime() async {
   //Update the reference to the user doc before accessing
   _updateUserRef();
   //Variable for holding week long segments of data

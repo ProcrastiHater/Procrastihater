@@ -17,7 +17,7 @@ import 'package:fl_chart/fl_chart.dart';
 //Page imports
 import '/pages/home_page.dart';
 import '/pages/graph/colors.dart';
-import '/pages/graph/fetch_historical.dart';
+import 'graph/fetch_data.dart';
 import '/pages/graph/widget.dart';
 
 //Global variables
@@ -82,9 +82,9 @@ class GraphView extends StatefulWidget {
 class _MyGraphViewState extends State<GraphView> {
 
   Future<void> _initializeData() async {
-    final result = await fetchScreenTime();
+    final result = await fetchHistoricalScreenTime();
     setState(() {
-      data = result;
+      historicalData = result;
     });
   }
 
@@ -100,7 +100,7 @@ class _MyGraphViewState extends State<GraphView> {
   
   @override
   Widget build(BuildContext context) {
-    if (data.isEmpty) {
+    if (historicalData.isEmpty) {
     return Center(child: CircularProgressIndicator());
     }
     return Padding(
@@ -166,10 +166,10 @@ class _MyGraphViewState extends State<GraphView> {
                   ) 
                 ),
               ),  
-              barTouchData: loadTouch(data),
+              barTouchData: loadTouch(historicalData),
               borderData: FlBorderData(show: true),    
               gridData: FlGridData(show: true),
-              barGroups: generateWeeklyChart(data),   
+              barGroups: generateWeeklyChart(historicalData),   
               backgroundColor: Colors.white,
             )
           )
@@ -205,8 +205,8 @@ class _MyExpandedListViewState extends State<ExpandedListView> {
       );
     }
 
-    if (!data.containsKey(widget.selectedDay)) {
-      if (data.isEmpty) {
+    if (!historicalData.containsKey(widget.selectedDay)) {
+      if (historicalData.isEmpty) {
         return Center(child: CircularProgressIndicator());
       }
       return Center(
@@ -222,7 +222,7 @@ class _MyExpandedListViewState extends State<ExpandedListView> {
         );
     }
 
-    final dayData = data[widget.selectedDay]!;
+    final dayData = historicalData[widget.selectedDay]!;
 
     return ListView.builder(
       itemCount: dayData.length,
