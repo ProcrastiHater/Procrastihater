@@ -9,7 +9,6 @@ library;
 
 //Dart Imports
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -35,12 +34,12 @@ Map<String, Map<String, String>> _screenTimeData = {};
 bool _hasPermission = false;
 
 //Firestore Connection Variables
-final FirebaseAuth AUTH = FirebaseAuth.instance;
-final FirebaseFirestore FIRESTORE = FirebaseFirestore.instance;
-final CollectionReference MAIN_COLLECTION = FIRESTORE.collection('UID');
-String? uid = AUTH.currentUser?.uid;
+final FirebaseAuth auth = FirebaseAuth.instance;
+final FirebaseFirestore firestore = FirebaseFirestore.instance;
+final CollectionReference mainCollection = firestore.collection('UID');
+String? uid = auth.currentUser?.uid;
 //Reference to user's document in Firestore
-DocumentReference userRef = MAIN_COLLECTION.doc(uid);
+DocumentReference userRef = mainCollection.doc(uid);
 
 
 ///*********************************
@@ -73,13 +72,13 @@ void main() async {
 /// Description: Root stateless widget of 
 /// the app, builds and displays main page view
 ///*********************************
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ProcrastiHater extends StatelessWidget {
+  const ProcrastiHater({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MyPageView(),
+    return MaterialApp(
+      home: MyPageView()
     );
   } 
 }
@@ -107,13 +106,13 @@ class _MyPageViewState extends State<MyPageView> {
   late PageController _pageController;
   
   //Tracks current index
-  int _currentPage = 0;
+  int currentPage = 0;
 
   //Initialize page controller and set initial page
   @override
   void initState() {
     _pageController = PageController(initialPage: 1);
-    _currentPage = 1;
+    currentPage = 1;
     super.initState();
   }
 
@@ -132,7 +131,7 @@ class _MyPageViewState extends State<MyPageView> {
         //Update current page index on page change
         onPageChanged: (index) {
         setState(() {
-          _currentPage = index; 
+          currentPage = index; 
         });
         },
         //Pages to display
@@ -157,10 +156,10 @@ void _updateUserRef() {
   
   var curUid = uid;
   //Regrab UID in case it's changed
-  uid = AUTH.currentUser?.uid;
+  uid = auth.currentUser?.uid;
   //Update user reference if UID has changed
   if(curUid != uid){
-    userRef = MAIN_COLLECTION.doc(uid);
+    userRef = mainCollection.doc(uid);
   }
 }
 
@@ -207,7 +206,7 @@ Future<void> _currentToHistorical() async {
   //If any data needs to be written to history
   if(needToMoveData) {
     //Create batch
-    var batch = FIRESTORE.batch();
+    var batch = firestore.batch();
     double totalDaily = 0.0;
     double totalWeekly = 0.0;
     DocumentSnapshot<Map<String, dynamic>>? histSnapshot;
@@ -345,7 +344,7 @@ Future<void> _writeScreenTimeData() async {
     double totalDaily = 0.0;
     final current = userRef.collection('appUsageCurrent');
     // Create a batch to handle multiple writes
-    final batch = FIRESTORE.batch();
+    final batch = firestore.batch();
     try {
       // Iterate through each app and its screen time
       for (final entry in _screenTimeData.entries) {

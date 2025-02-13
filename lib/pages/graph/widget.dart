@@ -122,3 +122,13 @@ BarTouchData getBarTouch(Map<String, Map<String, Map<String, dynamic>>> data, vo
       )
     );
   }
+  Widget sideTitles(double value, TitleMeta meta) {
+  return Text(
+    value.toStringAsFixed(1),
+    style: const TextStyle(
+      decoration: TextDecoration.none,
+      fontSize: 10,
+      color: Colors.black,
+    ),
+  );
+}

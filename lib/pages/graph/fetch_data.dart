@@ -19,6 +19,11 @@ import 'package:app_screen_time/main.dart';
 
 //Global Variables
 Map<String, Map<String, Map<String, dynamic>>> historicalData = {};
+DateTime currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
+DateTime previousDataset = currentDataset.subtract(Duration(days: 7));
+DateTime nextDataset = currentDataset.add(Duration(days: 7));
+bool hasNextDataSet = false;
+bool hasPreviousDataset = true;
 //
 //VARIABLE FOR CURRENTDATA
 //
@@ -33,10 +38,10 @@ void _updateUserRef() {
   //Grab current UID
   var curUid = uid;
   //Regrab UID in case it's changed
-  uid = AUTH.currentUser?.uid;
+  uid = auth.currentUser?.uid;
   //Update user reference if UID has changed
   if(curUid != uid) {
-    userRef = MAIN_COLLECTION.doc(uid);
+    userRef = mainCollection.doc(uid);
   }
 }
 
@@ -56,13 +61,28 @@ Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime
   Map<String, Map<String, Map<String, dynamic>>> fetchedData = {};
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
+  previousDataset = currentDataset.subtract(Duration(days: 7));
+  nextDataset = currentDataset.add(Duration(days: 7));
+  String formattedPrevious = DateFormat('MM-dd-yyyy').format(previousDataset);
+  String formattedNext = DateFormat('MM-dd-yyyy').format(nextDataset);
+  DocumentSnapshot previousDoc = await current.doc(formattedPrevious).get();
+  DocumentSnapshot nextDoc = await current.doc(formattedNext).get();
+  if (previousDoc.exists) {
+    hasPreviousDataset = true;
+  } else {
+    hasPreviousDataset = false;
+  }
+  if (nextDoc.exists) {
+    hasNextDataSet = true;
+  } else {
+    hasNextDataSet = false;
+  }
   //Variable for holding weeks begin data(Monday), formatted same way as Firebase formats
-  DateTime lastMonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
-  String formattedLastMonday = DateFormat('MM-dd-yyyy').format(lastMonday);
+  String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
   //Try block for accessing collection in users document, try/catch because of async
   try{
     //Get a 'snapshot' of a doucment where its name is equal to the formatted string
-    DocumentSnapshot doc = await current.doc(formattedLastMonday).get();
+    DocumentSnapshot doc = await current.doc(formattedCurrent).get();
     if (doc.exists) {
       //First level of maps holding the days of the week with recorded data
       Map<String, dynamic> weeklyData = doc.data() as Map<String, dynamic>;

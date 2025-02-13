@@ -41,7 +41,7 @@ class AuthGate extends StatelessWidget {
           );
         }
         // If user is signed in run App
-        return const MyApp();
+        return const ProcrastiHater();
       },      
     );
   }
