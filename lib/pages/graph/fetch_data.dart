@@ -41,18 +41,22 @@ void _updateUserRef() {
   }
 }
 
-
+///*********************************
+/// Name: getAvailableWeeks
+/// 
+/// Description: Function to convert a
+/// querysnapshot of collection appUsageHistory
+/// into a list
+///*********************************
 Future<List<String>> getAvailableWeeks() async{
    //Update the reference to the user doc before accessing
   _updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
 
-  //String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
-
-  // Get all documents from the collection (assuming the total number is small)
+  //Get all documents from the collection
   QuerySnapshot querySnapshot = await current.get();
-  // Extract the document IDs (week keys in 'MM-dd-yyyy' format)
+  //Extract the document IDs
   List<String> availableWeeks = querySnapshot.docs.map((doc) => doc.id).toList();
 
   // Sort the week keys by date
