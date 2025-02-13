@@ -15,7 +15,7 @@ import 'package:fl_chart/fl_chart.dart';
 //Page Imports
 import 'fetch_data.dart';
 import '/pages/graph/colors.dart';
-import '/pages/historical_data_page.dart';
+import '../friend_page.dart';
 
 //Global Variables
 List<String> availableDays = historicalData.keys.toList(); 
