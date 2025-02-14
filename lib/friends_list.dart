@@ -123,12 +123,17 @@ class _FriendsListState extends State<FriendsList>{
                         var friendData = friendSnapshot.data!.data() as Map<String, dynamic>;
                         String displayName = friendData['displayName'] ?? 'Unknown';
                         String photoUrl = friendData['pfp'] ?? 'https://picsum.photos/200/200';
+                        double totalDailyHours = friendData['totalDailyHours'] ?? 0.0;
 
                         return ListTile(
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(photoUrl),
                           ),
                           title: Text(displayName),
+                          subtitle: Text(
+                            'Total Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
+                            style: TextStyle(color: Colors.grey), 
+                          ),
                         );
                       },
                     );
