@@ -78,7 +78,18 @@ class _FriendsListState extends State<FriendsList>{
   }
 }
 
-  
+// Method to remove a friend from the user's friends list
+  void _deleteFriend(String friendUID) async {
+    DocumentReference userDocRef = _firestore.collection('UID').doc(_auth.currentUser?.uid);
+
+    await userDocRef.update({
+      'friends': FieldValue.arrayRemove([friendUID])
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Friend removed!'))
+    );
+  }  
 
 
   @override
@@ -133,6 +144,10 @@ class _FriendsListState extends State<FriendsList>{
                           subtitle: Text(
                             'Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
                             style: TextStyle(color: Colors.grey), 
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.close, color: Colors.grey),
+                            onPressed: () => _deleteFriend(friendUID), 
                           ),
                         );
                       },
