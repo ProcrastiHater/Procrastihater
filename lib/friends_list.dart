@@ -131,7 +131,7 @@ class _FriendsListState extends State<FriendsList>{
                           ),
                           title: Text(displayName),
                           subtitle: Text(
-                            'Total Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
+                            'Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
                             style: TextStyle(color: Colors.grey), 
                           ),
                         );
