@@ -151,7 +151,7 @@ class _GraphViewState extends State<GraphView> {
   String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
   //Fetch data from the database and intialize to global variable
   Future<void> _initializeData() async {
-    currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
+    //currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
     final weeksToView = await getAvailableWeeks();
     final result = await fetchHistoricalScreenTime();
     setState(() {

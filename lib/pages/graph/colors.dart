@@ -78,9 +78,11 @@ Future<void> initializeAppNameColorMapping() async {
         }
       });
     }
-    //Sort 
+    //Sorts unordered set before assigning colors to names, ensuring consistency across whole app
     List<String> sortedAppNames = allAppNames.toList()..sort();
+    //Get distinct colors
     List<Color> distinctColors = generateDistinctColors(sortedAppNames.length);
+    //Map colors to app name
     for (int i = 0; i < sortedAppNames.length; i++) {
       appNameToColor[sortedAppNames[i]] = distinctColors[i];
     }

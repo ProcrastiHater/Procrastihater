@@ -61,7 +61,7 @@ Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime
   updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
-
+  
   // Format the current dataset's date to match the document ID format
   String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 
