@@ -30,6 +30,15 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import android.content.pm.PackageManager
 import android.app.NotificationChannel
+//Firebase imports
+// import com.google.firebase.auth.auth
+// import com.google.firebase.firestore.firestore
+// import com.google.firebase.firestore.toObject
+// import com.google.firebase.Firebase
+//Background service stuff
+import androidx.work.*
+import com.example.app_screen_time.TotalSTNotifWorker
+
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "kotlin.methods/screentime"
     private lateinit var channel: MethodChannel
@@ -70,14 +79,7 @@ class MainActivity: FlutterActivity() {
                             val screenTimeData = getScreenTimeStats()
                             Log.d("MainActivity", "Screen time data: $screenTimeData")
                             if(checkNotificationsPermission()) {
-                                var builder = NotificationCompat.Builder(this, "ProcrastiNotif")
-                                    .setSmallIcon(R.mipmap.ic_launcher)
-                                    .setContentTitle("Screen Time")
-                                    .setContentText("Got Screen Time!")
-                                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                                with(NotificationManagerCompat.from(this)) {
-                                    notify(213, builder.build())
-                                }
+                                notifWork()
                             }else{
                                 openNotificationSettings()
                             }
@@ -208,6 +210,17 @@ class MainActivity: FlutterActivity() {
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    fun notifWork() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val notifRequest: WorkRequest = OneTimeWorkRequestBuilder<TotalSTNotifWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueue(notifRequest)
     }
 
     ///*********************************************

@@ -372,6 +372,12 @@ Future<void> _writeScreenTimeData() async {
     // Create a batch to handle multiple writes
     final batch = FIRESTORE.batch();
     try {
+      //Purge old data
+      final currentSnap = await current.get();
+      for (final doc in currentSnap.docs)
+      {
+        batch.delete(doc.reference);
+      }
       // Iterate through each app and its screen time
       for (final entry in _screenTimeData.entries) {
         final appName = entry.key;
