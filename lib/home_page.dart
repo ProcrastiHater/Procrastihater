@@ -81,15 +81,15 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState(){
     //Moves data from current to historical
-    _currentToHistorical().whenComplete(() {
-        _checkPermission().whenComplete((){
-            _getScreenTime().whenComplete((){
-              _writeScreenTimeData();
-            });
-          }
-        );
-      }
-    );
+    // _currentToHistorical().whenComplete(() {
+    //     _checkPermission().whenComplete((){
+    //         _getScreenTime().whenComplete((){
+    //           _writeScreenTimeData();
+    //         });
+    //       }
+    //     );
+    //   }
+    // );
     super.initState();
   }
 

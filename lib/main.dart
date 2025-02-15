@@ -59,16 +59,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase initialization
   await Firebase.initializeApp();
-  // _currentToHistorical().whenComplete(() {
-  //     _checkPermission().whenComplete((){
-  //         _getScreenTime().whenComplete((){
-  //           _writeScreenTimeData();
-  //         });
-  //       }
-  //     );
-  //   }
-  // );
-  //Workmanager().initialize(callbackDispatcher);
+  _currentToHistorical().whenComplete(() {
+      _checkPermission().whenComplete((){
+          _getScreenTime().whenComplete((){
+            _writeScreenTimeData();
+          });
+        }
+      );
+    }
+  );
+  //await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
   //launch the main app
   runApp(const LoginScreen());
 }
@@ -120,13 +120,8 @@ class _MyPageViewState extends State<MyPageView> {
   void initState() {
     _pageController = PageController(initialPage: 1);
     _currentPage = 1;
-    NotificationService.initialize();
+    //NotificationService.initialize();
     super.initState();
-    // Workmanager().registerOneOffTask(
-    //   'taskName',
-    //   'exampleTask',
-    //   initialDelay: Duration(seconds: 10)
-    // );
   }
 
   @override
@@ -182,7 +177,7 @@ Future<void> _checkPermission() async {
 ///*********************************
 Future<void> _requestPermission() async {
   try {
-    await screenTimeChannel.invokeMethod('requestPermission');
+    await screenTimeChannel.invokeMethod('requestScreenTimePermission');
     await _checkPermission();
   } on PlatformException catch (e) {
     debugPrint("Failed to request permission: ${e.message}");
@@ -200,7 +195,7 @@ double _getDailyTotal(){
     final screenTimeHours = double.parse(entry.value['hours']!);
     dailyHours += screenTimeHours;
   }
-  return (dailyHours * 100).round() / 100;
+  return (dailyHours * 100).round().toDouble() / 100;
 }
 
 ///*********************************************
@@ -249,7 +244,6 @@ Future<void> _getScreenTime() async {
       result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
     );
     debugPrint('Got screen time!');
-    _screenTimeNotification();
   } on PlatformException catch (e) {
     debugPrint("Failed to get screen time: ${e.message}");
   }
@@ -404,7 +398,7 @@ Future<void> _writeScreenTimeData() async {
       batch.set(
         userRef,
         {
-          'totalDailyHours': (totalDaily * 100).round() / 100,
+          'totalDailyHours': (totalDaily * 100).round().toDouble() / 100,
           'lastUpdated': FieldValue.serverTimestamp()
         },
         SetOptions(merge:true),
@@ -442,10 +436,24 @@ void _updateUserRef() {
 /// Description: Helper function for
 /// initializing Workmanager
 ///*********************************
+@pragma("vm:entry-point")
 void callbackDispatcher()
 {
-  Workmanager().executeTask((taskName, inputData) {
-      debugPrint('Task Executed: $taskName');
+  //WidgetsFlutterBinding.ensureInitialized();
+  Workmanager().executeTask((taskName, inputData) async {
+      await Firebase.initializeApp();
+      switch (taskName)
+      {
+        case 'bgWrite1':
+          await _currentToHistorical();
+          await _checkPermission();
+          await _getScreenTime();
+          await _writeScreenTimeData();
+          break;
+        default:
+          debugPrint('No task selected');
+          break;
+      }
       return Future.value(true);
     }
   );

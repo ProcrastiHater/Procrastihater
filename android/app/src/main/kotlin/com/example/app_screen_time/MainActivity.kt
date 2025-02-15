@@ -1,16 +1,19 @@
 package com.example.app_screen_time
 
+import android.Manifest
 import android.util.Log
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import android.os.Bundle
 import android.content.Context
 //Screen time usage import
 import android.app.usage.UsageStatsManager
 //Permissions Settings imports
 import android.provider.Settings
 import android.app.AppOpsManager
+import android.app.NotificationManager
 import android.content.Intent
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -21,11 +24,36 @@ import java.util.Locale
 import java.util.Date
 //Allows access to category titles
 import android.content.pm.ApplicationInfo
-
+//Notification stuff
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import android.content.pm.PackageManager
+import android.app.NotificationChannel
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "kotlin.methods/screentime"
     private lateinit var channel: MethodChannel
+    // private val FIRESTORE = FirebaseFirestore.getInstance()
+    // private var AUTH: FirebaseAuth = Firebase.auth
+    // private val MAIN_COLLECTION = FIRESTORE.collection("UID")
+    // private String uid = AUTH.currentUser?.getUid()
+    // private DocumentReference userRef = MAIN_COLLECTION.doc(uid)
 
+    ///*********************************************
+    /// Name: onCreate
+    ///
+    /// Description: Initializes activity
+    ///**********************************************
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        createNotificationChannel()
+    }
+
+    ///*********************************************
+    /// Name: configureFlutterEngine
+    ///
+    /// Description: Allows use of Method Channels
+    ///**********************************************
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         
@@ -41,6 +69,18 @@ class MainActivity: FlutterActivity() {
                         if (checkUsageStatsPermission()) {
                             val screenTimeData = getScreenTimeStats()
                             Log.d("MainActivity", "Screen time data: $screenTimeData")
+                            if(checkNotificationsPermission()) {
+                                var builder = NotificationCompat.Builder(this, "ProcrastiNotif")
+                                    .setSmallIcon(R.mipmap.ic_launcher)
+                                    .setContentTitle("Screen Time")
+                                    .setContentText("Got Screen Time!")
+                                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                with(NotificationManagerCompat.from(this)) {
+                                    notify(213, builder.build())
+                                }
+                            }else{
+                                openNotificationSettings()
+                            }
                             result.success(screenTimeData)
                         } else {
                             openUsageAccessSettings()
@@ -52,7 +92,7 @@ class MainActivity: FlutterActivity() {
                         Log.d("MainActivity", "Permission check result: $hasPermission")
                         result.success(hasPermission)
                     }
-                    "requestPermission" -> {
+                    "requestScreenTimePermission" -> {
                         openUsageAccessSettings()
                         result.success(true)
                     }
@@ -67,6 +107,43 @@ class MainActivity: FlutterActivity() {
             }
         }
     }
+
+    ///*********************************************
+    /// Name: writeScreenTimeData
+    ///
+    /// Description: Takes the data
+    /// that was accessed in _getScreenTime
+    /// and writes it to the Firestore database
+    /// using batches for multiple writes
+    ///**********************************************
+    // private fun writeScreenTimeData(){
+    //     updateUserRef()
+    //     val userData = getScreenTimeStats()
+    //     if(!userData.isEmpty()){
+    //         val current = userRef.collection("appUsageCurrent")
+    //         FIRESTORE.runBatch{batch->
+    //             try {
+    //                 val currentSnap = current.get()
+    //             }catch (e: Exception) {
+    //                 Log.e("MainActivity", "Error writing screen time data to Firestore: ", e)
+    //                 continue
+    //             }
+    //         }
+    //     }
+    // }
+
+    ///**************************************************
+    /// Name: updateUserRef
+    ///
+    /// Description: Updates userRef to doc if the UID has changed
+    ///***************************************************
+    // private fun updateUserRef(){
+    //     val curUid = uid
+    //     uid = AUTH.currentUser?.getUid()
+    //     if(curUid != uid) {
+    //         userRef = MAIN_COLLECTION.doc(uid)
+    //     }
+    // }
 
     ///*********************************************
     /// Name: checkUsageStatsPermission
@@ -100,6 +177,37 @@ class MainActivity: FlutterActivity() {
     ///**********************************************
     private fun openUsageAccessSettings() {
         startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+    }
+
+    private fun checkNotificationsPermission(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun openNotificationSettings(){
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            101
+        )
+    }
+
+    private fun createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is not in the Support Library.
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+            val name = "ProcrastiNotif"
+            val descriptionText = "ProcrastiHater Notifications"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel("ProcrastiNotif", name, importance)
+            channel.setDescription(descriptionText)
+            // Register the channel with the system.
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     ///*********************************************
