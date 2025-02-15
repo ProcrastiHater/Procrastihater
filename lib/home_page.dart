@@ -143,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
       final screenTimeHours = double.parse(entry.value['hours']!);
       dailyHours += screenTimeHours;
     }
-    return (dailyHours * 100).round() / 100;
+    return (dailyHours * 100).round().toDouble() / 100;
   }
   
   ///*********************************************
@@ -244,13 +244,13 @@ class _MyHomePageState extends State<MyHomePage> {
     if(needToMoveData) {
       //Create batch
       var batch = FIRESTORE.batch();
-      double totalDaily = 0.0;
       double totalWeekly = 0.0;
+      double totalDaily = 0.0;
       DocumentSnapshot<Map<String, dynamic>>? histSnapshot;
       try {
         // Iterate through each app and its screen time
         for (var appMap in fetchedData.entries) {
-          double screenTimeHours = appMap.value['dailyHours'];
+          double screenTimeHours = appMap.value['dailyHours']?.toDouble();
           Timestamp timestamp = appMap.value['lastUpdated'];
           String category = appMap.value['appType'];
           // Reference to the document with app name
@@ -269,10 +269,10 @@ class _MyHomePageState extends State<MyHomePage> {
             var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
             histSnapshot ??= await historical.get();
             if(totalWeekly == 0.0 && histSnapshot.data() != null && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
-              totalWeekly = histSnapshot['totalWeeklyHours'];
+              totalWeekly = histSnapshot['totalWeeklyHours'].toDouble();
             }
-            totalDaily += screenTimeHours;
             totalWeekly += screenTimeHours;
+            totalDaily += screenTimeHours;
             // Move data to historical
             batch.set(
               historical,
@@ -283,9 +283,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     'lastUpdated': dateUpdated,
                     'appType': category
                   },
-                  'totalDailyHours': (totalDaily * 100).round() / 100
+                  'totalDailyHours': (totalDaily * 100).round().toDouble() / 100
                 },
-                'totalWeeklyHours': (totalWeekly * 100).round() / 100
+                'totalWeeklyHours': (totalWeekly * 100).round().toDouble() / 100
               },
               SetOptions(merge: true),
             );
@@ -318,17 +318,21 @@ class _MyHomePageState extends State<MyHomePage> {
     //Update ref to user's doc if UID has changed
     _updateUserRef();
     if(_screenTimeData.isNotEmpty){
-      double totalDaily = 0.0;
       final current = userRef.collection('appUsageCurrent');
       // Create a batch to handle multiple writes
       final batch = FIRESTORE.batch();
       try {
+        //Purge old data
+        final currentSnap = await current.get();
+        for (final doc in currentSnap.docs)
+        {
+          batch.delete(doc.reference);
+        }
         // Iterate through each app and its screen time
         for (final entry in _screenTimeData.entries) {
           final appName = entry.key;
           final screenTimeHours = double.parse(entry.value['hours']!);
           final category = entry.value['category'];
-          totalDaily += screenTimeHours;
           
           // Reference to the document with app name
           final docRef = current.doc(appName);
@@ -342,14 +346,13 @@ class _MyHomePageState extends State<MyHomePage> {
               'lastUpdated': FieldValue.serverTimestamp(),
               'appType': category
             },
-            SetOptions(merge: true),
           );
         }
         //Put user's daily hours in their doc
         batch.set(
           userRef,
           {
-            'totalDailyHours': (totalDaily * 100).round() / 100,
+            'totalDailyHours': _getDailyTotal(),
             'lastUpdated': FieldValue.serverTimestamp()
           },
           SetOptions(merge:true),

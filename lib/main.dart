@@ -59,16 +59,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase initialization
   await Firebase.initializeApp();
-  _currentToHistorical().whenComplete(() {
-      _checkPermission().whenComplete((){
-          _getScreenTime().whenComplete((){
-            _writeScreenTimeData();
-          });
-        }
-      );
-    }
-  );
-  Workmanager().initialize(callbackDispatcher);
+  // _currentToHistorical().whenComplete(() {
+  //     _checkPermission().whenComplete((){
+  //         _getScreenTime().whenComplete((){
+  //           _writeScreenTimeData();
+  //         });
+  //       }
+  //     );
+  //   }
+  // );
+  //Workmanager().initialize(callbackDispatcher);
   //launch the main app
   runApp(const LoginScreen());
 }
@@ -122,11 +122,11 @@ class _MyPageViewState extends State<MyPageView> {
     _currentPage = 1;
     NotificationService.initialize();
     super.initState();
-    Workmanager().registerOneOffTask(
-      'taskName',
-      'exampleTask',
-      initialDelay: Duration(seconds: 10)
-    );
+    // Workmanager().registerOneOffTask(
+    //   'taskName',
+    //   'exampleTask',
+    //   initialDelay: Duration(seconds: 10)
+    // );
   }
 
   @override
@@ -299,13 +299,13 @@ Future<void> _currentToHistorical() async {
   if(needToMoveData) {
     //Create batch
     var batch = FIRESTORE.batch();
-    double totalDaily = 0.0;
     double totalWeekly = 0.0;
+    double totalDaily = 0.0;
     DocumentSnapshot<Map<String, dynamic>>? histSnapshot;
     try {
       // Iterate through each app and its screen time
       for (var appMap in fetchedData.entries) {
-        double screenTimeHours = appMap.value['dailyHours'];
+        double screenTimeHours = appMap.value['dailyHours']?.toDouble();
         Timestamp timestamp = appMap.value['lastUpdated'];
         String category = appMap.value['appType'];
         // Reference to the document with app name
@@ -324,10 +324,10 @@ Future<void> _currentToHistorical() async {
           var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
           histSnapshot ??= await historical.get();
           if(totalWeekly == 0.0 && histSnapshot.data() != null && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
-            totalWeekly = histSnapshot['totalWeeklyHours'];
+            totalWeekly = histSnapshot['totalWeeklyHours'].toDouble();
           }
-          totalDaily += screenTimeHours;
           totalWeekly += screenTimeHours;
+          totalDaily += screenTimeHours;
           // Move data to historical
           batch.set(
             historical,
@@ -338,9 +338,9 @@ Future<void> _currentToHistorical() async {
                   'lastUpdated': dateUpdated,
                   'appType': category
                 },
-                'totalDailyHours': (totalDaily * 100).round() / 100
+                'totalDailyHours': (totalDaily * 100).round().toDouble() / 100
               },
-              'totalWeeklyHours': (totalWeekly * 100).round() / 100
+              'totalWeeklyHours': (totalWeekly * 100).round().toDouble() / 100
             },
             SetOptions(merge: true),
           );
