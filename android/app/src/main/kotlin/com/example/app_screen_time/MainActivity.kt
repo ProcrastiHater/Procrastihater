@@ -22,6 +22,7 @@ import java.util.Calendar
 import java.util.TimeZone
 import java.util.Locale
 import java.util.Date
+import java.util.concurrent.TimeUnit
 //Allows access to category titles
 import android.content.pm.ApplicationInfo
 //Notification stuff
@@ -56,6 +57,11 @@ class MainActivity: FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         createNotificationChannel()
+        if(checkNotificationsPermission()) {
+            notifWork()
+        }else{
+            openNotificationSettings()
+        }
     }
 
     ///*********************************************
@@ -78,11 +84,6 @@ class MainActivity: FlutterActivity() {
                         if (checkUsageStatsPermission()) {
                             val screenTimeData = getScreenTimeStats()
                             Log.d("MainActivity", "Screen time data: $screenTimeData")
-                            if(checkNotificationsPermission()) {
-                                notifWork()
-                            }else{
-                                openNotificationSettings()
-                            }
                             result.success(screenTimeData)
                         } else {
                             openUsageAccessSettings()
@@ -216,7 +217,9 @@ class MainActivity: FlutterActivity() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-        val notifRequest: WorkRequest = OneTimeWorkRequestBuilder<TotalSTNotifWorker>()
+        val notifRequest: WorkRequest = PeriodicWorkRequestBuilder<TotalSTNotifWorker>(
+            15, TimeUnit.MINUTES
+        )
             .setConstraints(constraints)
             .build()
 

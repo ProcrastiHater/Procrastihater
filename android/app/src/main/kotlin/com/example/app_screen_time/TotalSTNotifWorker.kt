@@ -6,6 +6,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import kotlin.random.Random
 
 class TotalSTNotifWorker(context: Context, workerParams: WorkerParameters) : Worker (context, workerParams){
     override fun doWork(): Result {
@@ -21,7 +22,7 @@ class TotalSTNotifWorker(context: Context, workerParams: WorkerParameters) : Wor
             .setContentText("Hey, I'm working over here!")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         with(NotificationManagerCompat.from(applicationContext)) {
-            notify(213, builder.build())
+            notify(Random.nextInt(), builder.build())
         }
     }
 }
