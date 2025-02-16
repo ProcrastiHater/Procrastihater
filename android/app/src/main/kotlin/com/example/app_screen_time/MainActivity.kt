@@ -56,6 +56,7 @@ class MainActivity: FlutterActivity() {
     ///**********************************************
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WorkManager.getInstance().cancelAllWork()
         createNotificationChannel()
         if(checkNotificationsPermission()) {
             notifWork()
@@ -217,13 +218,17 @@ class MainActivity: FlutterActivity() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-        val notifRequest: WorkRequest = PeriodicWorkRequestBuilder<TotalSTNotifWorker>(
+        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<TotalSTNotifWorker>(
             15, TimeUnit.MINUTES
         )
             .setConstraints(constraints)
             .build()
 
-        WorkManager.getInstance(this).enqueue(notifRequest)
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "testNotification",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            notifRequest,
+        )
     }
 
     ///*********************************************
