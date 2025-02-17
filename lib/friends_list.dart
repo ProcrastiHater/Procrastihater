@@ -1,9 +1,9 @@
-///*********************************
+///********************************************************
 /// Name: friends_list.dart
 ///
-/// Description: Social Media page file for 
-/// application
-///*******************************
+/// Description: Friend list page to add, delete and view
+/// friends in the app
+///********************************************************
 
 //Dart Imports
 import 'dart:async';
@@ -15,13 +15,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-///*********************************
+///********************************************************
 /// Name: FriendsList
 /// 
 /// Description: Root stateless widget of 
 /// the FriendsList, builds and displays 
 /// social media page view
-///*********************************
+///********************************************************
 class FriendsList extends StatefulWidget {
   const FriendsList({super.key});
 
@@ -42,7 +42,12 @@ class _FriendsListState extends State<FriendsList>{
     super.initState();
   }
 
-  
+///*********************************************************
+/// Name: _addFriend
+/// 
+/// Description: Takes in a entered UID and searches
+/// the db for that user. If found adds to the friend list
+///*********************************************************
   void _addFriend(String friendUID) async {
   
   if(friendUID == _auth.currentUser?.uid as String)
@@ -78,7 +83,13 @@ class _FriendsListState extends State<FriendsList>{
   }
 }
 
-// Method to remove a friend from the user's friends list
+///*********************************************************
+/// Name: _deleteFriend
+/// 
+/// Description: When the small X near a friend's card in the 
+/// friends list is pressed it removes that friend from the
+/// user's friends list
+///*********************************************************
   void _deleteFriend(String friendUID) async {
     DocumentReference userDocRef = _firestore.collection('UID').doc(_auth.currentUser?.uid);
 
