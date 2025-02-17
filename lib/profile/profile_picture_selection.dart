@@ -9,6 +9,8 @@ library;
 // Dart imports
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // All of the profile photos
   final List<String> imageUrls = [
@@ -19,6 +21,11 @@ import 'package:firebase_auth/firebase_auth.dart';
     'https://picsum.photos/id/433/367/267',
     'https://picsum.photos/id/431/367/267'
   ];
+
+  final CollectionReference MAIN_COLLECTION = FirebaseFirestore.instance.collection('UID');
+  String? uid = FirebaseAuth.instance.currentUser?.uid;
+  //Reference to user's document in Firestore
+  DocumentReference userRef = MAIN_COLLECTION.doc(uid);
 
 class ProfilePictureSelectionScreen extends StatelessWidget {
   const ProfilePictureSelectionScreen({super.key});
@@ -72,6 +79,9 @@ class ProfilePictureSelectionScreen extends StatelessWidget {
                           // Update the user's profile picture in Firebase
                           await FirebaseAuth.instance.currentUser!.updatePhotoURL(imageUrls[index]);
                           await FirebaseAuth.instance.currentUser!.reload();
+                          await userRef.set({
+                            "pfp":  FirebaseAuth.instance.currentUser!.photoURL
+                          }, SetOptions(merge: true));
 
                           // Return true to indicate the profile picture was updated
                           Navigator.pop(context, true);

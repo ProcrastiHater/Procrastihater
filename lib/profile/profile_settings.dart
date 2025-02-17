@@ -10,6 +10,15 @@ library;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'profile_picture_selection.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
+
+
+final CollectionReference MAIN_COLLECTION = FirebaseFirestore.instance.collection('UID');
+String? uid = FirebaseAuth.instance.currentUser?.uid;
+//Reference to user's document in Firestore
+DocumentReference userRef = MAIN_COLLECTION.doc(uid);
 
 ///***************************************************
 /// Name: ProfileSettings
@@ -53,7 +62,11 @@ class ProfileSettingsState extends State<ProfileSettings> {
   Future<void> _updateDisplayName() async {
     if (_user != null) {
       await _user!.updateDisplayName(_displayNameController.text);
+            await userRef.set({
+          "displayName": _displayNameController.text
+        }, SetOptions(merge: true));
       await _user!.reload();
+     
       setState(() {
         _user = _auth.currentUser;
       });
@@ -146,6 +159,23 @@ class ProfileSettingsState extends State<ProfileSettings> {
               child: Text('Change Profile Picture')
             ),
             SizedBox(height: 10),
+            // Button to copy your UID to clipboard
+            // This could be prettier
+            ElevatedButton(
+              onPressed: () async {
+                  try {
+                    await Clipboard.setData(ClipboardData(text: _user?.uid as String));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Copied UID Clipboard!')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to copy to clipboard')),
+                    );
+                  }
+              },
+              child: const Text('Copy UID Clipboard'),
+            ),
             // Button to sign out
             ElevatedButton(
               onPressed: _signOut,

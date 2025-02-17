@@ -30,6 +30,7 @@ import 'pages/home_page.dart';
 import 'pages/leaderboard_page.dart';
 import 'pages/friend_page.dart';
 import 'profile/login_screen.dart';
+import 'friends_list.dart';
 
 //Global Variables 
 //Native Kotlin method channel
@@ -46,6 +47,7 @@ final CollectionReference mainCollection = firestore.collection('UID');
 String? uid = auth.currentUser?.uid;
 //Reference to user's document in Firestore
 DocumentReference userRef = mainCollection.doc(uid);
+
 
 
 ///*********************************
@@ -144,7 +146,7 @@ class _MyPageViewState extends State<MyPageView> {
         },
         //Pages to display
         children: const [
-          SocialMediaPage(),
+          FriendsList(),
           HomePage(),
           HistoricalDataPage(),
         ],
