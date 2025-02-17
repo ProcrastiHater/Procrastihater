@@ -20,8 +20,9 @@ import 'package:app_screen_time/main.dart';
 //Global Variables
 Map<String, Map<String, Map<String, dynamic>>> historicalData = {};
 //Variables for multi-week view
-DateTime currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
 List<String> availableWeekKeys = [];
+DateTime currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
+String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 
 ///*********************************
 /// Name: getAvailableWeeks
@@ -62,8 +63,8 @@ Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
   
-  // Format the current dataset's date to match the document ID format
-  String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
+  //Format the current dataset's date to match the document ID format
+  formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 
   //Variable for holding week long segments of data
   Map<String, Map<String, Map<String, dynamic>>> fetchedData = {};
