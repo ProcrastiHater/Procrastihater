@@ -154,6 +154,20 @@ class _MyPageViewState extends State<MyPageView> {
   }
 }
 
+///*********************************************
+/// Name: _getDailyTotal
+///   
+/// Description: Returns total daily hours
+///*********************************************
+double _getDailyTotal(){
+  double dailyHours = 0.0;
+  for(final entry in _screenTimeData.entries){
+    final screenTimeHours = double.parse(entry.value['hours']!);
+    dailyHours += screenTimeHours;
+  }
+  return (dailyHours * 100).round().toDouble() / 100;
+}
+
 ///**************************************************
 /// Name: _updateUserRef
 ///
@@ -239,8 +253,8 @@ Future<void> _currentToHistorical() async {
           String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
           var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
           histSnapshot ??= await historical.get();
-          if(totalWeekly == 0 && histSnapshot.data() != null && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
-            totalWeekly = histSnapshot['totalWeeklyHours'];
+          if(totalWeekly == 0.0 && histSnapshot.data() != null && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
+            totalWeekly = histSnapshot['totalWeeklyHours'].toDouble();
           }
           totalDaily += screenTimeHours;
           totalWeekly += screenTimeHours;
@@ -254,9 +268,9 @@ Future<void> _currentToHistorical() async {
                   'lastUpdated': dateUpdated,
                   'appType': category
                 },
-                'totalDailyHours': (totalDaily * 100).round() / 100
+                'totalDailyHours': (totalDaily * 100).round().toDouble() / 100
               },
-              'totalWeeklyHours': (totalWeekly * 100).round() / 100
+              'totalWeeklyHours': (totalWeekly * 100).round().toDouble() / 100
             },
             SetOptions(merge: true),
           );
@@ -325,12 +339,10 @@ Future<void> _getScreenTime() async {
   try {
     //Raw data from screentime channel 
     final Map<dynamic, dynamic> result = await screenTimeChannel.invokeMethod('getScreenTime');
-    //State for writing raw data in formatted map
-    //setState(() {
-      _screenTimeData = Map<String, Map<String, String>>.from(
-        result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
-      );
-    //});
+    //Convert data obtained by kotlin method to dart equivalent
+    _screenTimeData = Map<String, Map<String, String>>.from(
+      result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
+    );
     debugPrint('Got screen time!');
   } on PlatformException catch (e) {
     debugPrint("Failed to get screen time: ${e.message}");
@@ -354,6 +366,12 @@ Future<void> _writeScreenTimeData() async {
     // Create a batch to handle multiple writes
     final batch = firestore.batch();
     try {
+      //Purge old data
+      final currentSnap = await current.get();
+      for (final doc in currentSnap.docs)
+      {
+        batch.delete(doc.reference);
+      }
       // Iterate through each app and its screen time
       for (final entry in _screenTimeData.entries) {
         final appName = entry.key;
@@ -380,7 +398,7 @@ Future<void> _writeScreenTimeData() async {
       batch.set(
         userRef,
         {
-          'totalDailyHours': (totalDaily * 100).round() / 100,
+          'totalDailyHours': (totalDaily * 100).round().toDouble() / 100,
           'lastUpdated': FieldValue.serverTimestamp()
         },
         SetOptions(merge:true),
