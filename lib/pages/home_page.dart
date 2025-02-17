@@ -269,7 +269,6 @@ class _GraphViewState extends State<GraphView> {
                         } : null,
                   icon: Icon(Icons.arrow_back),
                 ),
-                SizedBox(height: 10),
                 Text(currentWeek),
                 //Next arrow button
                 IconButton(
