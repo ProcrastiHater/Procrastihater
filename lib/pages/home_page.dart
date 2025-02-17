@@ -28,6 +28,7 @@ import '/pages/graph/fetch_data.dart';
 import '/pages/graph/widget.dart';
 import '/pages/graph/colors.dart';
 
+
 ///*********************************
 /// Name: HomePage
 ///
@@ -102,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: [
+          
           Expanded(
             //Container holding graph in top portion of screen
             child: Scaffold(
@@ -110,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Colors.indigo.shade50,
                 child: GraphView(onDaySelected: updateSelectedDay),
               ),
-              bottomNavigationBar: SizedBox(
+             /* bottomNavigationBar: SizedBox(
                 height: 50,
                 child: NavigationBar(
                   selectedIndex: 1,
@@ -121,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   NavigationDestination(icon: Icon(Icons.calendar_month_rounded), label: 'Monthly'),
                   ],  
                 ), 
-              )           
+              )   */        
             )
           ),
           const SizedBox(height: 4.0),
@@ -168,9 +170,12 @@ class _GraphViewState extends State<GraphView> {
   Future<void> _initializeData() async {
     //currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
     final weeksToView = await getAvailableWeeks();
+    availableWeekKeys = weeksToView;
+    formattedCurrent = availableWeekKeys.last;
+    currentWeek = formattedCurrent;
+    currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
     final result = await fetchHistoricalScreenTime();
     setState(() {
-      availableWeekKeys = weeksToView;
       historicalData = result;
     });
   }
@@ -259,7 +264,6 @@ class _GraphViewState extends State<GraphView> {
                           historicalData = await fetchHistoricalScreenTime();
                           availableDays = historicalData.keys.toList();
                           setState(() {
-                            
                             isLoading = false;
                           });
                         } : null,
