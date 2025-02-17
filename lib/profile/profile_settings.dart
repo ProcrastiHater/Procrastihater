@@ -4,6 +4,7 @@
 /// Description: Creates a settings page where users can edit attribute's of their 
 /// account like profile picture, username, or sign-out of/delete their accounts
 ///********************************************************************************
+library;
 
 // Dart imports
 import 'package:flutter/material.dart';

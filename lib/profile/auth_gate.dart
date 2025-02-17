@@ -4,6 +4,7 @@
 /// Description: Creates widget that handles user sign in, account creation,
 /// and tracking if user is currently signed in.
 ///**************************************************************************
+library;
 
 //Firebase Imports
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
@@ -11,7 +12,7 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 // Dart Imports
 import 'package:flutter/material.dart';
-import 'main.dart';
+import '../main.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -40,7 +41,7 @@ class AuthGate extends StatelessWidget {
           );
         }
         // If user is signed in run App
-        return const MyApp();
+        return const ProcrastiHater();
       },      
     );
   }

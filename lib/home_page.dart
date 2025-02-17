@@ -11,7 +11,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'profile_settings.dart';
+import 'pages/friend_page.dart';
+import 'profile/profile_settings.dart';
 import 'dart:math';
 
 //Firebase Imports
