@@ -68,7 +68,6 @@ class Friend {
       required this.uid});
 }
 
-//TODO: Finish UserAppHistory
 
 class UserAppHistory {
   TotalUserHistory totalUserHistory;
