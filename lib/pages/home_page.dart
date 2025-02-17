@@ -28,6 +28,7 @@ import '/pages/graph/fetch_data.dart';
 import '/pages/graph/widget.dart';
 import '/pages/graph/colors.dart';
 
+
 ///*********************************
 /// Name: HomePage
 ///
@@ -174,9 +175,12 @@ class _GraphViewState extends State<GraphView> {
   Future<void> _initializeData() async {
     //currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
     final weeksToView = await getAvailableWeeks();
+    availableWeekKeys = weeksToView;
+    formattedCurrent = availableWeekKeys.last;
+    currentWeek = formattedCurrent;
+    currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
     final result = await fetchHistoricalScreenTime();
     setState(() {
-      availableWeekKeys = weeksToView;
       historicalData = result;
     });
   }
@@ -265,7 +269,6 @@ class _GraphViewState extends State<GraphView> {
                           historicalData = await fetchHistoricalScreenTime();
                           availableDays = historicalData.keys.toList();
                           setState(() {
-                            
                             isLoading = false;
                           });
                         } : null,
