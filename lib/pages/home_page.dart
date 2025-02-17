@@ -71,72 +71,78 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Text("ProcrastiStats"),
-        actions: [
-          // Creating little user icon you can press to view account info
-          IconButton(
-            icon: CircleAvatar(
-              backgroundImage: NetworkImage(
-                // Use user's pfp as icon image if there is no pfp use this link as a default
-                auth.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
-              ),
-            ),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileSettings(),
+    return /*LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final height = constraints.maxHeight;
+        return */ Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            title: Text("ProcrastiStats"),
+            actions: [
+              // Creating little user icon you can press to view account info
+              IconButton(
+                icon: CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    // Use user's pfp as icon image if there is no pfp use this link as a default
+                    auth.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
+                  ),
                 ),
-              );
-              // Reload the user in case anything changed
-              await auth.currentUser?.reload();
-              // Reload UI in case things changed
-              setState(() {});
-            },
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            //Container holding graph in top portion of screen
-            child: Scaffold(
-              body: Container(
-                padding: const EdgeInsets.all(4.0),
-                color: Colors.indigo.shade50,
-                child: GraphView(onDaySelected: updateSelectedDay),
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfileSettings(),
+                    ),
+                  );
+                  // Reload the user in case anything changed
+                  await auth.currentUser?.reload();
+                  // Reload UI in case things changed
+                  setState(() {});
+                },
+              )
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                //Container holding graph in top portion of screen
+                child: Scaffold(
+                  body: Container(
+                    padding: const EdgeInsets.all(4.0),
+                    color: Colors.indigo.shade50,
+                    child: GraphView(onDaySelected: updateSelectedDay),
+                  ),
+                  bottomNavigationBar: SizedBox(
+                    height: 50,
+                    child: NavigationBar(
+                      selectedIndex: 1,
+                      backgroundColor: Colors.indigo.shade50,
+                      destinations: const <Widget>[
+                        NavigationDestination(icon: Icon(Icons.calendar_today_rounded), label: 'Daily'),
+                        NavigationDestination(icon: Icon(Icons.calendar_view_week_rounded), label: 'Weekly'),
+                        NavigationDestination(icon: Icon(Icons.calendar_month_rounded), label: 'Monthly'),
+                      ],  
+                    ), 
+                  )           
+                )
               ),
-              bottomNavigationBar: SizedBox(
-                height: 50,
-                child: NavigationBar(
-                  selectedIndex: 1,
-                  backgroundColor: Colors.indigo.shade50,
-                  destinations: const <Widget>[
-                  NavigationDestination(icon: Icon(Icons.calendar_today_rounded), label: 'Daily'),
-                  NavigationDestination(icon: Icon(Icons.calendar_view_week_rounded), label: 'Weekly'),
-                  NavigationDestination(icon: Icon(Icons.calendar_month_rounded), label: 'Monthly'),
-                  ],  
-                ), 
-              )           
-            )
+              const SizedBox(height: 4.0),
+              Expanded(
+                //Container holding list view in bottom portion of screen
+                child: Container(
+                  padding: const EdgeInsets.all(4.0),
+                  color: Colors.indigo.shade100,
+                  child: ExpandedListView(selectedDay: selectedDay, appColors: appNameToColor),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4.0),
-          Expanded(
-            //Container holding list view in bottom portion of screen
-            child: Container(
-              padding: const EdgeInsets.all(4.0),
-              color: Colors.indigo.shade100,
-              child: ExpandedListView(selectedDay: selectedDay, appColors: appNameToColor),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        );
+      }
+    //);
+ // }
 }
 
 ///*********************************
