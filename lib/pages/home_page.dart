@@ -149,6 +149,7 @@ class GraphView extends StatefulWidget {
 ///*********************************
 class _GraphViewState extends State<GraphView> {
   String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
+  bool isLoading = false;
   //Fetch data from the database and intialize to global variable
   Future<void> _initializeData() async {
     //currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
@@ -182,7 +183,7 @@ class _GraphViewState extends State<GraphView> {
         padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
-            const SizedBox(height: 70),
+            const SizedBox(height: 80),
             Expanded(
               child: AspectRatio(
                   aspectRatio: 1.25,
@@ -196,7 +197,7 @@ class _GraphViewState extends State<GraphView> {
                         maxIncluded: false,
                         showTitles: true,
                         interval: 1,
-                        reservedSize: 15,
+                        reservedSize: 25,
                         getTitlesWidget: sideTitles,
                       )),
                       rightTitles: AxisTitles(
@@ -204,7 +205,7 @@ class _GraphViewState extends State<GraphView> {
                         maxIncluded: false,
                         showTitles: true,
                         interval: 1,
-                        reservedSize: 15,
+                        reservedSize: 25,
                         getTitlesWidget: sideTitles,
                       )),
                       topTitles: const AxisTitles(),
@@ -233,28 +234,39 @@ class _GraphViewState extends State<GraphView> {
               children: [
                 //Previous arrow button
                 IconButton(
-                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) > 0
+                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) > 0 && !isLoading
                       ? () async {
+                        setState(() {
+                          isLoading = true;
+                        });
                           int currentIndex = availableWeekKeys.indexOf(currentWeek);
                           currentWeek = availableWeekKeys[currentIndex - 1];
                           currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
                           historicalData = await fetchHistoricalScreenTime();
                           availableDays = historicalData.keys.toList();
-                          setState(() {});
+                          setState(() {
+                            
+                            isLoading = false;
+                          });
                         } : null,
                   icon: Icon(Icons.arrow_back),
                 ),
                 Text(currentWeek),
                 //Next arrow button
                 IconButton(
-                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) < availableWeekKeys.length - 1
+                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) < availableWeekKeys.length - 1 && !isLoading
                       ? () async {
+                          setState(() {
+                            isLoading = true;
+                          });
                           int currentIndex = availableWeekKeys.indexOf(currentWeek);
                           currentWeek = availableWeekKeys[currentIndex + 1];
                           currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
                           historicalData = await fetchHistoricalScreenTime();
                           availableDays = historicalData.keys.toList();
-                          setState(() {});
+                          setState(() {
+                            isLoading = false;
+                          });
                         } : null,
                   icon: Icon(Icons.arrow_forward),
                 ),

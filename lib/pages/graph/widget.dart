@@ -17,8 +17,8 @@ import 'fetch_data.dart';
 import '/pages/graph/colors.dart';
 import '../friend_page.dart';
 
-//Global Variables
-List<String> availableDays = historicalData.keys.toList(); 
+List<String> availableDays = historicalData.keys.toList();
+
 
 ///*********************************
 /// Name: generateWeeklyChart
