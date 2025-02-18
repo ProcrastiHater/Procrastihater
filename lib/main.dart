@@ -10,8 +10,6 @@ library;
 //Dart Imports
 import 'dart:async';
 import 'dart:io';
-import 'package:app_screen_time/notification_service.dart';
-import 'package:app_screen_time/notifications.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -47,8 +45,6 @@ final CollectionReference mainCollection = firestore.collection('UID');
 String? uid = auth.currentUser?.uid;
 //Reference to user's document in Firestore
 DocumentReference userRef = mainCollection.doc(uid);
-
-
 
 ///*********************************
 /// Name: main
@@ -103,6 +99,7 @@ class MyPageView extends StatefulWidget {
   @override
   State<MyPageView> createState() => _MyPageViewState();
 }
+
 ///*********************************
 /// Name: MyPageViewState
 /// 
@@ -122,7 +119,6 @@ class _MyPageViewState extends State<MyPageView> {
   void initState() {
     _pageController = PageController(initialPage: 1);
     currentPage = 1;
-    //NotificationService.initialize();
     super.initState();
   }
 
@@ -156,20 +152,6 @@ class _MyPageViewState extends State<MyPageView> {
   }
 }
 
-///*********************************************
-/// Name: _getDailyTotal
-///   
-/// Description: Returns total daily hours
-///*********************************************
-double _getDailyTotal(){
-  double dailyHours = 0.0;
-  for(final entry in _screenTimeData.entries){
-    final screenTimeHours = double.parse(entry.value['hours']!);
-    dailyHours += screenTimeHours;
-  }
-  return (dailyHours * 100).round().toDouble() / 100;
-}
-
 ///**************************************************
 /// Name: _updateUserRef
 ///
@@ -177,7 +159,6 @@ double _getDailyTotal(){
 ///***************************************************
 void updateUserRef() {
   //Grab current UID
-  
   var curUid = uid;
   //Regrab UID in case it's changed
   uid = auth.currentUser?.uid;
