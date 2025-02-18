@@ -40,6 +40,7 @@ class TestNotifWorker(context: Context, workerParams: WorkerParameters) : Worker
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         //Executes notify on MainActivity
         with(NotificationManagerCompat.from(applicationContext)) {
+            //Sends notification with random id
             notify(Random.nextInt(), builder.build())
         }
     }
