@@ -25,8 +25,9 @@ import 'pages/leaderboard_page.dart';
 import 'pages/friend_page.dart';
 import 'profile/login_screen.dart';
 import 'friends_list.dart';
+import 'pages/calendar_page.dart';
 
-//Global Variables 
+//Global Variables
 //Native Kotlin method channel
 const screenTimeChannel = MethodChannel('kotlin.methods/screentime');
 //Maps for reading/writing data from the database
@@ -42,13 +43,11 @@ String? uid = auth.currentUser?.uid;
 //Reference to user's document in Firestore
 DocumentReference userRef = mainCollection.doc(uid);
 
-
-
 ///*********************************
 /// Name: main
-/// 
+///
 /// Description: Initializes Firebase,
-/// 
+///
 /// launches the main app
 ///*********************************
 void main() async {
@@ -57,22 +56,20 @@ void main() async {
   await Firebase.initializeApp();
   //launch the main app
   _currentToHistorical().whenComplete(() {
-    _checkPermission().whenComplete((){
-      _getScreenTime().whenComplete((){
+    _checkPermission().whenComplete(() {
+      _getScreenTime().whenComplete(() {
         _writeScreenTimeData();
-          });
-        }
-      );
-    }
-  );
-  
+      });
+    });
+  });
+
   runApp(const LoginScreen());
 }
 
 ///*********************************
 /// Name: MyApp
-/// 
-/// Description: Root stateless widget of 
+///
+/// Description: Root stateless widget of
 /// the app, builds and displays main page view
 ///*********************************
 class ProcrastiHater extends StatelessWidget {
@@ -80,16 +77,14 @@ class ProcrastiHater extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MyPageView()
-    );
-  } 
+    return MaterialApp(home: MyPageView());
+  }
 }
 
 ///*********************************
 /// Name: MyPageView
-/// 
-/// Description: Stateful widget that 
+///
+/// Description: Stateful widget that
 /// manages the PageView for app navigation
 ///*********************************
 class MyPageView extends StatefulWidget {
@@ -97,17 +92,18 @@ class MyPageView extends StatefulWidget {
   @override
   State<MyPageView> createState() => _MyPageViewState();
 }
+
 ///*********************************
 /// Name: MyPageViewState
-/// 
-/// Description: Manages state for MyPageView, 
+///
+/// Description: Manages state for MyPageView,
 /// sets up PageView controller, tracks current
 /// page, and handles navigation
 ///*********************************
 class _MyPageViewState extends State<MyPageView> {
   //Controller for page navigation
   late PageController _pageController;
-  
+
   //Tracks current index
   int currentPage = 0;
 
@@ -128,24 +124,23 @@ class _MyPageViewState extends State<MyPageView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //PageView widget for navigation
-      body: PageView(
-        controller: _pageController,
-        //Update current page index on page change
-        onPageChanged: (index) {
+        //PageView widget for navigation
+        body: PageView(
+      controller: _pageController,
+      //Update current page index on page change
+      onPageChanged: (index) {
         setState(() {
-          currentPage = index; 
+          currentPage = index;
         });
-        },
-        //Pages to display
-        children: const [
-          FriendsList(),
-          HomePage(),
-          HistoricalDataPage(),
-        ],
-      )
-      
-    );
+      },
+      //Pages to display
+      children: const [
+        FriendsList(),
+        HomePage(),
+        HistoricalDataPage(),
+        CalendarPage(),
+      ],
+    ));
   }
 }
 
@@ -156,12 +151,12 @@ class _MyPageViewState extends State<MyPageView> {
 ///***************************************************
 void updateUserRef() {
   //Grab current UID
-  
+
   var curUid = uid;
   //Regrab UID in case it's changed
   uid = auth.currentUser?.uid;
   //Update user reference if UID has changed
-  if(curUid != uid){
+  if (curUid != uid) {
     userRef = mainCollection.doc(uid);
   }
 }
@@ -182,32 +177,36 @@ Future<void> _currentToHistorical() async {
   DateTime dateUpdated;
   bool needToMoveData = false;
   //Grab data from current
-  try{
+  try {
     final current = userRef.collection('appUsageCurrent');
     final curSnapshot = await current.get();
     //Loop to access all current screentime data from user
-    for (var doc in curSnapshot.docs){
+    for (var doc in curSnapshot.docs) {
       String docName = doc.id;
       double? hours = doc['dailyHours']?.toDouble();
       Timestamp timestamp = doc['lastUpdated'];
       dateUpdated = timestamp.toDate();
       String category = doc['appType'];
-      if (hours != null){
-        fetchedData[docName] = {'dailyHours': hours, 'lastUpdated': timestamp, 'appType': category};
+      if (hours != null) {
+        fetchedData[docName] = {
+          'dailyHours': hours,
+          'lastUpdated': timestamp,
+          'appType': category
+        };
       }
       //Check if any data needs to be written to history
-      if (dateUpdated.day != currentTime.day
-        || dateUpdated.month != currentTime.month
-        || dateUpdated.year != currentTime.year) {
+      if (dateUpdated.day != currentTime.day ||
+          dateUpdated.month != currentTime.month ||
+          dateUpdated.year != currentTime.year) {
         needToMoveData = true;
       }
     }
-  } catch (e){
+  } catch (e) {
     debugPrint("error fetching screentime data: $e");
   }
 
   //If any data needs to be written to history
-  if(needToMoveData) {
+  if (needToMoveData) {
     //Create batch
     var batch = firestore.batch();
     double totalDaily = 0.0;
@@ -223,18 +222,22 @@ Future<void> _currentToHistorical() async {
         DateTime dateUpdated = timestamp.toDate();
         DateTime currentTime = DateTime.now();
         //Check if date has changed since database was updated
-        if(dateUpdated.day != currentTime.day
-        || dateUpdated.month != currentTime.month
-        || dateUpdated.year != currentTime.year) {
+        if (dateUpdated.day != currentTime.day ||
+            dateUpdated.month != currentTime.month ||
+            dateUpdated.year != currentTime.year) {
           //Gets the number of the day of the week for the last update day
           int dayOfWeekNum = dateUpdated.weekday;
           //Gets the name of the day of the week for last update day
           String dayOfWeekStr = DateFormat('EEEE').format(dateUpdated);
           //Gets the start of that week
-          String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
-          var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
+          String startOfWeek = DateFormat('MM-dd-yyyy')
+              .format(dateUpdated.subtract(Duration(days: dayOfWeekNum - 1)));
+          var historical =
+              userRef.collection('appUsageHistory').doc(startOfWeek);
           histSnapshot ??= await historical.get();
-          if(totalWeekly == 0 && histSnapshot.data() != null && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
+          if (totalWeekly == 0 &&
+              histSnapshot.data() != null &&
+              histSnapshot.data()!.containsKey('totalWeeklyHours')) {
             totalWeekly = histSnapshot['totalWeeklyHours'];
           }
           totalDaily += screenTimeHours;
@@ -257,42 +260,42 @@ Future<void> _currentToHistorical() async {
           );
         }
       }
-    
+
       //Commit the batch
       await batch.commit();
-        
+
       debugPrint('Successfully wrote screen time data to History');
     } catch (e) {
       debugPrint('Error writing screen time data to Firestore: $e');
       rethrow;
     }
-  }
-  else{
+  } else {
     debugPrint('No data needed to be written to history');
   }
 }
 
 ///*********************************
 /// Name: _checkPermission
-///   
-/// Description: Invokes method from screentime channel 
+///
+/// Description: Invokes method from screentime channel
 /// to check for screetime usage permissions
 ///*********************************
 Future<void> _checkPermission() async {
   try {
-    final bool hasPermission = await screenTimeChannel.invokeMethod('checkPermission');
+    final bool hasPermission =
+        await screenTimeChannel.invokeMethod('checkPermission');
     //setState(() {
-      _hasPermission = hasPermission;
-   // });
+    _hasPermission = hasPermission;
+    // });
   } on PlatformException catch (e) {
-      debugPrint("Failed to check permission: ${e.message}");
+    debugPrint("Failed to check permission: ${e.message}");
   }
-}  
+}
 
 ///*********************************
 /// Name: _requestPermission
-///   
-/// Description: Invokes method from screentime channel to 
+///
+/// Description: Invokes method from screentime channel to
 /// send a request for screentime usage permissions
 ///*********************************
 Future<void> _requestPermission() async {
@@ -306,7 +309,7 @@ Future<void> _requestPermission() async {
 
 ///*********************************
 /// Name: _getScreenTime
-///   
+///
 /// Description: Accesses screentime data
 /// by storing into a Map.
 ///*********************************
@@ -318,13 +321,15 @@ Future<void> _getScreenTime() async {
   }
 
   try {
-    //Raw data from screentime channel 
-    final Map<dynamic, dynamic> result = await screenTimeChannel.invokeMethod('getScreenTime');
+    //Raw data from screentime channel
+    final Map<dynamic, dynamic> result =
+        await screenTimeChannel.invokeMethod('getScreenTime');
     //State for writing raw data in formatted map
     //setState(() {
-      _screenTimeData = Map<String, Map<String, String>>.from(
-        result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
-      );
+    _screenTimeData = Map<String, Map<String, String>>.from(
+      result.map((key, value) =>
+          MapEntry(key as String, Map<String, String>.from(value))),
+    );
     //});
     debugPrint('Got screen time!');
   } on PlatformException catch (e) {
@@ -335,15 +340,15 @@ Future<void> _getScreenTime() async {
 ///**************************************************
 /// Name: _writeScreenTimeData
 ///
-/// Description: Takes the data 
+/// Description: Takes the data
 /// that was accessed in _getScreenTime
-/// and writes it to the Firestore database 
+/// and writes it to the Firestore database
 /// using batches for multiple writes
 ///***************************************************
 Future<void> _writeScreenTimeData() async {
   //Update ref to user's doc if UID has changed
   updateUserRef();
-  if(_screenTimeData.isNotEmpty){
+  if (_screenTimeData.isNotEmpty) {
     double totalDaily = 0.0;
     final current = userRef.collection('appUsageCurrent');
     // Create a batch to handle multiple writes
@@ -355,10 +360,10 @@ Future<void> _writeScreenTimeData() async {
         final screenTimeHours = double.parse(entry.value['hours']!);
         final category = entry.value['category'];
         totalDaily += screenTimeHours;
-        
+
         // Reference to the document with app name
         final docRef = current.doc(appName);
-          
+
         // Set the data with merge option to update existing documents
         // or create new ones if they don't exist
         batch.set(
@@ -378,7 +383,7 @@ Future<void> _writeScreenTimeData() async {
           'totalDailyHours': (totalDaily * 100).round() / 100,
           'lastUpdated': FieldValue.serverTimestamp()
         },
-        SetOptions(merge:true),
+        SetOptions(merge: true),
       );
       // Commit the batch
       await batch.commit();
