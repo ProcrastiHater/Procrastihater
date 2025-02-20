@@ -60,17 +60,10 @@ void main() async {
   await Firebase.initializeApp();
   //launch the main app
   _checkNotifsPermission().whenComplete((){
-    if(!_hasPermission)
-    {
-      _requestNotifsPermission();
-    }else
-    {
-      _startTestNotifications();
-    }
     _currentToHistorical().whenComplete(() {
       _checkSTPermission().whenComplete((){
         _getScreenTime().whenComplete((){
-          _writeScreenTimeData();
+            _writeScreenTimeData();
         });
       });
     });
@@ -138,6 +131,10 @@ class _MyPageViewState extends State<MyPageView> {
 
   @override
   Widget build(BuildContext context) {
+    if(_hasNotifsPermission)
+    {
+      _startTestNotifications();
+    }
     return Scaffold(
       //PageView widget for navigation
       body: PageView(
@@ -324,22 +321,6 @@ Future<void> _checkNotifsPermission() async {
     _hasNotifsPermission = hasNotifsPermission;
   } on PlatformException catch (e) {
       debugPrint("Failed to check permission: ${e.message}");
-  }
-}  
-
-///*********************************
-/// Name: _requestNotifsPermission
-///   
-/// Description: Invokes method from platform channel to 
-/// send a request for notification permissions
-///*********************************
-Future<void> _requestNotifsPermission() async {
-  try {
-    await platformChannel.invokeMethod('requestNotificationsPermission');
-    await _checkNotifsPermission();
-    await _startTestNotifications();
-  } on PlatformException catch (e) {
-    debugPrint("Failed to request permission: ${e.message}");
   }
 }
 

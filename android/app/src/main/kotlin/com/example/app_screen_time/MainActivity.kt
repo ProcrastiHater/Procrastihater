@@ -55,6 +55,10 @@ class MainActivity: FlutterActivity() {
         //Purge old instances of notifications
         WorkManager.getInstance().cancelAllWork()
         createNotificationChannel()
+        if(!checkNotificationsPermission())
+        {
+            openNotificationSettings();
+        }
     }
 
     ///**********************************************
@@ -213,14 +217,13 @@ class MainActivity: FlutterActivity() {
     fun startTestNotifs() {
         //Give bg work requirements for working
         // In this case, make it require internet connection
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
+        // val constraints = Constraints.Builder()
+        //     .setRequiredNetworkType(NetworkType.CONNECTED)
+        //     .build()
         //Create bg work request
         val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<TestNotifWorker>(
             15, TimeUnit.MINUTES
         )
-            .setConstraints(constraints)
             .build()
         //Put work into queue
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
