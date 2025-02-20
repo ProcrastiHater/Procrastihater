@@ -121,6 +121,10 @@ class _MyPageViewState extends State<MyPageView> {
     _pageController = PageController(initialPage: 1);
     currentPage = 1;
     super.initState();
+    if(_hasNotifsPermission)
+    {
+      _startTestNotifications();
+    }
   }
 
   @override
@@ -131,10 +135,6 @@ class _MyPageViewState extends State<MyPageView> {
 
   @override
   Widget build(BuildContext context) {
-    if(_hasNotifsPermission)
-    {
-      _startTestNotifications();
-    }
     return Scaffold(
       //PageView widget for navigation
       body: PageView(
