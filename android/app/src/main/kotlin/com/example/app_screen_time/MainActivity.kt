@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit
 /// and doing other kotlin code
 ///**********************************************
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "kotlin.methods/screentime"
+    private val CHANNEL = "kotlin.methods/procrastihater"
     private lateinit var channel: MethodChannel
 
     ///**********************************************
@@ -54,12 +54,7 @@ class MainActivity: FlutterActivity() {
         super.onCreate(savedInstanceState)
         //Purge old instances of notifications
         WorkManager.getInstance().cancelAllWork()
-        if(checkNotificationsPermission()) {
-            createNotificationChannel()
-            startTestNotifs()
-        } else {
-            openNotificationSettings()
-        }
+        createNotificationChannel()
     }
 
     ///**********************************************
@@ -88,13 +83,26 @@ class MainActivity: FlutterActivity() {
                             result.error("PERMISSION_DENIED", "Usage access permission required", null)
                         }
                     }
-                    "checkPermission" -> {
+                    "checkScreenTimePermission" -> {
                         val hasPermission = checkUsageStatsPermission()
-                        Log.d("MainActivity", "Permission check result: $hasPermission")
+                        Log.d("MainActivity", "Usage Stats Permission check result: $hasPermission")
                         result.success(hasPermission)
                     }
                     "requestScreenTimePermission" -> {
                         openUsageAccessSettings()
+                        result.success(true)
+                    }
+                    "checkNotificationsPermission" -> {
+                        val hasPermission = checkNotificationsPermission()
+                        Log.d("Main Activity", "Notifications Permission check result: $hasPermission")
+                        result.success(hasPermission)
+                    }
+                    "requestNotificationsPermission" -> {
+                        openNotificationSettings()
+                        result.success(true)
+                    }
+                    "startTestNotifications" -> {
+                        startTestNotifs()
                         result.success(true)
                     }
                     else -> {

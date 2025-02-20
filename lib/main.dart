@@ -32,11 +32,12 @@ import 'friends_list.dart';
 
 //Global Variables 
 //Native Kotlin method channel
-const screenTimeChannel = MethodChannel('kotlin.methods/screentime');
+const platformChannel = MethodChannel('kotlin.methods/procrastihater');
 //Maps for reading/writing data from the database
 Map<String, Map<String, String>> _screenTimeData = {};
 //Permission variables for screen time usage permission
 bool _hasPermission = false;
+bool _hasNotifsPermission = false;
 
 //Firestore Connection Variables
 final FirebaseAuth auth = FirebaseAuth.instance;
@@ -58,15 +59,22 @@ void main() async {
   //Firebase initialization
   await Firebase.initializeApp();
   //launch the main app
-  _currentToHistorical().whenComplete(() {
-    _checkPermission().whenComplete((){
-      _getScreenTime().whenComplete((){
-        _writeScreenTimeData();
-          });
-        }
-      );
+  _checkNotifsPermission().whenComplete((){
+    if(!_hasPermission)
+    {
+      _requestNotifsPermission();
+    }else
+    {
+      _startTestNotifications();
     }
-  );
+    _currentToHistorical().whenComplete(() {
+      _checkSTPermission().whenComplete((){
+        _getScreenTime().whenComplete((){
+          _writeScreenTimeData();
+        });
+      });
+    });
+  });
   
   runApp(const LoginScreen());
 }
@@ -275,34 +283,80 @@ Future<void> _currentToHistorical() async {
 }
 
 ///*********************************
-/// Name: _checkPermission
+/// Name: _checkSTPermission
 ///   
-/// Description: Invokes method from screentime channel 
+/// Description: Invokes method from platform channel 
 /// to check for screetime usage permissions
 ///*********************************
-Future<void> _checkPermission() async {
+Future<void> _checkSTPermission() async {
   try {
-    final bool hasPermission = await screenTimeChannel.invokeMethod('checkPermission');
-    //setState(() {
-      _hasPermission = hasPermission;
-   // });
+    final bool hasPermission = await platformChannel.invokeMethod('checkScreenTimePermission');
+    _hasPermission = hasPermission;
   } on PlatformException catch (e) {
       debugPrint("Failed to check permission: ${e.message}");
   }
 }  
 
 ///*********************************
-/// Name: _requestPermission
+/// Name: _requestSTPermission
 ///   
-/// Description: Invokes method from screentime channel to 
+/// Description: Invokes method from platform channel to 
 /// send a request for screentime usage permissions
 ///*********************************
-Future<void> _requestPermission() async {
+Future<void> _requestSTPermission() async {
   try {
-    await screenTimeChannel.invokeMethod('requestPermission');
-    await _checkPermission();
+    await platformChannel.invokeMethod('requestScreenTimePermission');
+    await _checkSTPermission();
   } on PlatformException catch (e) {
     debugPrint("Failed to request permission: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: _checkNotifsPermission
+///   
+/// Description: Invokes method from platform channel 
+/// to check for notification permissions
+///*********************************
+Future<void> _checkNotifsPermission() async {
+  try {
+    final bool hasNotifsPermission = await platformChannel.invokeMethod('checkNotificationsPermission');
+    _hasNotifsPermission = hasNotifsPermission;
+  } on PlatformException catch (e) {
+      debugPrint("Failed to check permission: ${e.message}");
+  }
+}  
+
+///*********************************
+/// Name: _requestNotifsPermission
+///   
+/// Description: Invokes method from platform channel to 
+/// send a request for notification permissions
+///*********************************
+Future<void> _requestNotifsPermission() async {
+  try {
+    await platformChannel.invokeMethod('requestNotificationsPermission');
+    await _checkNotifsPermission();
+    await _startTestNotifications();
+  } on PlatformException catch (e) {
+    debugPrint("Failed to request permission: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: _startTestNotifications
+///   
+/// Description: Invokes method from platform channel to 
+/// start sending the test notification
+///*********************************
+Future<void> _startTestNotifications() async {
+  if(!_hasNotifsPermission) {
+    return;
+  }
+  try {
+    await platformChannel.invokeMethod('startTestNotifications');
+  } on PlatformException catch (e) {
+    debugPrint("Failed to start notifications: ${e.message}");
   }
 }
 
@@ -315,13 +369,13 @@ Future<void> _requestPermission() async {
 Future<void> _getScreenTime() async {
   //Checks if user has permission, if not it requests the permissions
   if (!_hasPermission) {
-    await _requestPermission();
+    await _requestSTPermission();
     return;
   }
 
   try {
-    //Raw data from screentime channel 
-    final Map<dynamic, dynamic> result = await screenTimeChannel.invokeMethod('getScreenTime');
+    //Raw data from screentime method of platform channel 
+    final Map<dynamic, dynamic> result = await platformChannel.invokeMethod('getScreenTime');
     //Convert data obtained by kotlin method to dart equivalent
     _screenTimeData = Map<String, Map<String, String>>.from(
       result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
