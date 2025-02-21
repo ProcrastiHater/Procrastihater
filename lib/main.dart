@@ -127,8 +127,18 @@ class ProcrastiHater extends StatelessWidget {
       pageBuilder: (context, animation, secondaryAnimation) => page,  
       transitionDuration: Duration(milliseconds: 400),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.fastEaseInToSlowEaseOut,
+        );
         final tween = Tween(begin: beginOffset, end: Offset.zero).chain(CurveTween(curve: Curves.fastEaseInToSlowEaseOut));
-        return SlideTransition(position: animation.drive(tween), child: child);
+        return SlideTransition(
+          position: curvedAnimation.drive(tween), 
+          child: FadeTransition(
+            opacity: curvedAnimation, 
+            child: child,
+          ),
+        );
       }
     );
   }
