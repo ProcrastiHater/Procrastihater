@@ -57,11 +57,13 @@ class _CalendarPageState extends State<CalendarPage> {
               Text(
                 'Selected Date: ${dateTime!.toString()}',
                 style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
               ),
             if (dateTimeRange != null)
               Text(
                 'Selected Range: ${dateTimeRange!.map((date) => date.toString()).join(" to ")}',
                 style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
               ),
           ],
         ),
