@@ -9,6 +9,8 @@ library;
 
 //Dart Imports
 import 'dart:async';
+import 'package:app_screen_time/profile/profile_picture_selection.dart';
+import 'package:app_screen_time/profile/profile_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -24,7 +26,6 @@ import 'pages/home_page.dart';
 import 'pages/leaderboard_page.dart';
 import 'pages/friend_page.dart';
 import 'profile/login_screen.dart';
-import 'friends_list.dart';
 
 //Global Variables 
 //Native Kotlin method channel
@@ -81,70 +82,54 @@ class ProcrastiHater extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyPageView()
+      initialRoute: '/homePage',
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case '/loginScreen':
+            return MaterialPageRoute(
+              builder: (context) => LoginScreen(),
+              settings: settings,
+            );
+          case '/homePage':
+            return MaterialPageRoute(
+              builder: (context) => HomePage(),
+              settings: settings,
+            );
+          case '/leaderBoardPage': 
+            return createSwipingRoute(LeaderBoardPage(), Offset(1.0, 0.0));
+          case '/friendsPage': 
+            return createSwipingRoute(FriendsPage(), Offset(-1.0, 0.0));
+          case '/friendsPageBack':
+            return createSwipingRoute(HomePage(), Offset(1.0, 0.0));
+          case '/leaderBoardPageBack':
+            return createSwipingRoute(HomePage(), Offset(-1.0, 0.0));
+          case '/profileSettings':
+            return MaterialPageRoute(
+              builder: (context) => ProfileSettings(),
+              settings: settings,
+            );
+          case '/profilePictureSelection':
+            return MaterialPageRoute(
+              builder: (context) => ProfilePictureSelectionScreen(),
+              settings: settings,
+            );
+          default:
+            return MaterialPageRoute(
+              builder: (context) => HomePage(),
+              settings: settings,
+            );
+        }
+      },
     );
   } 
-}
-
-///*********************************
-/// Name: MyPageView
-/// 
-/// Description: Stateful widget that 
-/// manages the PageView for app navigation
-///*********************************
-class MyPageView extends StatefulWidget {
-  const MyPageView({super.key});
-  @override
-  State<MyPageView> createState() => _MyPageViewState();
-}
-///*********************************
-/// Name: MyPageViewState
-/// 
-/// Description: Manages state for MyPageView, 
-/// sets up PageView controller, tracks current
-/// page, and handles navigation
-///*********************************
-class _MyPageViewState extends State<MyPageView> {
-  //Controller for page navigation
-  late PageController _pageController;
-  
-  //Tracks current index
-  int currentPage = 0;
-
-  //Initialize page controller and set initial page
-  @override
-  void initState() {
-    _pageController = PageController(initialPage: 1);
-    currentPage = 1;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      //PageView widget for navigation
-      body: PageView(
-        controller: _pageController,
-        //Update current page index on page change
-        onPageChanged: (index) {
-        setState(() {
-          currentPage = index; 
-        });
-        },
-        //Pages to display
-        children: const [
-          FriendsList(),
-          HomePage(),
-          HistoricalDataPage(),
-        ],
-      )
-      
+  static Route createSwipingRoute(Widget page, Offset beginOffset) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,  
+      transitionDuration: Duration(milliseconds: 400),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween(begin: beginOffset, end: Offset.zero).chain(CurveTween(curve: Curves.fastEaseInToSlowEaseOut));
+        return SlideTransition(position: animation.drive(tween), child: child);
+      }
     );
   }
 }

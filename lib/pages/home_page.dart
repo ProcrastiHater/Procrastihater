@@ -39,7 +39,19 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
-    return Container(padding: const EdgeInsets.all(4.0), child: MyHomePage());
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        //Swipe right
+        if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
+          Navigator.pushNamed(context, '/leaderBoardPage');
+        }
+        //Swipe left
+        if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+          Navigator.pushNamed(context, '/friendsPage');
+        }
+      },
+      child: Container(padding: const EdgeInsets.all(0.0), child: MyHomePage())
+    );
   }
 }
 
@@ -75,6 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         title: Text("ProcrastiStats"),
         actions: [
@@ -177,6 +190,7 @@ class _GraphViewState extends State<GraphView> {
     final result = await fetchHistoricalScreenTime();
     setState(() {
       historicalData = result;
+      availableDays = historicalData.keys.toList();
     });
   }
 
