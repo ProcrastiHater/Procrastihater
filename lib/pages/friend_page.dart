@@ -7,7 +7,18 @@
 library;
 
 //Dart Imports
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+//Firenbase Imports
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+
+final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 ///*********************************
 /// Name: HistoricalDataPage
@@ -22,11 +33,17 @@ class HistoricalDataPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      title: const Text("ProcrastiFriends"),
+          title: const Text("Global Leaderboard")
       ),
-    body: const Center(
-      child: Text("Friend List")
-    )
+      body: Column(
+      children: [
+          Expanded(
+            child: StreamBuilder<DocumentSnapshot>(
+              stream: _firestore.collection('UID').get();
+            )
+          ),
+        ],
+      ),
     );
   }
 }
