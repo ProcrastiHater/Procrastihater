@@ -9,8 +9,6 @@ library;
 
 //Dart Imports
 import 'dart:async';
-import 'package:app_screen_time/profile/profile_picture_selection.dart';
-import 'package:app_screen_time/profile/profile_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +24,8 @@ import 'pages/home_page.dart';
 import 'pages/leaderboard_page.dart';
 import 'pages/friend_page.dart';
 import 'profile/login_screen.dart';
+import 'profile/profile_picture_selection.dart';
+import 'profile/profile_settings.dart';
 
 //Global Variables 
 //Native Kotlin method channel
