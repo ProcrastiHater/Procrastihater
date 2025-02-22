@@ -65,14 +65,13 @@ void main() async {
       _checkSTPermission().whenComplete((){
         _getScreenTime().whenComplete((){
             _writeScreenTimeData();
+            if(_hasNotifsPermission) {
+              _startTestNotifications();
+            }
         });
       });
     });
   });
-  if(_hasNotifsPermission)
-  {
-    _startTestNotifications();
-  }
   //Launches login screen first which returns ProcrasiHater app if success
   runApp(const LoginScreen());
 }
