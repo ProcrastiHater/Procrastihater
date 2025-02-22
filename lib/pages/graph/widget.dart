@@ -20,7 +20,7 @@ import '../friend_page.dart';
 List<String> availableDays = historicalData.keys.toList();
 
 
-///*********************************
+///********************************
 /// Name: generateWeeklyChart
 /// 
 /// Description: Generate a chart in 

@@ -23,7 +23,7 @@ class LeaderBoardPage extends StatelessWidget {
     return GestureDetector(
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
-          Navigator.pushNamed(context, '/leaderBoardPageBack');
+          Navigator.pushReplacementNamed(context, '/leaderBoardPageBack');
         }
       },
       child: Scaffold(

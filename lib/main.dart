@@ -102,7 +102,7 @@ class ProcrastiHater extends StatelessWidget {
           case '/friendsPageBack':
             return createSwipingRoute(HomePage(), Offset(1.0, 0.0));
           case '/leaderBoardPageBack':
-            return createSwipingRoute(HomePage(), Offset(-1.0, 0.0));
+            return createSwipingRoute(HomePage(), Offset(-1.0, 0.0)); 
           case '/profileSettings':
             return MaterialPageRoute(
               builder: (context) => ProfileSettings(),

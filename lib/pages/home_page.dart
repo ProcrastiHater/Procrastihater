@@ -43,11 +43,11 @@ class HomePage extends StatelessWidget {
       onHorizontalDragEnd: (details) {
         //Swipe right
         if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
-          Navigator.pushNamed(context, '/leaderBoardPage');
+          Navigator.pushReplacementNamed(context, '/leaderBoardPage');
         }
         //Swipe left
         if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
-          Navigator.pushNamed(context, '/friendsPage');
+          Navigator.pushReplacementNamed(context, '/friendsPage');
         }
       },
       child: Container(padding: const EdgeInsets.all(0.0), child: MyHomePage())
@@ -100,12 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileSettings(),
-                ),
-              );
+              await Navigator.pushNamed(context, "/profileSettings");
               // Reload the user in case anything changed
               await auth.currentUser?.reload();
               // Reload UI in case things changed

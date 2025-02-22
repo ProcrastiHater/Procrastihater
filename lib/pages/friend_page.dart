@@ -30,7 +30,7 @@ class FriendsPage extends StatelessWidget {
     return GestureDetector(
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
-          Navigator.pushNamed(context, '/friendsPageBack');
+          Navigator.pushReplacementNamed(context, '/friendsPageBack');
         }
       },
       child: Scaffold(
@@ -55,15 +55,13 @@ class FriendsList extends StatefulWidget {
   const FriendsList({super.key});
 
   @override
-  _FriendsListState createState() => _FriendsListState();
-
+  State<FriendsList> createState() => _FriendsListState();
 }
 
 class _FriendsListState extends State<FriendsList>{
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _searchController = TextEditingController();
-  List<String> _friendsList = [];
 
 
   @override
