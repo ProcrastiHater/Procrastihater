@@ -39,14 +39,18 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
+    //Wait for a gesture
     return GestureDetector(
+      //The user swipes horizontally
       onHorizontalDragEnd: (details) {
-        //Swipe right
+        //The user swipes from right to left
         if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
+          //Load animation for leaderboard page
           Navigator.pushReplacementNamed(context, '/leaderBoardPage');
         }
-        //Swipe left
+        //The user swipes from left to right
         if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+          //Load animation for friends page
           Navigator.pushReplacementNamed(context, '/friendsPage');
         }
       },

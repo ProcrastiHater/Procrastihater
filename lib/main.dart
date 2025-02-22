@@ -50,7 +50,8 @@ DocumentReference userRef = mainCollection.doc(uid);
 /// 
 /// Description: Initializes Firebase,
 /// 
-/// launches the main app
+/// launches the main app and instantiates 
+/// all neccesary connections and permissions
 ///*********************************
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,6 +68,7 @@ void main() async {
     }
   );
   
+  //Launches login screen first which returns ProcrasiHater app if success
   runApp(const LoginScreen());
 }
 
@@ -74,45 +76,57 @@ void main() async {
 /// Name: MyApp
 /// 
 /// Description: Root stateless widget of 
-/// the app, builds and displays main page view
+/// the app, builds naviagation tree for app
 ///*********************************
 class ProcrastiHater extends StatelessWidget {
   const ProcrastiHater({super.key});
 
   @override
+  //Main material app for app
   Widget build(BuildContext context) {
     return MaterialApp(
+      //Main route of the app
       initialRoute: '/homePage',
+      //Route generation based on what the route needs to do
       onGenerateRoute: (RouteSettings settings) {
         switch (settings.name) {
+          //Login screen case builds default navigation
           case '/loginScreen':
             return MaterialPageRoute(
               builder: (context) => LoginScreen(),
               settings: settings,
             );
+          //Home page case builds default navigation
           case '/homePage':
             return MaterialPageRoute(
               builder: (context) => HomePage(),
               settings: settings,
             );
+          //Leaderboard page case builds animated right swiping navigation
           case '/leaderBoardPage': 
             return createSwipingRoute(LeaderBoardPage(), Offset(1.0, 0.0));
-          case '/friendsPage': 
-            return createSwipingRoute(FriendsPage(), Offset(-1.0, 0.0));
-          case '/friendsPageBack':
-            return createSwipingRoute(HomePage(), Offset(1.0, 0.0));
+          //Leaderboard page back case builds animated left swiping navigation
           case '/leaderBoardPageBack':
             return createSwipingRoute(HomePage(), Offset(-1.0, 0.0)); 
+          //Friends page case builds animated left swiping navigation
+          case '/friendsPage': 
+            return createSwipingRoute(FriendsPage(), Offset(-1.0, 0.0));
+          //Friends page back case builds animated right swiping navigation
+          case '/friendsPageBack':
+            return createSwipingRoute(HomePage(), Offset(1.0, 0.0));
+          //Profile settings case builds default navigation
           case '/profileSettings':
             return MaterialPageRoute(
               builder: (context) => ProfileSettings(),
               settings: settings,
             );
+          //Profile picture selection case builds default navigation
           case '/profilePictureSelection':
             return MaterialPageRoute(
               builder: (context) => ProfilePictureSelectionScreen(),
               settings: settings,
             );
+          //Default case builds default navigation to the home page
           default:
             return MaterialPageRoute(
               builder: (context) => HomePage(),
@@ -122,18 +136,32 @@ class ProcrastiHater extends StatelessWidget {
       },
     );
   } 
+  ///*********************************
+  /// Name: createSwipingRoute
+  /// 
+  /// Description: Function to build the 
+  /// navigation and swiping animation for
+  /// main pages of the app
+  ///*********************************
   static Route createSwipingRoute(Widget page, Offset beginOffset) {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => page,  
+      //Navigation for the page param
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      //Duration of the animation
       transitionDuration: Duration(milliseconds: 400),
+      //Animation builder
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        //Animation style for swipe
         final curvedAnimation = CurvedAnimation(
           parent: animation,
           curve: Curves.fastEaseInToSlowEaseOut,
         );
+        //Tween variable for animation
         final tween = Tween(begin: beginOffset, end: Offset.zero).chain(CurveTween(curve: Curves.fastEaseInToSlowEaseOut));
+        //Actual slide transition variable
         return SlideTransition(
           position: curvedAnimation.drive(tween), 
+          //Fade transition for smoothness 
           child: FadeTransition(
             opacity: curvedAnimation, 
             child: child,

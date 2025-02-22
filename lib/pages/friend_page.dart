@@ -27,9 +27,13 @@ class FriendsPage extends StatelessWidget {
   const FriendsPage({super.key});
   @override
   Widget build(BuildContext context) {
+    //Wait for a gesture
     return GestureDetector(
+      //The user swipes horizontally
       onHorizontalDragEnd: (details) {
+        //The user swipes from right to left
         if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
+          //Load back animation for page
           Navigator.pushReplacementNamed(context, '/friendsPageBack');
         }
       },
