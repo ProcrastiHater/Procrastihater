@@ -80,6 +80,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   //State management for loading list view
   String selectedDay = "null";
+  int graphIndex = 0;
   void updateSelectedDay(String day) {
     setState(() {
       selectedDay = day;
@@ -114,28 +115,56 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       body: Column(
-        children: [
-          
+        children: [ 
           Expanded(
             //Container holding graph in top portion of screen
             child: Scaffold(
-              body: Container(
-                padding: const EdgeInsets.all(4.0),
-                color: Colors.indigo.shade50,
-                child: GraphView(onDaySelected: updateSelectedDay),
-              ),
-             /* bottomNavigationBar: SizedBox(
+              body: [
+                //Daily Graph
+                Container(
+                  padding: const EdgeInsets.all(4.0),
+                  color: Colors.indigo.shade50,
+                  //child: GraphView(onDaySelected: updateSelectedDay),
+                ),
+                //Weekly Graph
+                 Container(
+                  padding: const EdgeInsets.all(4.0),
+                  color: Colors.indigo.shade50,
+                  child: GraphView(onDaySelected: updateSelectedDay),
+                ),
+                //Monthly Graph
+                 Container(
+                  padding: const EdgeInsets.all(4.0),
+                  color: Colors.indigo.shade50,
+                  //child: GraphView(onDaySelected: updateSelectedDay),
+                ),
+              ][graphIndex],
+              bottomNavigationBar: SizedBox(
                 height: 50,
                 child: NavigationBar(
-                  selectedIndex: 1,
+                  selectedIndex: graphIndex,
                   backgroundColor: Colors.indigo.shade50,
+                  onDestinationSelected: (int index) {
+                    setState(() {
+                      graphIndex = index;
+                    });
+                  },
                   destinations: const <Widget>[
-                  NavigationDestination(icon: Icon(Icons.calendar_today_rounded), label: 'Daily'),
-                  NavigationDestination(icon: Icon(Icons.calendar_view_week_rounded), label: 'Weekly'),
-                  NavigationDestination(icon: Icon(Icons.calendar_month_rounded), label: 'Monthly'),
+                    NavigationDestination(
+                      icon: Icon(Icons.calendar_today_rounded), 
+                      label: 'Daily'
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.calendar_view_week_rounded), 
+                      label: 'Weekly'
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.calendar_month_rounded), 
+                      label: 'Monthly'
+                    ),
                   ],  
                 ), 
-              )   */        
+              )         
             )
           ),
           const SizedBox(height: 4.0),
