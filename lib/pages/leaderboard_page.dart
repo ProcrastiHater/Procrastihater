@@ -28,9 +28,19 @@ class LeaderBoardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GestureDetector(
+      //The user swipes horizontally
+      onHorizontalDragEnd: (details) {
+        //The user swipes from right to left
+        if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+          //Load back animation for page
+          Navigator.pushReplacementNamed(context, '/leaderBoardPageBack');
+        }
+      },
+    child: Scaffold(
       appBar: AppBar(
         title: const Text("Global Leaderboard"),
+        automaticallyImplyLeading: false
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: firestore.collection('UID').snapshots(),
@@ -69,6 +79,7 @@ class LeaderBoardPage extends StatelessWidget {
           );
         },
       ),
+     ),
     );
   }
 }
