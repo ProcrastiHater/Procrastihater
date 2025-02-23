@@ -10,7 +10,6 @@ library;
 //Dart Imports
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -26,7 +25,8 @@ import 'pages/home_page.dart';
 import 'pages/leaderboard_page.dart';
 import 'pages/friend_page.dart';
 import 'profile/login_screen.dart';
-import 'friends_list.dart';
+import 'profile/profile_picture_selection.dart';
+import 'profile/profile_settings.dart';
 
 //Global Variables 
 //Native Kotlin method channel
@@ -50,7 +50,8 @@ DocumentReference userRef = mainCollection.doc(uid);
 /// 
 /// Description: Initializes Firebase,
 /// 
-/// launches the main app
+/// launches the main app and instantiates 
+/// all neccesary connections and permissions
 ///*********************************
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,7 +72,7 @@ void main() async {
       });
     });
   });
-  
+  //Launches login screen first which returns ProcrasiHater app if success
   runApp(const LoginScreen());
 }
 
@@ -79,79 +80,98 @@ void main() async {
 /// Name: MyApp
 /// 
 /// Description: Root stateless widget of 
-/// the app, builds and displays main page view
+/// the app, builds naviagation tree for app
 ///*********************************
 class ProcrastiHater extends StatelessWidget {
   const ProcrastiHater({super.key});
 
   @override
+  //Main material app for app
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyPageView()
+      //Main route of the app
+      initialRoute: '/homePage',
+      //Route generation based on what the route needs to do
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          //Login screen case builds default navigation
+          case '/loginScreen':
+            return MaterialPageRoute(
+              builder: (context) => LoginScreen(),
+              settings: settings,
+            );
+          //Home page case builds default navigation
+          case '/homePage':
+            return MaterialPageRoute(
+              builder: (context) => HomePage(),
+              settings: settings,
+            );
+          //Leaderboard page case builds animated right swiping navigation
+          case '/leaderBoardPage': 
+            return createSwipingRoute(LeaderBoardPage(), Offset(1.0, 0.0));
+          //Leaderboard page back case builds animated left swiping navigation
+          case '/leaderBoardPageBack':
+            return createSwipingRoute(HomePage(), Offset(-1.0, 0.0)); 
+          //Friends page case builds animated left swiping navigation
+          case '/friendsPage': 
+            return createSwipingRoute(FriendsPage(), Offset(-1.0, 0.0));
+          //Friends page back case builds animated right swiping navigation
+          case '/friendsPageBack':
+            return createSwipingRoute(HomePage(), Offset(1.0, 0.0));
+          //Profile settings case builds default navigation
+          case '/profileSettings':
+            return MaterialPageRoute(
+              builder: (context) => ProfileSettings(),
+              settings: settings,
+            );
+          //Profile picture selection case builds default navigation
+          case '/profilePictureSelection':
+            return MaterialPageRoute(
+              builder: (context) => ProfilePictureSelectionScreen(),
+              settings: settings,
+            );
+          //Default case builds default navigation to the home page
+          default:
+            return MaterialPageRoute(
+              builder: (context) => HomePage(),
+              settings: settings,
+            );
+        }
+      },
     );
   } 
-}
-
-///*********************************
-/// Name: MyPageView
-/// 
-/// Description: Stateful widget that 
-/// manages the PageView for app navigation
-///*********************************
-class MyPageView extends StatefulWidget {
-  const MyPageView({super.key});
-  @override
-  State<MyPageView> createState() => _MyPageViewState();
-}
-
-///*********************************
-/// Name: MyPageViewState
-/// 
-/// Description: Manages state for MyPageView, 
-/// sets up PageView controller, tracks current
-/// page, and handles navigation
-///*********************************
-class _MyPageViewState extends State<MyPageView> {
-  //Controller for page navigation
-  late PageController _pageController;
-  
-  //Tracks current index
-  int currentPage = 0;
-
-  //Initialize page controller and set initial page
-  @override
-  void initState() {
-    _pageController = PageController(initialPage: 1);
-    currentPage = 1;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      //PageView widget for navigation
-      body: PageView(
-        controller: _pageController,
-        //Update current page index on page change
-        onPageChanged: (index) {
-        setState(() {
-          currentPage = index; 
-        });
-        },
-        //Pages to display
-        children: const [
-          FriendsList(),
-          HomePage(),
-          HistoricalDataPage(),
-        ],
-      )
-      
+  ///*********************************
+  /// Name: createSwipingRoute
+  /// 
+  /// Description: Function to build the 
+  /// navigation and swiping animation for
+  /// main pages of the app
+  ///*********************************
+  static Route createSwipingRoute(Widget page, Offset beginOffset) {
+    return PageRouteBuilder(
+      //Navigation for the page param
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      //Duration of the animation
+      transitionDuration: Duration(milliseconds: 400),
+      //Animation builder
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        //Animation style for swipe
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.fastEaseInToSlowEaseOut,
+        );
+        //Tween variable for animation
+        final tween = Tween(begin: beginOffset, end: Offset.zero).chain(CurveTween(curve: Curves.fastEaseInToSlowEaseOut));
+        //Actual slide transition variable
+        return SlideTransition(
+          position: curvedAnimation.drive(tween), 
+          //Fade transition for smoothness 
+          child: FadeTransition(
+            opacity: curvedAnimation, 
+            child: child,
+          ),
+        );
+      }
     );
   }
 }

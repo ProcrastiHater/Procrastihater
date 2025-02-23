@@ -80,12 +80,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
 /// the TextField is changed
 ///***************************************************
   Future<void> _updateProfilePicture() async {
-    bool? updated = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfilePictureSelectionScreen(),
-      ),
-    );
+    bool? updated = await Navigator.pushNamed(context, '/profilePictureSelection') as bool?;
 
     if (updated == true) {
       // Reload user data
