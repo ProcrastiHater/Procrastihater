@@ -39,7 +39,23 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
-    return Container(padding: const EdgeInsets.all(4.0), child: MyHomePage());
+    //Wait for a gesture
+    return GestureDetector(
+      //The user swipes horizontally
+      onHorizontalDragEnd: (details) {
+        //The user swipes from right to left
+        if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
+          //Load animation for leaderboard page
+          Navigator.pushReplacementNamed(context, '/leaderBoardPage');
+        }
+        //The user swipes from left to right
+        if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+          //Load animation for friends page
+          Navigator.pushReplacementNamed(context, '/friendsPage');
+        }
+      },
+      child: Container(padding: const EdgeInsets.all(0.0), child: MyHomePage())
+    );
   }
 }
 
@@ -75,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         title: Text("ProcrastiStats"),
         actions: [
@@ -87,12 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileSettings(),
-                ),
-              );
+              await Navigator.pushNamed(context, "/profileSettings");
               // Reload the user in case anything changed
               await auth.currentUser?.reload();
               // Reload UI in case things changed
@@ -177,6 +189,7 @@ class _GraphViewState extends State<GraphView> {
     final result = await fetchHistoricalScreenTime();
     setState(() {
       historicalData = result;
+      availableDays = historicalData.keys.toList();
     });
   }
 

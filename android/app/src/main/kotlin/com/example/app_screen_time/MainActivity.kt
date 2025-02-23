@@ -1,16 +1,19 @@
 package com.example.app_screen_time
 
+import android.Manifest
 import android.util.Log
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import android.os.Bundle
 import android.content.Context
 //Screen time usage import
 import android.app.usage.UsageStatsManager
 //Permissions Settings imports
 import android.provider.Settings
 import android.app.AppOpsManager
+import android.app.NotificationManager
 import android.content.Intent
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -21,11 +24,48 @@ import java.util.Locale
 import java.util.Date
 //Allows access to category titles
 import android.content.pm.ApplicationInfo
+//Notification imports
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import android.content.pm.PackageManager
+import android.app.NotificationChannel
+//Background service imports
+import androidx.work.*
+import com.example.app_screen_time.TestNotifWorker
+import java.util.concurrent.TimeUnit
 
+///*********************************************
+/// Name: MainActivity
+///
+/// Description: Class for managing method channels
+/// and doing other kotlin code
+///**********************************************
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "kotlin.methods/screentime"
+    private val CHANNEL = "kotlin.methods/procrastihater"
     private lateinit var channel: MethodChannel
 
+    ///**********************************************
+    /// Name: onCreate
+    ///
+    /// Description: Initializes activity
+    ///**********************************************
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        //Purge old instances of notifications
+        WorkManager.getInstance().cancelAllWork()
+        createNotificationChannel()
+        if(!checkNotificationsPermission())
+        {
+            openNotificationSettings();
+        }
+    }
+
+    ///**********************************************
+    /// Name: configureFlutterEngine
+    ///
+    /// Description: Allows use of Method Channels
+    ///**********************************************
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         
@@ -47,13 +87,26 @@ class MainActivity: FlutterActivity() {
                             result.error("PERMISSION_DENIED", "Usage access permission required", null)
                         }
                     }
-                    "checkPermission" -> {
+                    "checkScreenTimePermission" -> {
                         val hasPermission = checkUsageStatsPermission()
-                        Log.d("MainActivity", "Permission check result: $hasPermission")
+                        Log.d("MainActivity", "Usage Stats Permission check result: $hasPermission")
                         result.success(hasPermission)
                     }
-                    "requestPermission" -> {
+                    "requestScreenTimePermission" -> {
                         openUsageAccessSettings()
+                        result.success(true)
+                    }
+                    "checkNotificationsPermission" -> {
+                        val hasPermission = checkNotificationsPermission()
+                        Log.d("Main Activity", "Notifications Permission check result: $hasPermission")
+                        result.success(hasPermission)
+                    }
+                    "requestNotificationsPermission" -> {
+                        openNotificationSettings()
+                        result.success(true)
+                    }
+                    "startTestNotifications" -> {
+                        startTestNotifs()
                         result.success(true)
                     }
                     else -> {
@@ -68,7 +121,7 @@ class MainActivity: FlutterActivity() {
         }
     }
 
-    ///*********************************************
+    ///**********************************************
     /// Name: checkUsageStatsPermission
     ///
     /// Description: Checks to see if the user has granted
@@ -92,7 +145,7 @@ class MainActivity: FlutterActivity() {
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
-    ///*********************************************
+    ///**********************************************
     /// Name: openUsageAccessSettings
     /// 
     /// Description: Opens the permissions page for accessing
@@ -102,7 +155,85 @@ class MainActivity: FlutterActivity() {
         startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
     }
 
-    ///*********************************************
+    ///**********************************************
+    /// Name: checkNotificationsPermission
+    ///
+    /// Description: Checks to see if the user has granted
+    /// permission for receiving notifications
+    ///**********************************************
+    private fun checkNotificationsPermission(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    ///**********************************************
+    /// Name: openUsageAccessSettings
+    /// 
+    /// Description: Opens the permissions dialog for
+    /// receiving notifications
+    ///**********************************************
+    private fun openNotificationSettings(){
+        //Params: context, array of permissions, 
+        // request code (>= 0, but otherwise can be anything)
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            123
+        )
+    }
+
+    ///**********************************************
+    /// Name: createNotificationChannel
+    /// 
+    /// Description: Creates notification channel,
+    /// which is required by Android for notifications
+    /// to be visible
+    ///**********************************************
+    private fun createNotificationChannel() {
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+            val name = "ProcrastiNotif"
+            val descriptionText = "ProcrastiHater Notifications"
+            //Set importance of notification
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            //Create notification channel, which is required by current Android versions
+            val channel = NotificationChannel("ProcrastiNotif", name, importance)
+            //Set the description of the notification channel
+            channel.setDescription(descriptionText)
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            //Register notification channel
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    ///**********************************************
+    /// Name: startTestNotifs
+    /// 
+    /// Description: Starts background task for
+    /// sending test notification
+    ///**********************************************
+    fun startTestNotifs() {
+        //Give bg work requirements for working
+        // In this case, make it require internet connection
+        // val constraints = Constraints.Builder()
+        //     .setRequiredNetworkType(NetworkType.CONNECTED)
+        //     .build()
+        //Create bg work request
+        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<TestNotifWorker>(
+            15, TimeUnit.MINUTES
+        )
+            .build()
+        //Put work into queue
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "testNotification",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            notifRequest,
+        )
+    }
+
+    ///**********************************************
     /// Name: getMidnight
     /// 
     /// Description: Returns a long of midnight for the
@@ -117,7 +248,7 @@ class MainActivity: FlutterActivity() {
         return today.time.time
     }
 
-    ///*********************************************
+    ///***********************************************
     /// Name: getScreenTimeStats
     /// 
     /// Description: Returns a Map that uses app names as keys
@@ -146,6 +277,7 @@ class MainActivity: FlutterActivity() {
         val screenTimeMap = mutableMapOf<String, MutableMap<String, String>>()
     
         for (stats in queryUsageStats) {
+            //Filter out apps with less than 0.05 hrs
             if (stats.totalTimeInForeground / 3600000.0 < 0.05) {
                 continue
             }
