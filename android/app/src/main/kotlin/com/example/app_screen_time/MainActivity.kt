@@ -1,5 +1,6 @@
 package com.example.app_screen_time
 
+import kotlin.Double
 import android.Manifest
 import android.util.Log
 import androidx.annotation.NonNull
@@ -33,7 +34,10 @@ import android.app.NotificationChannel
 //Background service imports
 import androidx.work.*
 import com.example.app_screen_time.TestNotifWorker
+import com.example.app_screen_time.TotalSTWorker
 import java.util.concurrent.TimeUnit
+
+public var screenTimeMap = mutableMapOf<String, MutableMap<String, String>>();
 
 ///*********************************************
 /// Name: MainActivity
@@ -107,6 +111,10 @@ class MainActivity: FlutterActivity() {
                     }
                     "startTestNotifications" -> {
                         startTestNotifs()
+                        result.success(true)
+                    }
+                    "startTotalSTNotifications" ->{
+                        startTotalSTNotifs()
                         result.success(true)
                     }
                     else -> {
@@ -234,6 +242,26 @@ class MainActivity: FlutterActivity() {
     }
 
     ///**********************************************
+    /// Name: startTotalSTNotifs
+    /// 
+    /// Description: Starts background task for
+    /// sending totalSTNotifications
+    ///**********************************************
+    fun startTotalSTNotifs() {
+        //Create bg work request
+        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<TotalSTWorker>(
+            15, TimeUnit.MINUTES
+        )
+            .build()
+        //Put work into queue
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "totalSTNotification",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            notifRequest,
+        )
+    }
+
+    ///**********************************************
     /// Name: getMidnight
     /// 
     /// Description: Returns a long of midnight for the
@@ -247,7 +275,7 @@ class MainActivity: FlutterActivity() {
         today.set(Calendar.MILLISECOND, 0)
         return today.time.time
     }
-
+    
     ///***********************************************
     /// Name: getScreenTimeStats
     /// 
@@ -271,10 +299,7 @@ class MainActivity: FlutterActivity() {
             UsageStatsManager.INTERVAL_DAILY,
             startTime,
             endTime
-        )
-        
-        //Create a map for transferring screen time to dart/flutter code
-        val screenTimeMap = mutableMapOf<String, MutableMap<String, String>>()
+        ) 
     
         for (stats in queryUsageStats) {
             //Filter out apps with less than 0.05 hrs

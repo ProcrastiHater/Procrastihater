@@ -62,6 +62,11 @@ void main() async {
       _checkSTPermission().whenComplete((){
         _getScreenTime().whenComplete((){
             _writeScreenTimeData();
+            if(_hasNotifsPermission)
+            {
+              //_startTestNotifications();
+              _startTotalSTNotifications();
+            }
         });
       });
     });
@@ -119,10 +124,6 @@ class _MyPageViewState extends State<MyPageView> {
     _pageController = PageController(initialPage: 1);
     currentPage = 1;
     super.initState();
-    if(_hasNotifsPermission)
-    {
-      _startTestNotifications();
-    }
   }
 
   @override
@@ -334,6 +335,23 @@ Future<void> _startTestNotifications() async {
   }
   try {
     await platformChannel.invokeMethod('startTestNotifications');
+  } on PlatformException catch (e) {
+    debugPrint("Failed to start notifications: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: _startTotalSTNotifications
+///   
+/// Description: Invokes method from platform channel to 
+/// start sending the total screen time notification
+///*********************************
+Future<void> _startTotalSTNotifications() async {
+  if(!_hasPermission) {
+    return;
+  }
+  try {
+    await platformChannel.invokeMethod('startTotalSTNotifications');
   } on PlatformException catch (e) {
     debugPrint("Failed to start notifications: ${e.message}");
   }
