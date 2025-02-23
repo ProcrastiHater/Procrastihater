@@ -73,7 +73,7 @@ class TotalSTWorker(context: Context, workerParams: WorkerParameters) : Worker (
             notifText += " 6 or less"
         }
         else if (totalDaily <= 9){
-            notifText += " 9 or less"
+            notifText += " You've clocked a full work day on your phone!"
         }
         else{
             notifText += " More than 9"

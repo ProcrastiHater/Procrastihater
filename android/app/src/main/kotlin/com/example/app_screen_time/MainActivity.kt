@@ -36,6 +36,7 @@ import androidx.work.*
 import com.example.app_screen_time.TestNotifWorker
 import com.example.app_screen_time.TotalSTWorker
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 public var screenTimeMap = mutableMapOf<String, MutableMap<String, String>>();
 
@@ -113,8 +114,12 @@ class MainActivity: FlutterActivity() {
                         startTestNotifs()
                         result.success(true)
                     }
-                    "startTotalSTNotifications" ->{
+                    "startTotalSTNotifications" -> {
                         startTotalSTNotifs()
+                        result.success(true)
+                    }
+                    "cancelTotalSTNotifications" -> {
+                        WorkManager.getInstance(this).cancelUniqueWork("totalSTNotification")
                         result.success(true)
                     }
                     else -> {
@@ -170,8 +175,7 @@ class MainActivity: FlutterActivity() {
     /// permission for receiving notifications
     ///**********************************************
     private fun checkNotificationsPermission(): Boolean {
-        return ActivityCompat.checkSelfPermission(
-            this,
+        return checkSelfPermission(
             Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
     }
@@ -185,10 +189,9 @@ class MainActivity: FlutterActivity() {
     private fun openNotificationSettings(){
         //Params: context, array of permissions, 
         // request code (>= 0, but otherwise can be anything)
-        ActivityCompat.requestPermissions(
-            this,
+        requestPermissions(
             arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-            123
+            Random.nextInt(0, 20000)
         )
     }
 
