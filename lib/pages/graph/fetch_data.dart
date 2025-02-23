@@ -18,7 +18,10 @@ import 'package:app_screen_time/main.dart';
 
 
 //Global Variables
-Map<String, Map<String, Map<String, dynamic>>> historicalData = {};
+Map<String, Map<String, dynamic>> dailyData = {};
+Map<String, Map<String, Map<String, dynamic>>> weeklyData = {};
+//Monthly data variable
+
 //Variables for multi-week view
 List<String> availableWeekKeys = [];
 DateTime currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
@@ -49,7 +52,7 @@ Future<List<String>> getAvailableWeeks() async{
 }
 
 ///*********************************
-/// Name: fetchScreenTime
+/// Name: fetchWeeklyScreenTime
 /// 
 /// Description: Fetch the screentime 
 /// for the current week which is  
@@ -57,7 +60,7 @@ Future<List<String>> getAvailableWeeks() async{
 /// database. Data is fetched using a map
 /// of map of maps and is returned.
 ///*********************************
-Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime() async {
+Future<Map<String, Map<String, Map<String, dynamic>>>> fetchWeeklyScreenTime() async {
   //Update the reference to the user doc before accessing
   updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
@@ -105,3 +108,31 @@ Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime
   return fetchedData;
 }
 
+
+///**************************************************
+/// Name: fetchDailyScreenTime
+///
+/// Description: Takes the data
+/// from the Firestore database
+/// and returns a map of maps
+/// of the user's current screentime
+///***************************************************
+Future<Map<String, Map<String, dynamic>>> fetchDailyScreenTime() async {
+  updateUserRef();
+  Map<String, Map<String, dynamic>> fetchedData = {};
+  try {
+    final current = userRef.collection("appUsageCurrent");
+    final docSnapshot = await current.get();
+    for (var doc in docSnapshot.docs) {
+      String docName = doc.id;
+      double? hours = doc['dailyHours']?.toDouble();
+      String category = doc['appType'];
+      if (hours != null) {
+        fetchedData[docName] = {'hours': hours, 'category': category};
+      }
+    }
+  } catch (e) {
+    debugPrint("error fetching screentime data: $e");
+  }
+  return fetchedData;
+}
