@@ -207,12 +207,11 @@ class ProfileSettingsState extends State<ProfileSettings> {
                       notifsOnForST = val; //true
                     });
                   }else{
-                    requestNotifsPermission();
-                    // ScaffoldMessenger.of(context).showSnackBar(
-                    //   const SnackBar(content: Text('I don\'t have permission to send notifications')),
-                    // );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('I don\'t have permission to send notifications')),
+                    );
                     setState(() {
-                      notifsOnForST = false; //true
+                      notifsOnForST = false; //false
                     });
                   }
                 }

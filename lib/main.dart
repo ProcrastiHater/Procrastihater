@@ -58,12 +58,11 @@ void main() async {
   //Firebase initialization
   await Firebase.initializeApp();
   //launch the main app
-  checkNotifsPermission().whenComplete((){
-    _currentToHistorical().whenComplete(() {
-      _checkSTPermission().whenComplete((){
-        _getScreenTime().whenComplete((){
-            _writeScreenTimeData();
-        });
+  _currentToHistorical().whenComplete(() {
+    _checkSTPermission().whenComplete((){
+      _getScreenTime().whenComplete((){
+          _writeScreenTimeData();
+          checkNotifsPermission();
       });
     });
   });

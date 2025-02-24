@@ -65,22 +65,22 @@ class TotalSTWorker(context: Context, workerParams: WorkerParameters) : Worker (
     private fun showNotification(){
         getScreenTimeStats()
         val totalDaily = getTotalDaily()
-        var notifText = "You have used your phone for $totalDaily hours today."
+        var notifText = "";
         if(totalDaily <= 3){
-            notifText += " 3 or less"
+            notifText += "3 or less"
         }
         else if (totalDaily <= 6){
-            notifText += " 6 or less"
+            notifText += "6 or less"
         }
         else if (totalDaily <= 9){
-            notifText += " You've clocked a full work day on your phone!"
+            notifText += "You've clocked a full work day on your phone!"
         }
         else{
-            notifText += " More than 9"
+            notifText += "More than 9"
         }
         var builder = NotificationCompat.Builder(context, "ProcrastiNotif")
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("ProcrastiHater")
+            .setContentTitle("$totalDaily hours on your phone")
             .setContentText(notifText)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         //Executes notify on MainActivity
