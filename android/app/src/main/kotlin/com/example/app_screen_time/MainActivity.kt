@@ -58,7 +58,8 @@ class MainActivity: FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //Purge old instances of notifications
-        WorkManager.getInstance().cancelUniqueWork("totalSTNotification")
+        WorkManager.getInstance().cancelAllWork()
+        //WorkManager.getInstance().cancelUniqueWork("totalSTNotification")
         createNotificationChannel()
         if(!checkNotificationsPermission())
         {
