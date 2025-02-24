@@ -69,18 +69,6 @@ class _CalendarPageState extends State<CalendarPage> {
               },
               child: const Text('Open Calendar'),
             ),
-            if (dateTime != null)
-              Text(
-                'Selected Date: ${dateTime!.toString()}',
-                style: const TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-            if (dateTimeRange != null)
-              Text(
-                'Selected Range: ${dateTimeRange!.map((date) => date.toString()).join(" to ")}',
-                style: const TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
             ListTile(
               title: const Text('Add normal event'),
               trailing: const Icon(Icons.calendar_today),
