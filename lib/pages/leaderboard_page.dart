@@ -23,63 +23,92 @@ final FirebaseFirestore firestore = FirebaseFirestore.instance;
 /// the Leaderboard_Page, builds and displays 
 /// the global leaderboard by default
 ///*********************************
-class LeaderBoardPage extends StatelessWidget {
+  class LeaderBoardPage extends StatefulWidget {
   const LeaderBoardPage({super.key});
+
+  @override
+  State<LeaderBoardPage> createState() => _LeaderBoardPageState();
+}
+
+class _LeaderBoardPageState extends State<LeaderBoardPage> {
+  bool showFriendsLeaderboard = false; // Toggle state
+  final String currentUserId = auth.currentUser!.uid;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      //The user swipes horizontally
       onHorizontalDragEnd: (details) {
-        //The user swipes from right to left
         if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
-          //Load back animation for page
           Navigator.pushReplacementNamed(context, '/leaderBoardPageBack');
         }
       },
-    child: Scaffold(
-      appBar: AppBar(
-        title: const Text("Global Leaderboard"),
-        automaticallyImplyLeading: false
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(showFriendsLeaderboard ? "Friends Leaderboard" : "Global Leaderboard"),
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              icon: Icon(showFriendsLeaderboard ? Icons.people : Icons.public),
+              onPressed: () {
+                setState(() {
+                  showFriendsLeaderboard = !showFriendsLeaderboard;
+                });
+              },
+            ),
+          ],
+        ),
+        body: FutureBuilder<DocumentSnapshot>(
+          future: firestore.collection('UID').doc(currentUserId).get(),
+          builder: (context, userSnapshot) {
+            if (!userSnapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+            List<String> friends = List<String>.from(userData['friends'] ?? []);
+
+            return StreamBuilder<QuerySnapshot>(
+              stream: showFriendsLeaderboard
+                  ? firestore.collection('UID').where(FieldPath.documentId, whereIn: [...friends, currentUserId]).snapshots()
+                  : firestore.collection('UID').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                var users = snapshot.data!.docs.map((doc) {
+                var data = doc.data() as Map<String, dynamic>;
+                  return {
+                    'uid': doc.id,
+                    'displayName': data['displayName'] ?? 'Unknown',
+                    'pfp': data['pfp'] ?? 'https://picsum.photos/200/200',
+                    'totalDailyHours': (data['totalDailyHours'] ?? 0.0) as num,
+                  };
+                }).toList();
+
+                users.sort((a, b) => (b['totalDailyHours'] as num).compareTo(a['totalDailyHours'] as num));
+
+                return ListView.builder(
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    var user = users[index];
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(user['pfp']),
+                      ),
+                      title: Text(user['displayName']),
+                      subtitle: Text(
+                        'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: firestore.collection('UID').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          var users = snapshot.data!.docs.map((doc) {
-            var data = doc.data() as Map<String, dynamic>;
-            return {
-              'uid': doc.id,
-              'displayName': data['displayName'] ?? 'Unknown',
-              'pfp': data['pfp'] ?? 'https://picsum.photos/200/200',
-              'totalDailyHours': (data['totalDailyHours'] ?? 0.0) as num,
-            };
-          }).toList();
-
-          users.sort((a, b) => (b['totalDailyHours'] as num).compareTo(a['totalDailyHours'] as num));
-
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              var user = users[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(user['pfp']),
-                ),
-                title: Text(user['displayName']),
-                subtitle: Text(
-                  'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              );
-            },
-          );
-        },
-      ),
-     ),
     );
   }
 }
