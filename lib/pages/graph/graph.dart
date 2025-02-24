@@ -109,7 +109,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                         showTitles: true,
-                        getTitlesWidget: bottomWeeklyTitles,
+                        getTitlesWidget: bottomDayTitles,
                         reservedSize: 20,
                       )),
                     ),
@@ -173,7 +173,6 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     );
   }
 }
-
 
 ///*********************************
 /// Name: DailyGraphView
@@ -258,7 +257,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        getTitlesWidget: bottomDailyTitles,
+                        getTitlesWidget: bottomAppTitles,
                         reservedSize: 60,
                       )
                     ),
@@ -271,7 +270,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                     show: true,
                   ),
                   //Functionality Widgets
-                  //barTouchData: loadTouch(dailyData),
+                  barTouchData: loadTouch(dailyData),
                   barGroups: generateDailyChart(dailyData),
                 )
               )

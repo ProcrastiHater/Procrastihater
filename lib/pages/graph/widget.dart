@@ -208,7 +208,7 @@ BarTouchData getBarWeekTouch(Map<String, Map<String, Map<String, dynamic>>> data
 /// Description: Widget to load bottom 
 /// tiles of graph
 ///*********************************
-Widget bottomDailyTitles(double value, TitleMeta meta) {
+Widget bottomAppTitles(double value, TitleMeta meta) {
   const style = TextStyle(
     decoration: TextDecoration.none,
     fontSize: 10.0, 
@@ -234,7 +234,7 @@ Widget bottomDailyTitles(double value, TitleMeta meta) {
 /// Description: Widget to load bottom 
 /// tiles of graph
 ///*********************************
-Widget bottomWeeklyTitles(double value, TitleMeta meta) {
+Widget bottomDayTitles(double value, TitleMeta meta) {
   const style = TextStyle(
     decoration: TextDecoration.none,
     fontSize: 10.0, 
