@@ -128,12 +128,12 @@ class ProcrastiHater extends StatelessWidget {
               builder: (context) => ProfilePictureSelectionScreen(),
               settings: settings,
             );
-          //Default case builds default navigation to the home page
+          /*//Default case builds default navigation to the home page
           default:
             return MaterialPageRoute(
               builder: (context) => HomePage(),
               settings: settings,
-            );
+            );*/
         }
       },
     );

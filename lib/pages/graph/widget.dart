@@ -8,6 +8,7 @@ library;
 
 //Dart Imports
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 //fl_chart imports
 import 'package:fl_chart/fl_chart.dart';
@@ -216,9 +217,13 @@ Widget bottomDailyTitles(double value, TitleMeta meta) {
   String text = availableApps[value.toInt()];
   return SideTitleWidget(
     meta: meta,
-    child: Text(
-      text, 
-      style: style
+    space: 25,
+    child: Transform.rotate(
+      angle: 45 * math.pi / 180,
+      child: Text(
+        text, 
+        style: style
+      )
     )
   );
 }

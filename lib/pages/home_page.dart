@@ -22,6 +22,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 //Page Imports
+import '/pages/graph/graph.dart';
+
 import 'package:app_screen_time/main.dart';
 import '/profile/profile_settings.dart';
 import '/pages/graph/fetch_data.dart';
@@ -79,11 +81,11 @@ class MyHomePage extends StatefulWidget {
 ///*********************************
 class _MyHomePageState extends State<MyHomePage> {
   //State management for loading list view
-  String selectedDay = "null";
-  int graphIndex = 0;
-  void updateSelectedDay(String day) {
+  String selectedBar = "null";
+  int graphIndex = 1;
+  void updateSelectedBar(String bar) {
     setState(() {
-      selectedDay = day;
+      selectedBar = bar;
     });
   }
 
@@ -124,19 +126,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                   padding: const EdgeInsets.all(4.0),
                   color: Colors.indigo.shade50,
-                  //child: GraphView(onDaySelected: updateSelectedDay),
+                  child: DailyGraphView(onBarSelected: updateSelectedBar),
                 ),
                 //Weekly Graph
                  Container(
                   padding: const EdgeInsets.all(4.0),
                   color: Colors.indigo.shade50,
-                  child: GraphView(onDaySelected: updateSelectedDay),
+                  child: WeeklyGraphView(onBarSelected: updateSelectedBar),
                 ),
                 //Monthly Graph
                  Container(
                   padding: const EdgeInsets.all(4.0),
                   color: Colors.indigo.shade50,
-                  //child: GraphView(onDaySelected: updateSelectedDay),
+                  //child: MonthlyGraphView(onBarSelected: updateSelectedBar),
                 ),
               ][graphIndex],
               bottomNavigationBar: SizedBox(
@@ -173,167 +175,11 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               padding: const EdgeInsets.all(4.0),
               color: Colors.indigo.shade100,
-              child: ExpandedListView(selectedDay: selectedDay, appColors: appNameToColor),
+              child: ExpandedListView(selectedBar: selectedBar, appColors: appNameToColor),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-///*********************************
-/// Name: GraphView
-/// 
-/// Description: Root stateful widget
-/// for GraphView
-///*********************************
-class GraphView extends StatefulWidget {
-  final Function(String) onDaySelected;
-  const GraphView({super.key, required this.onDaySelected});
-
-  @override
-  State<GraphView> createState() => _GraphViewState();
-}
-
-///*********************************
-/// Name: _MyGraphViewState
-/// 
-/// Description: State for GraphView,
-/// builds graph and displays the current
-/// week of data with ability to see
-/// previous weeks
-///*********************************
-class _GraphViewState extends State<GraphView> {
-  String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
-  bool isLoading = false;
-  //Fetch data from the database and intialize to global variable
-  Future<void> _initializeData() async {
-    //currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
-    final weeksToView = await getAvailableWeeks();
-    availableWeekKeys = weeksToView;
-    formattedCurrent = availableWeekKeys.last;
-    currentWeek = formattedCurrent;
-    currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-    final result = await fetchHistoricalScreenTime();
-    setState(() {
-      historicalData = result;
-      availableDays = historicalData.keys.toList();
-    });
-  }
-
-  //Wrapper for loading bar touch, 
-  BarTouchData loadTouch(Map<String, Map<String, Map<String, dynamic>>> data) {
-    return getBarTouch(data, widget.onDaySelected);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    initializeAppNameColorMapping();
-    _initializeData();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    //Display loading screen if data is not present
-    if (historicalData.isEmpty) {
-      return Center(child: CircularProgressIndicator());
-    }
-    return Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 80),
-            Expanded(
-              child: AspectRatio(
-                  aspectRatio: 1.25,
-                  //Bar chart 
-                  child: BarChart(BarChartData(
-                    alignment: BarChartAlignment.center,
-                    //Title Widgets
-                    titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                        maxIncluded: false,
-                        showTitles: true,
-                        interval: 1,
-                        reservedSize: 25,
-                        getTitlesWidget: sideTitles,
-                      )),
-                      rightTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                        maxIncluded: false,
-                        showTitles: true,
-                        interval: 1,
-                        reservedSize: 25,
-                        getTitlesWidget: sideTitles,
-                      )),
-                      topTitles: const AxisTitles(),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: bottomTitles,
-                        reservedSize: 20,
-                      )),
-                    ),
-                      //Style Widgets
-                      backgroundColor: Colors.white,
-                      borderData: FlBorderData(show: true),
-                      gridData: FlGridData(
-                      drawVerticalLine: false,
-                      show: true,
-                    ),
-                    //Functionality Widgets
-                    barTouchData: loadTouch(historicalData),
-                    barGroups: generateWeeklyChart(historicalData),
-                  ))),
-            ),
-            Row(
-              //Equal spacing between children
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                //Previous arrow button
-                IconButton(
-                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) > 0 && !isLoading
-                      ? () async {
-                        setState(() {
-                          isLoading = true;
-                        });
-                          int currentIndex = availableWeekKeys.indexOf(currentWeek);
-                          currentWeek = availableWeekKeys[currentIndex - 1];
-                          currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                          historicalData = await fetchHistoricalScreenTime();
-                          availableDays = historicalData.keys.toList();
-                          setState(() {
-                            isLoading = false;
-                          });
-                        } : null,
-                  icon: Icon(Icons.arrow_back),
-                ),
-                Text(currentWeek),
-                //Next arrow button
-                IconButton(
-                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) < availableWeekKeys.length - 1 && !isLoading
-                      ? () async {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          int currentIndex = availableWeekKeys.indexOf(currentWeek);
-                          currentWeek = availableWeekKeys[currentIndex + 1];
-                          currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                          historicalData = await fetchHistoricalScreenTime();
-                          availableDays = historicalData.keys.toList();
-                          setState(() {
-                            isLoading = false;
-                          });
-                        } : null,
-                  icon: Icon(Icons.arrow_forward),
-                ),
-              ],
-            ),
-          ],
-        )
     );
   }
 }
@@ -345,10 +191,10 @@ class _GraphViewState extends State<GraphView> {
 /// for ExpandedListView
 ///*********************************
 class ExpandedListView extends StatefulWidget {
-  final String selectedDay;
+  final String selectedBar;
   final Map<String, Color> appColors;
   const ExpandedListView(
-      {super.key, required this.selectedDay, required this.appColors});
+      {super.key, required this.selectedBar, required this.appColors});
   @override
   State<ExpandedListView> createState() => _ExpandedListViewState();
 }
@@ -363,7 +209,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
   @override
   //Load text as placeholder while waiting for bar touch
   Widget build(BuildContext context) {
-    if (widget.selectedDay == "null") {
+    if (widget.selectedBar == "null") {
       return Center(
         child: Text("Select a day to view",
             style: const TextStyle(
@@ -376,12 +222,12 @@ class _ExpandedListViewState extends State<ExpandedListView> {
     }
 
     //Load loading screen if data is empty
-    if (!historicalData.containsKey(widget.selectedDay)) {
-      if (historicalData.isEmpty) {
+    if (!weeklyData.containsKey(widget.selectedBar)) {
+      if (weeklyData.isEmpty) {
         return Center(child: CircularProgressIndicator());
       }  
       return Center(
-          child: Text("No data available for ${widget.selectedDay}",
+          child: Text("No data available for ${widget.selectedBar}",
               style: const TextStyle(
                 decoration: TextDecoration.none,
                 color: Colors.black,
@@ -393,7 +239,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
       }
 
     //List view built of daily data from bar touch
-    final dayData = historicalData[widget.selectedDay]!;
+    final dayData = weeklyData[widget.selectedBar]!;
     final reversedEntries = dayData.entries.toList().reversed.toList();
     return ListView.builder(
       padding: EdgeInsets.zero,
