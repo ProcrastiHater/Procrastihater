@@ -44,14 +44,16 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
       },
       child: Scaffold(
         appBar: AppBar(
+          
           title: Text(showFriendsLeaderboard ? "Friends Leaderboard" : "Global Leaderboard"),
           automaticallyImplyLeading: false,
           actions: [
-            IconButton(
-              icon: Icon(showFriendsLeaderboard ? Icons.people : Icons.public),
-              onPressed: () {
+          Icon(showFriendsLeaderboard ? Icons.group : Icons.public),  
+          Switch(
+              value: showFriendsLeaderboard,
+              onChanged: (value) {
                 setState(() {
-                  showFriendsLeaderboard = !showFriendsLeaderboard;
+                  showFriendsLeaderboard = value;
                 });
               },
             ),
