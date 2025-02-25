@@ -37,8 +37,18 @@ import com.example.app_screen_time.TestNotifWorker
 import com.example.app_screen_time.TotalSTWorker
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
+//Firebase imports
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.*
+import com.google.firebase.auth.*
 
 public var screenTimeMap = mutableMapOf<String, MutableMap<String, String>>();
+
+lateinit var firestore: FirebaseFirestore
+lateinit var auth: FirebaseAuth
+lateinit var mainCollection: CollectionReference
+lateinit var uid: String
+lateinit var userRef: DocumentReference
 
 ///*********************************************
 /// Name: MainActivity
@@ -57,6 +67,12 @@ class MainActivity: FlutterActivity() {
     ///**********************************************
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        firestore = Firebase.firestore
+        auth = Firebase.auth
+        mainCollection = firestore!!.collection("UID")
+        uid = auth!!.currentUser!!.getUid()
+        userRef = mainCollection.document(uid)
+
         //Purge old instances of notifications
         WorkManager.getInstance().cancelAllWork()
         //WorkManager.getInstance().cancelUniqueWork("totalSTNotification")
@@ -331,4 +347,8 @@ class MainActivity: FlutterActivity() {
     
         return screenTimeMap
     }
+}
+
+fun updateUserRef(){
+    var curUid = uid
 }
