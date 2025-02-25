@@ -69,8 +69,8 @@ class MainActivity: FlutterActivity() {
         super.onCreate(savedInstanceState)
         firestore = Firebase.firestore
         auth = Firebase.auth
-        mainCollection = firestore!!.collection("UID")
-        uid = auth!!.currentUser!!.getUid()
+        mainCollection = firestore.collection("UID")
+        uid = auth.currentUser!!.getUid()
         userRef = mainCollection.document(uid)
 
         //Purge old instances of notifications
@@ -102,6 +102,7 @@ class MainActivity: FlutterActivity() {
                     "getScreenTime" -> {
                         if (checkUsageStatsPermission()) {
                             val screenTimeData = getScreenTimeStats()
+                            updateUserRef()
                             Log.d("MainActivity", "Screen time data: $screenTimeData")
                             result.success(screenTimeData)
                         } else {
@@ -349,6 +350,18 @@ class MainActivity: FlutterActivity() {
     }
 }
 
+///**************************************************
+/// Name: updateUserRef
+///
+/// Description: Updates userRef to doc if the UID has changed
+///***************************************************
 fun updateUserRef(){
     var curUid = uid
+    uid = auth.currentUser!!.getUid()
+    if(curUid != uid){
+        userRef = mainCollection.document(uid);
+        Log.d("Kotlin", "UID updated");
+    }else{
+        Log.d("Kotlin", "UID did not change");
+    }
 }
