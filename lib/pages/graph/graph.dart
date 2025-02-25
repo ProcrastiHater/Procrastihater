@@ -83,7 +83,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
         padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
-            const SizedBox(height: 80),
+            const SizedBox(height: 60),
+            Text("Weekly Graph", style: TextStyle(fontSize: 18),),
             Expanded(
               child: BarChart(BarChartData(
                     alignment: BarChartAlignment.center,
@@ -224,7 +225,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
       padding: const EdgeInsets.all(10.0),
       child: Column(
         children: [
-          const SizedBox(height: 80),
+          const SizedBox(height: 60),
+          Text("Daily Graph", style: TextStyle(fontSize: 18),),
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,

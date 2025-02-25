@@ -7,6 +7,7 @@ library;
 
 import 'package:app_screen_time/pages/graph/fetch_data.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 
 ///*********************************
@@ -39,13 +40,20 @@ class _ExpandedListViewState extends State<ExpandedListView> {
           if (dailyData.isEmpty) {
             return Center(child: CircularProgressIndicator());
           }  
-                //List view built of daily data from bar touch
+        //List view built of daily data from bar touch
         final dayData = dailyData;
         final reversedEntries = dayData.entries.toList();
         return ListView.builder(
           padding: EdgeInsets.zero,
           itemCount: dayData.length,
           itemBuilder: (context, index) {
+            if (index == 0) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(child: Text("Daily Data", style: TextStyle(fontSize: 22),)),
+                );
+            }
+            else {
             final entry = reversedEntries.elementAt(index);
             final appName = entry.key;
             final appHours = entry.value['hours'];
@@ -61,6 +69,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
               subtitle: Text('$appHours hours'),
               trailing: Text(appType),
             );
+            }
           },
         );  
       //Weekly list view
@@ -95,6 +104,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
             )
           );
         }
+        
         //List view built of daily data from bar touch
         final dayData = weeklyData[widget.selectedBar]!;
         final reversedEntries = dayData.entries.toList().reversed.toList();
@@ -102,6 +112,13 @@ class _ExpandedListViewState extends State<ExpandedListView> {
           padding: EdgeInsets.zero,
           itemCount: dayData.length,
           itemBuilder: (context, index) {
+            if (index == 0) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(child: Text(DateFormat('MM-dd-yyyy').format(currentDataset), style: TextStyle(fontSize: 22),)),
+                );
+            }
+            else {
             final entry = reversedEntries.elementAt(index);
             final appName = entry.key;
             final appHours = entry.value['hours'];
@@ -117,6 +134,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
               subtitle: Text('$appHours hours'),
               trailing: Text(appType),
             );
+            }
           },
         );
       //Monthly list view
