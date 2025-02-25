@@ -9,36 +9,109 @@ library;
 //Dart Imports
 import 'package:flutter/material.dart';
 
+//Firebase imports
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+final FirebaseAuth auth = FirebaseAuth.instance;
+final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
 ///*********************************
-/// Name: SocialMediaPage
+/// Name: Leaderboard_Page
 /// 
 /// Description: Root stateless widget of 
-/// the SocialMediaPage, builds and displays 
-/// social media page view
+/// the Leaderboard_Page, builds and displays 
+/// the global leaderboard by default
 ///*********************************
-class LeaderBoardPage extends StatelessWidget {
+  class LeaderBoardPage extends StatefulWidget {
   const LeaderBoardPage({super.key});
+
+  @override
+  State<LeaderBoardPage> createState() => _LeaderBoardPageState();
+}
+
+class _LeaderBoardPageState extends State<LeaderBoardPage> {
+  bool showFriendsLeaderboard = false; // Toggle state
+  final String currentUserId = auth.currentUser!.uid;
+
   @override
   Widget build(BuildContext context) {
-    //Wait for a gesture
     return GestureDetector(
-      //The user swipes horizontally
       onHorizontalDragEnd: (details) {
-        //The user swipes from left to right
         if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
-          //Load back animation for page
           Navigator.pushReplacementNamed(context, '/leaderBoardPageBack');
         }
       },
       child: Scaffold(
         appBar: AppBar(
+          
+          title: Text(showFriendsLeaderboard ? "Friends Leaderboard" : "Global Leaderboard"),
           automaticallyImplyLeading: false,
-          title: const Text("ProcrastiLeaderboards"),
+          actions: [
+          Icon(showFriendsLeaderboard ? Icons.group : Icons.public),  
+          Switch(
+              value: showFriendsLeaderboard,
+              onChanged: (value) {
+                setState(() {
+                  showFriendsLeaderboard = value;
+                });
+              },
+            ),
+          ],
         ),
-        body: const Center(
-          child: Text("Friend Icons")
-        )
-      )
+        body: FutureBuilder<DocumentSnapshot>(
+          future: firestore.collection('UID').doc(currentUserId).get(),
+          builder: (context, userSnapshot) {
+            if (!userSnapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+            List<String> friends = List<String>.from(userData['friends'] ?? []);
+
+            return StreamBuilder<QuerySnapshot>(
+              stream: showFriendsLeaderboard
+                  ? firestore.collection('UID').where(FieldPath.documentId, whereIn: [...friends, currentUserId]).snapshots()
+                  : firestore.collection('UID').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                var users = snapshot.data!.docs.map((doc) {
+                var data = doc.data() as Map<String, dynamic>;
+                  return {
+                    'uid': doc.id,
+                    'displayName': data['displayName'] ?? 'Unknown',
+                    'pfp': data['pfp'] ?? 'https://picsum.photos/200/200',
+                    'totalDailyHours': (data['totalDailyHours'] ?? 0.0) as num,
+                  };
+                }).toList();
+
+                users.sort((a, b) => (b['totalDailyHours'] as num).compareTo(a['totalDailyHours'] as num));
+
+                return ListView.builder(
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    var user = users[index];
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(user['pfp']),
+                      ),
+                      title: Text(user['displayName']),
+                      subtitle: Text(
+                        'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                      trailing: Text("${index+1}"),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
+      ),
     );
   }
 }
