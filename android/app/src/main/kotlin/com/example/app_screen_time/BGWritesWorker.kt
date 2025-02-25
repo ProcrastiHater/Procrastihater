@@ -68,46 +68,45 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                         for (doc in result.getDocuments()) {
                             batch.delete(doc.getReference())
                         }
-                        batch.commit()
                         Log.d("BGWritesWorker", "Clearing appUsageCurrent")
+                        // Iterate through each app and its screen time
+                        for (entry in screenTimeMap.entries.iterator())
+                        {
+                            val appName = entry.component1()
+                            val screenTimeHours = (entry.component2()["hours"])!!.toDouble()
+                            val category = entry.component2()["category"]
+                            totalDaily += screenTimeHours
+        
+                            // Reference to the document with app name
+                            val docRef = current.document(appName)
+        
+                            // Set the data with merge option to update existing documents
+                            // or create new ones if they don't exist
+                            batch.set(
+                                docRef,
+                                hashMapOf(
+                                    "dailyHours" to screenTimeHours,
+                                    "lastUpdated" to FieldValue.serverTimestamp(),
+                                    "appType" to category,
+                                ),
+                                SetOptions.merge()
+                            )
+                        }
+                        batch.set(
+                            userRef,
+                            hashMapOf(
+                                "totalDailyHours" to Math.round(totalDaily * 100.0) / 100.0,
+                                "lastUpdated" to FieldValue.serverTimestamp(),
+                            ),
+                            SetOptions.merge()
+                        )
+                        // Commit the branch
+                        batch.commit()
+                        Log.d("BGWritesWorker", "Committed Write")
                     }
                     .addOnFailureListener{ exception ->
                         Log.e("BGWritesWorker", "Error clearing documents.", exception)
                     }
-                // Iterate through each app and its screen time
-                for (entry in screenTimeMap.entries.iterator())
-                {
-                    val appName = entry.component1()
-                    val screenTimeHours = (entry.component2()["hours"])!!.toDouble()
-                    val category = entry.component2()["category"]
-                    totalDaily += screenTimeHours
-
-                    // Reference to the document with app name
-                    val docRef = current.document(appName)
-
-                    // Set the data with merge option to update existing documents
-                    // or create new ones if they don't exist
-                    batch.set(
-                        docRef,
-                        hashMapOf(
-                            "dailyHours" to screenTimeHours,
-                            "lastUpdated" to FieldValue.serverTimestamp(),
-                            "appType" to category,
-                        ),
-                        SetOptions.merge()
-                    )
-                }
-                batch.set(
-                    userRef,
-                    hashMapOf(
-                        "totalDailyHours" to Math.round(totalDaily * 100.0) / 100.0,
-                        "lastUpdated" to FieldValue.serverTimestamp(),
-                    ),
-                    SetOptions.merge()
-                )
-                // Commit the branch
-                //batch.commit()
-                Log.d("BGWritesWorker", "Committed Write")
             } catch (e: Exception) {
                 Log.e("BGWritesWorker", "Error writing screen time data to Firestore: $e")
                 throw e
