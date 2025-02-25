@@ -81,9 +81,23 @@ class MyHomePage extends StatefulWidget {
 /// holds main layout widget for page
 ///*********************************
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+    Future<void> _initializeData() async {
+    final dailyResult = await fetchDailyScreenTime();
+    final weeklyResult = await fetchWeeklyScreenTime();
+    setState(() {
+      dailyData = dailyResult;
+      weeklyData = weeklyResult;
+    });
+  }
+
   //State management for loading list view
   String selectedBar = "null";
-  int graphIndex = 1;
+  int graphIndex = 0;
   void updateSelectedBar(String bar) {
     setState(() {
       selectedBar = bar;

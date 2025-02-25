@@ -31,18 +31,6 @@ class ExpandedListView extends StatefulWidget {
 /// for ExpandedListView
 ///*********************************
 class _ExpandedListViewState extends State<ExpandedListView> { 
-  void initState() {
-    super.initState();
-    setState(() {
-    _initializeData();
-    });
-  }
-    Future<void> _initializeData() async {
-    final result = await fetchDailyScreenTime();
-    setState(() {
-      dailyData = result;
-    });
-  }
   @override
   Widget build(BuildContext context) {
     switch(widget.graphIndex) {
