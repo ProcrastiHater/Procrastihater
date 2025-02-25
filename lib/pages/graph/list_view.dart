@@ -36,7 +36,33 @@ class _ExpandedListViewState extends State<ExpandedListView> {
     switch(widget.graphIndex) {
       //Daily list view
       case 0:
-        return Center(child: CircularProgressIndicator());
+          if (dailyData.isEmpty) {
+            return Center(child: CircularProgressIndicator());
+          }  
+                //List view built of daily data from bar touch
+        final dayData = dailyData;
+        final reversedEntries = dayData.entries.toList();
+        return ListView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: dayData.length,
+          itemBuilder: (context, index) {
+            final entry = reversedEntries.elementAt(index);
+            final appName = entry.key;
+            final appHours = entry.value['hours'];
+            final appType = entry.value['appType'];
+            return ListTile(
+              title: Text(
+                appName,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: widget.appColors[appName],
+                ),
+              ),
+              subtitle: Text('$appHours hours'),
+              trailing: Text(appType),
+            );
+          },
+        );  
       //Weekly list view
       case 1:
         if (widget.selectedBar == "null") {

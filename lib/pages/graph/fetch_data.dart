@@ -126,9 +126,9 @@ Future<Map<String, Map<String, dynamic>>> fetchDailyScreenTime() async {
     for (var doc in docSnapshot.docs) {
       String docName = doc.id;
       double? hours = doc['dailyHours']?.toDouble();
-      String category = doc['appType'];
+      String appType = doc['appType'];
       if (hours != null) {
-        fetchedData[docName] = {'hours': hours, 'category': category};
+        fetchedData[docName] = {'hours': hours, 'appType': appType};
       }
     }
   } catch (e) {
