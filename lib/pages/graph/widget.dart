@@ -16,7 +16,7 @@ import 'package:fl_chart/fl_chart.dart';
 //Page Imports
 import 'fetch_data.dart';
 import '/pages/graph/colors.dart';
-import '../friend_page.dart';
+import '/pages/friend_page.dart';
 
 List<String> availableApps = dailyData.keys.toList();
 List<String> availableDays = weeklyData.keys.toList();
@@ -78,7 +78,9 @@ BarChartGroupData generatedWeeklyGroupData(int index, Map<String, Map<String, dy
 ///********************************
 /// Name: generateDailyChart
 /// 
-/// Description: 
+/// Description: Generate a chart in 
+/// day long segements with apps as 
+/// individual bars
 ///*********************************
 List<BarChartGroupData> generateDailyChart(Map<String, Map<String, dynamic>> data) {
   return [
@@ -90,9 +92,11 @@ List<BarChartGroupData> generateDailyChart(Map<String, Map<String, dynamic>> dat
 ///*********************************
 /// Name: generatedDayData
 /// 
-/// Description: 
+/// Description: Generate a bar with 
+/// individual app data 
 ///*********************************
 BarChartGroupData generatedDayData(int index, String appName,Map<String, dynamic> appData) {
+  //Return individual bars with data
   return BarChartGroupData(
     x: index,
     barRods: [
@@ -110,11 +114,14 @@ BarChartGroupData generatedDayData(int index, String appName,Map<String, dynamic
 ///*********************************
 /// Name: getBarDayTouch
 /// 
-/// Description: 
+/// Description: Displays all the app
+/// information as a tooltip when 
+/// selecting a bar
 ///*********************************
 BarTouchData getBarDayTouch(Map<String, Map<String, dynamic>> data, void Function(String) onBarSelected) {
   return BarTouchData(
     enabled: true,
+    //Loads app data on touch of specific bar
     touchTooltipData: BarTouchTooltipData(
       getTooltipColor: (_) => Colors.blueGrey,
       tooltipPadding: const EdgeInsets.all(8.0),
@@ -205,8 +212,8 @@ BarTouchData getBarWeekTouch(Map<String, Map<String, Map<String, dynamic>>> data
 ///*********************************
 /// Name: bottomDailyTiles
 /// 
-/// Description: Widget to load bottom 
-/// tiles of graph
+/// Description: Widget to load app
+/// names of apps when daily view is selected
 ///*********************************
 Widget bottomAppTitles(double value, TitleMeta meta) {
   const style = TextStyle(
@@ -237,8 +244,8 @@ Widget bottomAppTitles(double value, TitleMeta meta) {
 ///*********************************
 /// Name: bottomWeeklyTiles
 /// 
-/// Description: Widget to load bottom 
-/// tiles of graph
+/// Description: Widget to load days for 
+/// when weekly view is selected
 ///*********************************
 Widget bottomDayTitles(double value, TitleMeta meta) {
   const style = TextStyle(

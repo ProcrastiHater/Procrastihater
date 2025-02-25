@@ -44,9 +44,10 @@ List<Color> generateDistinctColors(int count) {
 /// Name: initializeAppNameColorMapping
 ///
 /// Description: Loads all apps the user
-/// has stored in the database before
-/// mapping all apps to a distinct color
-/// provided by generateDistinctColor()
+/// has stored in the database(historical 
+/// and current) before mapping all apps 
+/// to a distinct color provided by 
+/// generateDistinctColor()
 ///*******************************
 Future<void> initializeAppNameColorMapping() async {
   updateUserRef();
@@ -62,7 +63,7 @@ Future<void> initializeAppNameColorMapping() async {
 
     Set<String> allAppNames = {};
     
-    //Loop through each doc
+    //Loop through each doc in appUsageHistory
     for (var doc in historySnapshot.docs) {
       //Extract weekly data from each doc
       Map<String, dynamic> weeklyData = doc.data() as Map<String, dynamic>;
@@ -85,10 +86,10 @@ Future<void> initializeAppNameColorMapping() async {
       }
       );
     }
-      for (var doc in currentSnapshot.docs) {
-       // if (!allAppNames.contains(doc.id)) {
-          allAppNames.add(doc.id);
-       // }
+    //Loop through each doc in appUsageHistory
+    for (var doc in currentSnapshot.docs) {
+      //Add app names to set
+      allAppNames.add(doc.id);
     }
     //Sorts unordered set before assigning colors to names, ensuring consistency across whole app
     List<String> sortedAppNames = allAppNames.toList()..sort();

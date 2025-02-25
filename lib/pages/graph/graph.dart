@@ -1,7 +1,9 @@
 ///*********************************
 /// Name: graph.dart
 ///
-/// Description: 
+/// Description: File for holding 
+/// graph classes for easy switching
+/// between different graphs
 ///*******************************
 library;
 
@@ -20,7 +22,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 //Page Imports
-import 'package:app_screen_time/main.dart';
+import '/main.dart';
 import '/profile/profile_settings.dart';
 import '/pages/graph/fetch_data.dart';
 import '/pages/graph/widget.dart';
@@ -29,7 +31,8 @@ import '/pages/graph/colors.dart';
 ///*********************************
 /// Name: WeeklyGraphView
 /// 
-/// Description: 
+/// Description: Stateful widget for
+/// weekly state
 ///*********************************
 class WeeklyGraphView extends StatefulWidget {
   final Function(String) onBarSelected;
@@ -42,7 +45,9 @@ class WeeklyGraphView extends StatefulWidget {
 ///*********************************
 /// Name: _WeeklyGraphViewState
 /// 
-/// Description: 
+/// Description: State for WeeklyGraphView,
+/// holds layout and state management for 
+/// weekly graph
 ///*********************************
 class _WeeklyGraphViewState extends State<WeeklyGraphView> {
   String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
@@ -80,97 +85,103 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       return Center(child: CircularProgressIndicator());
     }
     return Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 60),
-            Text("Weekly Graph", style: TextStyle(fontSize: 18),),
-            Expanded(
-              child: BarChart(BarChartData(
-                    alignment: BarChartAlignment.center,
-                    //Title Widgets
-                    titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                        maxIncluded: false,
-                        showTitles: true,
-                        interval: 1,
-                        reservedSize: 25,
-                        getTitlesWidget: sideTitles,
-                      )),
-                      rightTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                        maxIncluded: false,
-                        showTitles: true,
-                        interval: 1,
-                        reservedSize: 25,
-                        getTitlesWidget: sideTitles,
-                      )),
-                      topTitles: const AxisTitles(),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: bottomDayTitles,
-                        reservedSize: 20,
-                      )),
-                    ),
-                      //Style Widgets
-                      backgroundColor: Colors.white,
-                      borderData: FlBorderData(show: true),
-                      gridData: FlGridData(
-                      drawVerticalLine: false,
-                      show: true,
-                    ),
-                    //Functionality Widgets
-                    barTouchData: loadTouch(weeklyData),
-                    barGroups: generateWeeklyChart(weeklyData),
-                  ))
-            ),
-            Row(
-              //Equal spacing between children
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                //Previous arrow button
-                IconButton(
-                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) > 0 && !isLoading
-                      ? () async {
-                        setState(() {
-                          isLoading = true;
-                        });
-                          int currentIndex = availableWeekKeys.indexOf(currentWeek);
-                          currentWeek = availableWeekKeys[currentIndex - 1];
-                          currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                          weeklyData = await fetchWeeklyScreenTime();
-                          availableDays = weeklyData.keys.toList();
-                          setState(() {
-                            isLoading = false;
-                          });
-                        } : null,
-                  icon: Icon(Icons.arrow_back),
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        children: [
+          const SizedBox(height: 60),
+          //Graph Title
+          Text("Weekly Graph", style: TextStyle(fontSize: 18),),
+          Expanded(
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.center,
+                //Title Widgets
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      maxIncluded: false,
+                      showTitles: true,
+                      interval: 1,
+                      reservedSize: 25,
+                      getTitlesWidget: sideTitles,
+                    )
+                  ),
+                  rightTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      maxIncluded: false,
+                      showTitles: true,
+                      interval: 1,
+                      reservedSize: 25,
+                      getTitlesWidget: sideTitles,
+                    )
+                  ),
+                  topTitles: const AxisTitles(),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: bottomDayTitles,
+                      reservedSize: 20,
+                    )
+                  ),
                 ),
-                Text(currentWeek),
-                //Next arrow button
-                IconButton(
-                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) < availableWeekKeys.length - 1 && !isLoading
-                      ? () async {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          int currentIndex = availableWeekKeys.indexOf(currentWeek);
-                          currentWeek = availableWeekKeys[currentIndex + 1];
-                          currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                          weeklyData = await fetchWeeklyScreenTime();
-                          availableDays = weeklyData.keys.toList();
-                          setState(() {
-                            isLoading = false;
-                          });
-                        } : null,
-                  icon: Icon(Icons.arrow_forward),
+                //Style Widgets
+                backgroundColor: Colors.white,
+                borderData: FlBorderData(show: true),
+                gridData: FlGridData(
+                  drawVerticalLine: false,
+                  show: true,
                 ),
-              ],
-            ),
-          ],
-        )
+                //Functionality Widgets
+                barTouchData: loadTouch(weeklyData),
+                barGroups: generateWeeklyChart(weeklyData),
+              )
+            )
+          ),
+          Row(
+            //Equal spacing between children
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              //Previous arrow button
+              IconButton(
+                onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) > 0 && !isLoading
+                  ? () async {
+                  setState(() {
+                    isLoading = true;
+                });
+                  int currentIndex = availableWeekKeys.indexOf(currentWeek);
+                  currentWeek = availableWeekKeys[currentIndex - 1];
+                  currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
+                  weeklyData = await fetchWeeklyScreenTime();
+                  availableDays = weeklyData.keys.toList();
+                  setState(() {
+                    isLoading = false;
+                  });
+                } : null,
+                icon: Icon(Icons.arrow_back),
+              ),
+              Text(currentWeek),
+              //Next arrow button
+              IconButton(
+                onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) < availableWeekKeys.length - 1 && !isLoading
+                  ? () async {
+                  setState(() {
+                    isLoading = true;
+                  });
+                  int currentIndex = availableWeekKeys.indexOf(currentWeek);
+                  currentWeek = availableWeekKeys[currentIndex + 1];
+                  currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
+                  weeklyData = await fetchWeeklyScreenTime();
+                  availableDays = weeklyData.keys.toList();
+                  setState(() {
+                    isLoading = false;
+                  });
+                } : null,
+                icon: Icon(Icons.arrow_forward),
+              ),
+            ],
+          ),
+        ],
+      )
     );
   }
 }
@@ -178,7 +189,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
 ///*********************************
 /// Name: DailyGraphView
 /// 
-/// Description: 
+/// Description: Stateful widget for
+/// daily state
 ///*********************************
 class DailyGraphView extends StatefulWidget {
   final Function(String) onBarSelected;
@@ -189,13 +201,16 @@ class DailyGraphView extends StatefulWidget {
 }
 
 ///*********************************
-/// Name: _WeeklyGraphViewState
+/// Name: _DailyGraphViewState
 /// 
-/// Description: 
+/// Description: State for DailyGraphView,
+/// holds layout and state management for 
+/// daily graph
 ///*********************************
 class _DailyGraphViewState extends State<DailyGraphView> {
 
   @override
+  //Initialize colors making sure all apps are mapped to a color before displaying
   void initState() {
     super.initState();
     initializeAppNameColorMapping();
@@ -226,62 +241,67 @@ class _DailyGraphViewState extends State<DailyGraphView> {
       child: Column(
         children: [
           const SizedBox(height: 60),
+          //Title for graph
           Text("Daily Graph", style: TextStyle(fontSize: 18),),
           Expanded(
+            //Widget to allow scrolling of graph if it overflows the screen
             child: SingleChildScrollView(
+              //Allow tooltips to display above graph
               clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
+                //Sets a minimum size for graph
                 constraints: BoxConstraints(minWidth: 390),
                 child: SizedBox(
-                width: 100 + availableApps.length * 70,
-                child: BarChart(
-                BarChartData(
-                  groupsSpace: 60,
-                  alignment: BarChartAlignment.center,
-                  //Title Widgets
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        maxIncluded: false,
-                        showTitles: true,
-                        interval: 1,
-                        reservedSize: 25,
-                        getTitlesWidget: sideTitles,
-                      )
-                    ),
-                    rightTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        maxIncluded: false,
-                        showTitles: true,
-                        interval: 1,
-                        reservedSize: 25,
-                        getTitlesWidget: sideTitles,
-                      )
-                    ),
-                    topTitles: const AxisTitles(),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: bottomAppTitles,
-                        reservedSize: 60,
-                      )
-                    ),
-                  ),
-                  //Style Widgets
-                  backgroundColor: Colors.white,
-                  borderData: FlBorderData(show: true),
-                  gridData: FlGridData(
-                    drawVerticalLine: false,
-                    show: true,
-                  ),
-                  //Functionality Widgets
-                  barTouchData: loadTouch(dailyData),
-                  barGroups: generateDailyChart(dailyData),
-                )
+                  //Dynamically size graph based on amount of apps
+                  width: 100 + availableApps.length * 70,
+                  child: BarChart(
+                    BarChartData(
+                      groupsSpace: 60,
+                      alignment: BarChartAlignment.center,
+                      //Title Widgets
+                      titlesData: FlTitlesData(
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            maxIncluded: false,
+                            showTitles: true,
+                            interval: 1,
+                            reservedSize: 25,
+                            getTitlesWidget: sideTitles,
+                          )
+                        ),
+                        rightTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            maxIncluded: false,
+                            showTitles: true,
+                            interval: 1,
+                            reservedSize: 25,
+                            getTitlesWidget: sideTitles,
+                          )
+                        ),
+                        topTitles: const AxisTitles(),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: bottomAppTitles,
+                            reservedSize: 60,
+                          )
+                        ),
+                      ),
+                      //Style Widgets
+                      backgroundColor: Colors.white,
+                      borderData: FlBorderData(show: true),
+                      gridData: FlGridData(
+                        drawVerticalLine: false,
+                        show: true,
+                      ),
+                      //Functionality Widgets
+                      barTouchData: loadTouch(dailyData),
+                      barGroups: generateDailyChart(dailyData),
+                    )
+                  )
+                ),
               )
-              ),
-                )
             ),
           ),
         ],

@@ -1,7 +1,9 @@
 ///*********************************
 /// Name: list_view.dart
 ///
-/// Description: 
+/// Description: File for holding 
+/// list view class for easy switching
+/// between different list views
 ///*******************************
 library;
 
@@ -37,38 +39,51 @@ class _ExpandedListViewState extends State<ExpandedListView> {
     switch(widget.graphIndex) {
       //Daily list view
       case 0:
-          if (dailyData.isEmpty) {
-            return Center(child: CircularProgressIndicator());
-          }  
-        //List view built of daily data from bar touch
+      //Return loading icon if no data is present
+        if (dailyData.isEmpty) {
+          return Center(child: CircularProgressIndicator());
+        } 
+        //Data to be displayed 
         final dayData = dailyData;
-        final reversedEntries = dayData.entries.toList();
+        final entries = dayData.entries.toList();
+        //Builder to display list
         return ListView.builder(
+          //Builds from the top of parent widget
           padding: EdgeInsets.zero,
+          //Data tiles plus 1 for title
           itemCount: dayData.length + 1,
+          //Data tile builder  
           itemBuilder: (context, index) {
+            //Display title if first tile
             if (index == 0) {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Center(child: Text("Daily Data", style: TextStyle(fontSize: 22),)),
-                );
-            }
-            else {
-            final entry = reversedEntries.elementAt(index - 1);
-            final appName = entry.key;
-            final appHours = entry.value['hours'];
-            final appType = entry.value['appType'];
-            return ListTile(
-              title: Text(
-                appName,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: widget.appColors[appName],
+                child: Center(
+                  child: Text(
+                    "Daily Data", 
+                    style: TextStyle(fontSize: 22),
+                  )
                 ),
-              ),
-              subtitle: Text('$appHours hours'),
-              trailing: Text(appType),
-            );
+              );
+            }
+            //Build data tile
+            else {
+              final entry = entries.elementAt(index - 1);
+              final appName = entry.key;
+              final appHours = entry.value['hours'];
+              final appType = entry.value['appType'];
+              //Data tile
+              return ListTile(
+                title: Text(
+                  appName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: widget.appColors[appName],
+                  ),
+                ),
+                subtitle: Text('$appHours hours'),
+                trailing: Text(appType),
+              );
             }
           },
         );  
@@ -91,7 +106,8 @@ class _ExpandedListViewState extends State<ExpandedListView> {
         if (!weeklyData.containsKey(widget.selectedBar)) {
           if (weeklyData.isEmpty) {
             return Center(child: CircularProgressIndicator());
-          }  
+          } 
+          //Return text string if the selected bar does not contain data
           return Center(
             child: Text(
               "No data available for ${widget.selectedBar}",
@@ -104,36 +120,42 @@ class _ExpandedListViewState extends State<ExpandedListView> {
             )
           );
         }
-        
-        //List view built of daily data from bar touch
+        //Data to be displayed 
         final dayData = weeklyData[widget.selectedBar]!;
         final reversedEntries = dayData.entries.toList().reversed.toList();
+        //Builder to display list
         return ListView.builder(
+          //Builds from the top of parent widget
           padding: EdgeInsets.zero,
+          //Data tiles plus 1 for title
           itemCount: dayData.length + 1,
+          //Data tile builder  
           itemBuilder: (context, index) {
+            //Display title if first tile
             if (index == 0) {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Center(child: Text("${DateFormat('MM-dd-yyyy').format(currentDataset)}: ${widget.selectedBar}", style: TextStyle(fontSize: 22),)),
-                );
+              );
             }
+            //Build data tile
             else {
-            final entry = reversedEntries.elementAt(index - 1);
-            final appName = entry.key;
-            final appHours = entry.value['hours'];
-            final appType = entry.value['appType'];
-            return ListTile(
-              title: Text(
-                appName,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: widget.appColors[appName],
+              final entry = reversedEntries.elementAt(index - 1);
+              final appName = entry.key;
+              final appHours = entry.value['hours'];
+              final appType = entry.value['appType'];
+              //Data tile
+              return ListTile(
+                title: Text(
+                  appName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: widget.appColors[appName],
+                  ),
                 ),
-              ),
-              subtitle: Text('$appHours hours'),
-              trailing: Text(appType),
-            );
+                subtitle: Text('$appHours hours'),
+                trailing: Text(appType),
+              );
             }
           },
         );
