@@ -86,9 +86,9 @@ Future<void> initializeAppNameColorMapping() async {
       );
     }
       for (var doc in currentSnapshot.docs) {
-        if (!allAppNames.contains(doc.id)) {
+       // if (!allAppNames.contains(doc.id)) {
           allAppNames.add(doc.id);
-        }
+       // }
     }
     //Sorts unordered set before assigning colors to names, ensuring consistency across whole app
     List<String> sortedAppNames = allAppNames.toList()..sort();
