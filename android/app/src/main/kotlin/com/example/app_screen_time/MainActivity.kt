@@ -79,8 +79,9 @@ class MainActivity: FlutterActivity() {
         createNotificationChannel()
         if(!checkNotificationsPermission())
         {
-            openNotificationSettings();
+            openNotificationSettings()
         }
+        startBGWrites()
     }
 
     ///**********************************************
@@ -277,6 +278,35 @@ class MainActivity: FlutterActivity() {
         //Put work into queue
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "totalSTNotification",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            notifRequest,
+        )
+    }
+
+    ///**********************************************
+    /// Name: startBGWrites
+    /// 
+    /// Description: Starts background task for
+    /// writing to DB
+    ///**********************************************
+    fun startBGWrites() {
+        // Give bg work requirements for working
+        // In this case, make it require internet connection
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        //Create bg work request
+        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<BGWritesWorker>(
+            60, TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .setInitialDelay(3, TimeUnit.MINUTES)
+            .build()
+
+        //Put work into queue
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "BackgroundWrites",
             ExistingPeriodicWorkPolicy.REPLACE,
             notifRequest,
         )
