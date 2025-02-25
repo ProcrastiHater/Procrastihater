@@ -149,6 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   backgroundColor: Colors.indigo.shade50,
                   onDestinationSelected: (int index) {
                     setState(() {
+                      selectedBar == "null";
                       graphIndex = index;
                     });
                   },
@@ -176,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               padding: const EdgeInsets.all(4.0),
               color: Colors.indigo.shade100,
-              child: ExpandedListView(selectedBar: selectedBar, appColors: appNameToColor),
+              child: ExpandedListView(selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
             ),
           ),
         ],

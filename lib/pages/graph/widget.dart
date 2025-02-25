@@ -217,13 +217,19 @@ Widget bottomAppTitles(double value, TitleMeta meta) {
   String text = availableApps[value.toInt()];
   return SideTitleWidget(
     meta: meta,
-    space: 25,
-    child: Transform.rotate(
-      angle: 45 * math.pi / 180,
-      child: Text(
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 70),
+          child: Text(
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         text, 
         style: style
       )
+        )
+      ]
     )
   );
 }
