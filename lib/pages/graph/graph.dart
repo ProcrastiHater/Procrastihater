@@ -229,10 +229,11 @@ class _DailyGraphViewState extends State<DailyGraphView> {
           Text("Daily Graph", style: TextStyle(fontSize: 18),),
           Expanded(
             child: SingleChildScrollView(
+              clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 constraints: BoxConstraints(minWidth: 390),
-                child:    SizedBox(
+                child: SizedBox(
                 width: 100 + availableApps.length * 70,
                 child: BarChart(
                 BarChartData(
@@ -275,7 +276,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                     show: true,
                   ),
                   //Functionality Widgets
-                  //barTouchData: loadTouch(dailyData),
+                  barTouchData: loadTouch(dailyData),
                   barGroups: generateDailyChart(dailyData),
                 )
               )

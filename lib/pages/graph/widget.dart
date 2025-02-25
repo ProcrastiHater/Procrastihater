@@ -115,23 +115,16 @@ BarChartGroupData generatedDayData(int index, String appName,Map<String, dynamic
 BarTouchData getBarDayTouch(Map<String, Map<String, dynamic>> data, void Function(String) onBarSelected) {
   return BarTouchData(
     enabled: true,
-    //Reads touch and updates the selectedDay to load list view
-    touchCallback: (event, response){
-      if (response != null && response.spot != null) {
-        int dayIndex = response.spot!.touchedBarGroupIndex;
-        String day = availableDays[dayIndex];
-        onBarSelected(day);
-      }
-    },
-    //Loads tooltip containing total hours for the day
     touchTooltipData: BarTouchTooltipData(
       getTooltipColor: (_) => Colors.blueGrey,
       tooltipPadding: const EdgeInsets.all(8.0),
       tooltipMargin: 8.0,
       getTooltipItem: (group, groupIndex, rod, rodIndex) {
         double totalHours = rod.toY;
+        String appName = availableApps[groupIndex];
+        String category = data[appName]?['appType'];
         return BarTooltipItem(
-          'Total Hours\n',
+          "$appName\n",
           const TextStyle(
             decoration: TextDecoration.none,
             color: Colors.white,
@@ -140,7 +133,14 @@ BarTouchData getBarDayTouch(Map<String, Map<String, dynamic>> data, void Functio
           ),
           children: [
             TextSpan(
-            text: '${totalHours.toStringAsFixed(1)} hrs',
+            text: 'Hours: $totalHours\n',
+            style: const TextStyle(
+              decoration: TextDecoration.none,
+              color: Colors.white
+              ),
+            ),
+            TextSpan(
+            text: 'Category: $category',
             style: const TextStyle(
               decoration: TextDecoration.none,
               color: Colors.white

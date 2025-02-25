@@ -45,7 +45,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
         final reversedEntries = dayData.entries.toList();
         return ListView.builder(
           padding: EdgeInsets.zero,
-          itemCount: dayData.length,
+          itemCount: dayData.length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
               return Padding(
@@ -54,7 +54,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
                 );
             }
             else {
-            final entry = reversedEntries.elementAt(index);
+            final entry = reversedEntries.elementAt(index - 1);
             final appName = entry.key;
             final appHours = entry.value['hours'];
             final appType = entry.value['appType'];
@@ -110,7 +110,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
         final reversedEntries = dayData.entries.toList().reversed.toList();
         return ListView.builder(
           padding: EdgeInsets.zero,
-          itemCount: dayData.length,
+          itemCount: dayData.length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
               return Padding(
@@ -119,7 +119,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
                 );
             }
             else {
-            final entry = reversedEntries.elementAt(index);
+            final entry = reversedEntries.elementAt(index - 1);
             final appName = entry.key;
             final appHours = entry.value['hours'];
             final appType = entry.value['appType'];
