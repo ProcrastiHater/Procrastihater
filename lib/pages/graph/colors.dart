@@ -52,13 +52,18 @@ Future<void> initializeAppNameColorMapping() async {
   updateUserRef();
   //Attempt to connect to database
   try {
-    final current = userRef.collection('appUsageHistory');
+    final currentHistory = userRef.collection('appUsageHistory');
     //Take a snapshot of all docs in appUsageHistory
-    QuerySnapshot snapshot = await current.get();
+    QuerySnapshot historySnapshot = await currentHistory.get();
     //Set for holding app Names
+
+    final currentAppUsage = userRef.collection('appUsageCurrent');
+    QuerySnapshot currentSnapshot = await currentAppUsage.get();
+
     Set<String> allAppNames = {};
+    
     //Loop through each doc
-    for (var doc in snapshot.docs) {
+    for (var doc in historySnapshot.docs) {
       //Extract weekly data from each doc
       Map<String, dynamic> weeklyData = doc.data() as Map<String, dynamic>;
       //Loop through weekly data
@@ -74,9 +79,16 @@ Future<void> initializeAppNameColorMapping() async {
               //Add app names to set
               allAppNames.add(appName);
             }
-          });
+          }
+          );
         }
-      });
+      }
+      );
+    }
+      for (var doc in currentSnapshot.docs) {
+        if (!allAppNames.contains(doc.id)) {
+          allAppNames.add(doc.id);
+        }
     }
     //Sorts unordered set before assigning colors to names, ensuring consistency across whole app
     List<String> sortedAppNames = allAppNames.toList()..sort();

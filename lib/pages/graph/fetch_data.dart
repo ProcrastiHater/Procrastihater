@@ -123,7 +123,7 @@ Future<Map<String, Map<String, dynamic>>> fetchDailyScreenTime() async {
   try {
     final current = userRef.collection("appUsageCurrent");
     final docSnapshot = await current.get();
-    for (var doc in docSnapshot.docs) {
+    for (var doc in docSnapshot.docs) { 
       String docName = doc.id;
       double? hours = doc['dailyHours']?.toDouble();
       String appType = doc['appType'];
