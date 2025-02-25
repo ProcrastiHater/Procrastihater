@@ -103,6 +103,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                         'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
                         style: const TextStyle(color: Colors.grey),
                       ),
+                      trailing: Text("${index+1}"),
                     );
                   },
                 );
