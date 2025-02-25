@@ -115,7 +115,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
             if (index == 0) {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Center(child: Text(DateFormat('MM-dd-yyyy').format(currentDataset), style: TextStyle(fontSize: 22),)),
+                child: Center(child: Text("${DateFormat('MM-dd-yyyy').format(currentDataset)}: ${widget.selectedBar}", style: TextStyle(fontSize: 22),)),
                 );
             }
             else {
