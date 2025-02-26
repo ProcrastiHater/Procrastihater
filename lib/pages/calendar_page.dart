@@ -24,12 +24,47 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   DateTime? dateTime;
   List<DateTime>? dateTimeRange;
+  String? title;
+  String? description;
+  String? location;
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.addListener(() {
+      setState(() {
+        title = _titleController.text;
+      });
+    });
+    _descriptionController.addListener(() {
+      setState(() {
+        description = _descriptionController.text;
+      });
+    });
+    _locationController.addListener(() {
+      setState(() {
+        location = _locationController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
 
   Event buildEvent({Recurrence? recurrence}) {
     return Event(
-      title: 'Test event',
-      description: 'example',
-      location: 'Flutter app',
+      title: title ?? 'Test event',
+      description: description ?? 'example',
+      location: location ?? 'Flutter app',
       startDate: dateTime ?? DateTime.now(),
       endDate: (dateTime ?? DateTime.now()).add(const Duration(minutes: 30)),
       allDay: false,
@@ -43,20 +78,43 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      appBar: AppBar(title: const Text('ProcrastiPlanner')),
+      body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                labelText: 'Event Title',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            TextField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Event Description',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            TextField(
+              controller: _locationController,
+              decoration: const InputDecoration(
+                labelText: 'Event Location',
+                border: OutlineInputBorder(),
+              ),
+            ),
             ElevatedButton(
               onPressed: () async {
                 final result = await showOmniDateTimePicker(
-                    context: context, is24HourMode: false);
+                    context: context, is24HourMode: true);
                 setState(() {
                   dateTime = result;
                 });
                 debugPrint('dateTime: $dateTime');
               },
-              child: const Text('Show DateTime Picker'),
+              child: const Text('Select Event Time'),
             ),
             ElevatedButton(
               onPressed: () async {
