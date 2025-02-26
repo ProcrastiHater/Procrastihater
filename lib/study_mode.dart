@@ -12,7 +12,8 @@ class StudyModePage extends StatefulWidget {
 
 class StudyModePageState extends State<StudyModePage> {
  bool _isStudying = false;
- Stopwatch _stopwatch = Stopwatch();
+ final Stopwatch _stopwatch = Stopwatch();
+ 
 
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -33,7 +34,25 @@ void _startStudySession() {
   });
   }
 
-String _formatTime(Duration duration) {
+ Future<void> endSession() async {
+
+    final user = auth.currentUser;
+    int earnedPoints = _stopwatch.elapsed.inMinutes;
+    if(earnedPoints < 1) { return; }
+    setState(() {
+      _isStudying = false;
+    });
+
+    _stopwatch.stop();
+
+    if (user != null) {
+      await firestore.collection('UID').doc(user.uid).update({
+        'points': FieldValue.increment(earnedPoints),
+      });
+    }
+  }
+
+String formatTime(Duration duration) {
   String hours = duration.inHours.toString().padLeft(2, '0');
   String minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
   String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
@@ -50,12 +69,12 @@ String _formatTime(Duration duration) {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _formatTime(_stopwatch.elapsed),
+                    formatTime(_stopwatch.elapsed),
                     style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: ()=>{},
+                    onPressed: endSession,
                     child: const Text("End Study Session"),
                   ),
                 ],
