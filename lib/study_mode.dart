@@ -10,7 +10,7 @@ class StudyModePage extends StatefulWidget {
   StudyModePageState createState() => StudyModePageState();
 }
 
-class StudyModePageState extends State<StudyModePage> {
+class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserver {
  bool _isStudying = false;
  final Stopwatch _stopwatch = Stopwatch();
  
@@ -18,10 +18,38 @@ class StudyModePageState extends State<StudyModePage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+ @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this); 
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); 
+    _isStudying = false;
+    _stopwatch.stop();
+    super.dispose();
+  }
+
+ @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_isStudying) {
+      if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+        applyPenalty(); 
+        _stopwatch.stop();
+        _stopwatch.reset(); 
+        setState(() {
+          _isStudying = false;
+        });
+      } 
+    }
+  }
+
 void _startStudySession() {
     setState(() {
     _isStudying = true;
-    _stopwatch.start();  // Start the stopwatch
+    _stopwatch.start();  
   });
 
   // Refreshing the UI every second so that the stopwatch can be displayed
@@ -48,6 +76,16 @@ void _startStudySession() {
     if (user != null) {
       await firestore.collection('UID').doc(user.uid).update({
         'points': FieldValue.increment(earnedPoints),
+      });
+    }
+  }
+
+  Future<void> applyPenalty() async {
+
+    final user = auth.currentUser;
+    if (user != null) {
+      await firestore.collection('UID').doc(user.uid).update({
+        'points': FieldValue.increment(-50),
       });
     }
   }
