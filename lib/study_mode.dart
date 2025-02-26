@@ -63,17 +63,17 @@ void _startStudySession() {
   }
 
  Future<void> endSession() async {
-
     final user = auth.currentUser;
     int earnedPoints = _stopwatch.elapsed.inMinutes;
-    if(earnedPoints < 1) { return; }
+
     setState(() {
       _isStudying = false;
     });
 
     _stopwatch.stop();
+   _stopwatch.reset();
 
-    if (user != null) {
+    if (earnedPoints >= 1 && user != null) {
       await firestore.collection('UID').doc(user.uid).update({
         'points': FieldValue.increment(earnedPoints),
       });
