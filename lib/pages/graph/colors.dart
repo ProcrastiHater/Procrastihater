@@ -11,7 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 //Page Imports
-import 'package:app_screen_time/main.dart';
+import '/main.dart';
 
 //Global variables
 Map<String, Color> appNameToColor = {}; 
@@ -58,9 +58,6 @@ Future<void> initializeAppNameColorMapping() async {
     QuerySnapshot historySnapshot = await currentHistory.get();
     //Set for holding app Names
 
-    final currentAppUsage = userRef.collection('appUsageCurrent');
-    QuerySnapshot currentSnapshot = await currentAppUsage.get();
-
     Set<String> allAppNames = {};
     
     //Loop through each doc in appUsageHistory
@@ -86,11 +83,11 @@ Future<void> initializeAppNameColorMapping() async {
       }
       );
     }
+
     //Loop through each doc in appUsageHistory
-    for (var doc in currentSnapshot.docs) {
-      //Add app names to set
-      allAppNames.add(doc.id);
-    }
+    screenTimeData.forEach((key, value) {
+      allAppNames.add(key);
+    });
     //Sorts unordered set before assigning colors to names, ensuring consistency across whole app
     List<String> sortedAppNames = allAppNames.toList()..sort();
     //Get distinct colors

@@ -7,9 +7,14 @@
 ///*******************************
 library;
 
-import 'package:app_screen_time/pages/graph/fetch_data.dart';
+//Dart Imports
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+//Page Imports
+import '/pages/graph/fetch_data.dart';
+import '/main.dart';
+
 
 
 ///*********************************
@@ -40,11 +45,11 @@ class _ExpandedListViewState extends State<ExpandedListView> {
       //Daily list view
       case 0:
       //Return loading icon if no data is present
-        if (dailyData.isEmpty) {
+        if (screenTimeData.isEmpty) {
           return Center(child: CircularProgressIndicator());
         } 
         //Data to be displayed 
-        final dayData = dailyData;
+        final dayData = screenTimeData;
         final entries = dayData.entries.toList();
         //Builder to display list
         return ListView.builder(
@@ -71,7 +76,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
               final entry = entries.elementAt(index - 1);
               final appName = entry.key;
               final appHours = entry.value['hours'];
-              final appType = entry.value['appType'];
+              String? appType = entry.value['category'];
               //Data tile
               return ListTile(
                 title: Text(
@@ -82,7 +87,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
                   ),
                 ),
                 subtitle: Text('$appHours hours'),
-                trailing: Text(appType),
+                trailing: Text(appType!),
               );
             }
           },

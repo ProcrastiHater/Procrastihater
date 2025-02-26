@@ -74,7 +74,6 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
   @override
   void initState() {
     super.initState();
-    initializeAppNameColorMapping();
     _initializeData();
   }
 
@@ -213,27 +212,24 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   //Initialize colors making sure all apps are mapped to a color before displaying
   void initState() {
     super.initState();
-    initializeAppNameColorMapping();
     _initializeData();
   }
 
   Future<void> _initializeData() async {
-    final result = await fetchDailyScreenTime();
     setState(() {
-      dailyData = result;
-      availableApps = dailyData.keys.toList();
+      availableApps = screenTimeData.keys.toList();
     });
   }
 
   //Wrapper for loading bar touch, 
-  BarTouchData loadTouch(Map<String, Map<String, dynamic>> data) {
+  BarTouchData loadTouch(Map<String, Map<String, String>> data) {
     return getBarDayTouch(data, widget.onBarSelected);
   }
 
   @override
   Widget build(BuildContext context) {
     //Display loading screen if data is not present
-    if (dailyData.isEmpty) {
+    if (screenTimeData.isEmpty) {
       return Center(child: CircularProgressIndicator());
     }
     return Padding(
@@ -247,7 +243,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
             //Widget to allow scrolling of graph if it overflows the screen
             child: SingleChildScrollView(
               //Allow tooltips to display above graph
-              clipBehavior: Clip.none,
+              //clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 //Sets a minimum size for graph
@@ -296,8 +292,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                         show: true,
                       ),
                       //Functionality Widgets
-                      barTouchData: loadTouch(dailyData),
-                      barGroups: generateDailyChart(dailyData),
+                      barTouchData: loadTouch(screenTimeData),
+                      barGroups: generateDailyChart(screenTimeData),
                     )
                   )
                 ),

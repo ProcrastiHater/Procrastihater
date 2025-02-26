@@ -18,7 +18,6 @@ import 'package:app_screen_time/main.dart';
 
 
 //Global Variables
-Map<String, Map<String, dynamic>> dailyData = {};
 Map<String, Map<String, Map<String, dynamic>>> weeklyData = {};
 //Monthly data variable placeholder
 
@@ -103,43 +102,6 @@ Future<Map<String, Map<String, Map<String, dynamic>>>> fetchWeeklyScreenTime() a
   }
   //Catch block if accessing user document fails 
   catch (e){
-    debugPrint("error fetching screentime data: $e");
-  }
-  return fetchedData;
-}
-
-///*********************************
-/// Name: fetchDailyScreenTime
-/// 
-/// Description: Fetch the screentime 
-/// for the current day which is  
-/// stored within userAppCurrent in our 
-/// database. Data is fetched using a map 
-/// of maps and is returned.
-///*********************************
-Future<Map<String, Map<String, dynamic>>> fetchDailyScreenTime() async {
-  //Update the reference to the user doc before accessing
-  updateUserRef();
-  //Variable for holding day long segments of data
-  Map<String, Map<String, dynamic>> fetchedData = {};
-  try {
-    //Variable for scoping into the users appUsageCurrent collection
-    final current = userRef.collection("appUsageCurrent");
-    //Get a 'snapshot' of the current doucment
-    final docSnapshot = await current.get();
-    //Access each individual app in dailyData
-    for (var doc in docSnapshot.docs) { 
-      //Write the data to map of maps for use in current app usage graph display
-      String docName = doc.id;
-      double? hours = doc['dailyHours']?.toDouble();
-      String appType = doc['appType'];
-      if (hours != null) {
-        fetchedData[docName] = {'hours': hours, 'appType': appType};
-      }
-    }
-  }
-  //Catch block if accessing user document fails 
-  catch (e) {
     debugPrint("error fetching screentime data: $e");
   }
   return fetchedData;

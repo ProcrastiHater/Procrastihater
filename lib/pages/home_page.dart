@@ -84,15 +84,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _initializeData();
-  }
-    Future<void> _initializeData() async {
-    final dailyResult = await fetchDailyScreenTime();
-    final weeklyResult = await fetchWeeklyScreenTime();
-    setState(() {
-      dailyData = dailyResult;
-      weeklyData = weeklyResult;
-    });
   }
 
   //State management for loading list view
@@ -153,7 +144,8 @@ class _MyHomePageState extends State<MyHomePage> {
                  Container(
                   padding: const EdgeInsets.all(4.0),
                   color: Colors.indigo.shade50,
-                  //child: MonthlyGraphView(onBarSelected: updateSelectedBar),
+                  child: Center(child: Text("Monthly Graph Display"),)
+                  //MonthlyGraphView(onBarSelected: updateSelectedBar),
                 ),
               ][graphIndex],
               bottomNavigationBar: SizedBox(

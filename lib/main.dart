@@ -10,6 +10,8 @@ library;
 //Dart Imports
 import 'dart:async';
 import 'dart:io';
+import 'package:app_screen_time/pages/graph/colors.dart';
+import 'package:app_screen_time/pages/graph/fetch_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -32,7 +34,7 @@ import 'profile/profile_settings.dart';
 //Native Kotlin method channel
 const platformChannel = MethodChannel('kotlin.methods/procrastihater');
 //Maps for reading/writing data from the database
-Map<String, Map<String, String>> _screenTimeData = {};
+Map<String, Map<String, String>> screenTimeData = {};
 //Permission variables for screen time usage permission
 bool _hasPermission = false;
 bool _hasNotifsPermission = false;
@@ -62,16 +64,20 @@ void main() async {
     _currentToHistorical().whenComplete(() {
       _checkSTPermission().whenComplete((){
         _getScreenTime().whenComplete((){
-            _writeScreenTimeData();
-            if(_hasNotifsPermission) {
-              _startTestNotifications();
-            }
+          fetchWeeklyScreenTime().whenComplete((){
+            initializeAppNameColorMapping().whenComplete((){
+              _writeScreenTimeData();
+              if(_hasNotifsPermission) {
+                _startTestNotifications();
+              }
+              //Launches login screen first which returns ProcrasiHater app if success
+              runApp(const LoginScreen());
+            });
+          }); 
         });
       });
     });
   });
-  //Launches login screen first which returns ProcrasiHater app if success
-  runApp(const LoginScreen());
 }
 
 ///*********************************
@@ -375,7 +381,7 @@ Future<void> _getScreenTime() async {
     //Raw data from screentime method of platform channel 
     final Map<dynamic, dynamic> result = await platformChannel.invokeMethod('getScreenTime');
     //Convert data obtained by kotlin method to dart equivalent
-    _screenTimeData = Map<String, Map<String, String>>.from(
+    screenTimeData = Map<String, Map<String, String>>.from(
       result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
     );
     debugPrint('Got screen time!');
@@ -395,7 +401,7 @@ Future<void> _getScreenTime() async {
 Future<void> _writeScreenTimeData() async {
   //Update ref to user's doc if UID has changed
   updateUserRef();
-  if(_screenTimeData.isNotEmpty){
+  if(screenTimeData.isNotEmpty){
     double totalDaily = 0.0;
     final current = userRef.collection('appUsageCurrent');
     // Create a batch to handle multiple writes
@@ -408,7 +414,7 @@ Future<void> _writeScreenTimeData() async {
         batch.delete(doc.reference);
       }
       // Iterate through each app and its screen time
-      for (final entry in _screenTimeData.entries) {
+      for (final entry in screenTimeData.entries) {
         final appName = entry.key;
         final screenTimeHours = double.parse(entry.value['hours']!);
         final category = entry.value['category'];

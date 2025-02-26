@@ -14,11 +14,12 @@ import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 
 //Page Imports
-import 'fetch_data.dart';
+import '/pages/graph/fetch_data.dart';
 import '/pages/graph/colors.dart';
 import '/pages/friend_page.dart';
+import '/main.dart';
 
-List<String> availableApps = dailyData.keys.toList();
+List<String> availableApps = screenTimeData.keys.toList();
 List<String> availableDays = weeklyData.keys.toList();
 
 
@@ -102,7 +103,7 @@ BarChartGroupData generatedDayData(int index, String appName,Map<String, dynamic
     barRods: [
       BarChartRodData(
         fromY: 0,
-        toY: appData['hours'] ?? 0.0,
+        toY: double.parse(appData['hours'] ?? 0.0),
         width: 15, 
         color: appNameToColor[appName],
         borderRadius: BorderRadius.circular(5),
@@ -118,18 +119,20 @@ BarChartGroupData generatedDayData(int index, String appName,Map<String, dynamic
 /// information as a tooltip when 
 /// selecting a bar
 ///*********************************
-BarTouchData getBarDayTouch(Map<String, Map<String, dynamic>> data, void Function(String) onBarSelected) {
+BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function(String) onBarSelected) {
   return BarTouchData(
     enabled: true,
     //Loads app data on touch of specific bar
     touchTooltipData: BarTouchTooltipData(
+      fitInsideVertically: true,
+      fitInsideHorizontally: true,
       getTooltipColor: (_) => Colors.blueGrey,
       tooltipPadding: const EdgeInsets.all(8.0),
       tooltipMargin: 8.0,
       getTooltipItem: (group, groupIndex, rod, rodIndex) {
         double totalHours = rod.toY;
         String appName = availableApps[groupIndex];
-        String category = data[appName]?['appType'];
+        String? category = data[appName]?['appType'];
         return BarTooltipItem(
           "$appName\n",
           const TextStyle(
