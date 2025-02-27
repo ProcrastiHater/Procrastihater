@@ -132,7 +132,7 @@ BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function
       getTooltipItem: (group, groupIndex, rod, rodIndex) {
         double totalHours = rod.toY;
         String appName = availableApps[groupIndex];
-        String? category = data[appName]?['appType'];
+        String? category = data[appName]?['category'];
         return BarTooltipItem(
           "$appName\n",
           const TextStyle(

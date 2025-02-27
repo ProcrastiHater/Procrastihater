@@ -144,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
             const Divider(),
             ListTile(
               trailing: Icon(Icons.school),
-              title: Text("Study Mody"),
+              title: Text("Study Mode"),
               onTap: () {
                 Navigator.pushNamed(context, '/studyModePage');
               },
