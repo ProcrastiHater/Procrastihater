@@ -1,5 +1,6 @@
 package com.example.app_screen_time
 
+import kotlin.Double
 import android.Manifest
 import android.util.Log
 import androidx.annotation.NonNull
@@ -33,7 +34,11 @@ import android.app.NotificationChannel
 //Background service imports
 import androidx.work.*
 import com.example.app_screen_time.TestNotifWorker
+import com.example.app_screen_time.TotalSTWorker
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
+
+public var screenTimeMap = mutableMapOf<String, MutableMap<String, String>>();
 
 ///*********************************************
 /// Name: MainActivity
@@ -54,6 +59,7 @@ class MainActivity: FlutterActivity() {
         super.onCreate(savedInstanceState)
         //Purge old instances of notifications
         WorkManager.getInstance().cancelAllWork()
+        //WorkManager.getInstance().cancelUniqueWork("totalSTNotification")
         createNotificationChannel()
         if(!checkNotificationsPermission())
         {
@@ -109,6 +115,16 @@ class MainActivity: FlutterActivity() {
                         startTestNotifs()
                         result.success(true)
                     }
+                    "startTotalSTNotifications" -> {
+                        startTotalSTNotifs()
+                        Log.d("MainActivity", "Started Screen Time Notifications")
+                        result.success(true)
+                    }
+                    "cancelTotalSTNotifications" -> {
+                        WorkManager.getInstance(this).cancelUniqueWork("totalSTNotification")
+                        Log.d("MainActivity", "Canceled Screen Time Notifications")
+                        result.success(true)
+                    }
                     else -> {
                         Log.e("MainActivity", "Method not implemented: ${call.method}")
                         result.notImplemented()
@@ -162,8 +178,7 @@ class MainActivity: FlutterActivity() {
     /// permission for receiving notifications
     ///**********************************************
     private fun checkNotificationsPermission(): Boolean {
-        return ActivityCompat.checkSelfPermission(
-            this,
+        return checkSelfPermission(
             Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
     }
@@ -177,10 +192,9 @@ class MainActivity: FlutterActivity() {
     private fun openNotificationSettings(){
         //Params: context, array of permissions, 
         // request code (>= 0, but otherwise can be anything)
-        ActivityCompat.requestPermissions(
-            this,
+        requestPermissions(
             arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-            123
+            Random.nextInt(0, 20000)
         )
     }
 
@@ -234,6 +248,26 @@ class MainActivity: FlutterActivity() {
     }
 
     ///**********************************************
+    /// Name: startTotalSTNotifs
+    /// 
+    /// Description: Starts background task for
+    /// sending totalSTNotifications
+    ///**********************************************
+    fun startTotalSTNotifs() {
+        //Create bg work request
+        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<TotalSTWorker>(
+            15, TimeUnit.MINUTES
+        )
+            .build()
+        //Put work into queue
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "totalSTNotification",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            notifRequest,
+        )
+    }
+
+    ///**********************************************
     /// Name: getMidnight
     /// 
     /// Description: Returns a long of midnight for the
@@ -247,7 +281,7 @@ class MainActivity: FlutterActivity() {
         today.set(Calendar.MILLISECOND, 0)
         return today.time.time
     }
-
+    
     ///***********************************************
     /// Name: getScreenTimeStats
     /// 
@@ -271,10 +305,7 @@ class MainActivity: FlutterActivity() {
             UsageStatsManager.INTERVAL_DAILY,
             startTime,
             endTime
-        )
-        
-        //Create a map for transferring screen time to dart/flutter code
-        val screenTimeMap = mutableMapOf<String, MutableMap<String, String>>()
+        ) 
     
         for (stats in queryUsageStats) {
             //Filter out apps with less than 0.05 hrs

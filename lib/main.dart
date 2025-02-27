@@ -34,8 +34,8 @@ const platformChannel = MethodChannel('kotlin.methods/procrastihater');
 //Maps for reading/writing data from the database
 Map<String, Map<String, String>> _screenTimeData = {};
 //Permission variables for screen time usage permission
-bool _hasPermission = false;
-bool _hasNotifsPermission = false;
+bool hasPermission = false;
+bool hasNotifsPermission = false;
 
 //Firestore Connection Variables
 final FirebaseAuth auth = FirebaseAuth.instance;
@@ -58,15 +58,11 @@ void main() async {
   //Firebase initialization
   await Firebase.initializeApp();
   //launch the main app
-  _checkNotifsPermission().whenComplete((){
-    _currentToHistorical().whenComplete(() {
-      _checkSTPermission().whenComplete((){
-        _getScreenTime().whenComplete((){
-            _writeScreenTimeData();
-            if(_hasNotifsPermission) {
-              _startTestNotifications();
-            }
-        });
+  _currentToHistorical().whenComplete(() {
+    _checkSTPermission().whenComplete((){
+      _getScreenTime().whenComplete((){
+          _writeScreenTimeData();
+          checkNotifsPermission();
       });
     });
   });
@@ -304,8 +300,8 @@ Future<void> _currentToHistorical() async {
 ///*********************************
 Future<void> _checkSTPermission() async {
   try {
-    final bool hasPermission = await platformChannel.invokeMethod('checkScreenTimePermission');
-    _hasPermission = hasPermission;
+    final bool _hasPermission = await platformChannel.invokeMethod('checkScreenTimePermission');
+    hasPermission = _hasPermission;
   } on PlatformException catch (e) {
       debugPrint("Failed to check permission: ${e.message}");
   }
@@ -327,17 +323,32 @@ Future<void> _requestSTPermission() async {
 }
 
 ///*********************************
-/// Name: _checkNotifsPermission
+/// Name: checkNotifsPermission
 ///   
 /// Description: Invokes method from platform channel 
 /// to check for notification permissions
 ///*********************************
-Future<void> _checkNotifsPermission() async {
+Future<void> checkNotifsPermission() async {
   try {
-    final bool hasNotifsPermission = await platformChannel.invokeMethod('checkNotificationsPermission');
-    _hasNotifsPermission = hasNotifsPermission;
+    final bool _hasNotifsPermission = await platformChannel.invokeMethod('checkNotificationsPermission');
+    hasNotifsPermission = _hasNotifsPermission;
   } on PlatformException catch (e) {
       debugPrint("Failed to check permission: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: requestNotifsPermission
+///   
+/// Description: Invokes method from platform channel to 
+/// send a request for notification permissions
+///*********************************
+Future<void> requestNotifsPermission() async {
+  try {
+    await platformChannel.invokeMethod('requestNotificationsPermission');
+    await checkNotifsPermission();
+  } on PlatformException catch (e) {
+    debugPrint("Failed to request permission: ${e.message}");
   }
 }
 
@@ -348,7 +359,7 @@ Future<void> _checkNotifsPermission() async {
 /// start sending the test notification
 ///*********************************
 Future<void> _startTestNotifications() async {
-  if(!_hasNotifsPermission) {
+  if(!hasNotifsPermission) {
     return;
   }
   try {
@@ -358,6 +369,7 @@ Future<void> _startTestNotifications() async {
   }
 }
 
+
 ///*********************************
 /// Name: _getScreenTime
 ///   
@@ -366,7 +378,7 @@ Future<void> _startTestNotifications() async {
 ///*********************************
 Future<void> _getScreenTime() async {
   //Checks if user has permission, if not it requests the permissions
-  if (!_hasPermission) {
+  if (!hasPermission) {
     await _requestSTPermission();
     return;
   }
