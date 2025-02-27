@@ -33,13 +33,13 @@ class TestNotifWorker(context: Context, workerParams: WorkerParameters) : Worker
     /// displaying the test notification
     ///**********************************************    
     private fun showNotification(){
-        var builder = NotificationCompat.Builder(applicationContext, "ProcrastiNotif")
+        var builder = NotificationCompat.Builder(getApplicationContext(), "ProcrastiNotif")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("ProcrastiHater")
             .setContentText("Hey, I'm working here!")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         //Executes notify on MainActivity
-        with(NotificationManagerCompat.from(applicationContext)) {
+        with(NotificationManagerCompat.from(getApplicationContext())) {
             //Sends notification with random id
             notify(Random.nextInt(), builder.build())
         }

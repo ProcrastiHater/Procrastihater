@@ -10,6 +10,8 @@ library;
 //Dart Imports
 import 'dart:async';
 import 'dart:io';
+import 'package:app_screen_time/pages/graph/colors.dart';
+import 'package:app_screen_time/pages/graph/fetch_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -27,15 +29,17 @@ import 'pages/friend_page.dart';
 import 'profile/login_screen.dart';
 import 'profile/profile_picture_selection.dart';
 import 'profile/profile_settings.dart';
+import 'pages/calendar.dart';
+import 'pages/study_mode.dart';
 
 //Global Variables 
 //Native Kotlin method channel
 const platformChannel = MethodChannel('kotlin.methods/procrastihater');
 //Maps for reading/writing data from the database
-Map<String, Map<String, String>> _screenTimeData = {};
+Map<String, Map<String, String>> screenTimeData = {};
 //Permission variables for screen time usage permission
-bool _hasPermission = false;
-bool _hasNotifsPermission = false;
+bool hasPermission = false;
+bool hasNotifsPermission = false;
 
 //Firestore Connection Variables
 final FirebaseAuth auth = FirebaseAuth.instance;
@@ -58,21 +62,22 @@ void main() async {
   //Firebase initialization
   await Firebase.initializeApp();
   //launch the main app
-  _checkNotifsPermission().whenComplete((){
-    _currentToHistorical().whenComplete(() {
-      _checkSTPermission().whenComplete((){
-        _getScreenTime().whenComplete((){
+  _currentToHistorical().whenComplete(() {
+    _checkSTPermission().whenComplete((){
+      _getScreenTime().whenComplete((){
+        fetchWeeklyScreenTime().whenComplete((){
+          initializeAppNameColorMapping().whenComplete((){
             _writeScreenTimeData();
-            if(_hasNotifsPermission) {
-              _startTestNotifications();
-            }
-        });
+            checkNotifsPermission();
+            //Launches login screen first which returns ProcrasiHater app if success
+            runApp(const LoginScreen());
+          });
+        }); 
       });
     });
   });
-  //Launches login screen first which returns ProcrasiHater app if success
-  runApp(const LoginScreen());
 }
+
 
 ///*********************************
 /// Name: MyApp
@@ -99,7 +104,7 @@ class ProcrastiHater extends StatelessWidget {
               settings: settings,
             );
           //Home page case builds default navigation
-          case '/homePage':
+          case '/homePage': 
             return MaterialPageRoute(
               builder: (context) => HomePage(),
               settings: settings,
@@ -128,12 +133,22 @@ class ProcrastiHater extends StatelessWidget {
               builder: (context) => ProfilePictureSelectionScreen(),
               settings: settings,
             );
-          //Default case builds default navigation to the home page
+          case '/studyModePage':
+            return MaterialPageRoute(
+              builder: (context) => StudyModePage(),
+              settings: settings,
+            );
+          case '/calendarPage':
+            return MaterialPageRoute(
+              builder: (context) => CalendarPage(),
+              settings: settings,
+            );
+          /*//Default case builds default navigation to the home page
           default:
             return MaterialPageRoute(
               builder: (context) => HomePage(),
               settings: settings,
-            );
+            );*/
         }
       },
     );
@@ -304,8 +319,8 @@ Future<void> _currentToHistorical() async {
 ///*********************************
 Future<void> _checkSTPermission() async {
   try {
-    final bool hasPermission = await platformChannel.invokeMethod('checkScreenTimePermission');
-    _hasPermission = hasPermission;
+    final bool _hasPermission = await platformChannel.invokeMethod('checkScreenTimePermission');
+    hasPermission = _hasPermission;
   } on PlatformException catch (e) {
       debugPrint("Failed to check permission: ${e.message}");
   }
@@ -327,17 +342,32 @@ Future<void> _requestSTPermission() async {
 }
 
 ///*********************************
-/// Name: _checkNotifsPermission
+/// Name: checkNotifsPermission
 ///   
 /// Description: Invokes method from platform channel 
 /// to check for notification permissions
 ///*********************************
-Future<void> _checkNotifsPermission() async {
+Future<void> checkNotifsPermission() async {
   try {
-    final bool hasNotifsPermission = await platformChannel.invokeMethod('checkNotificationsPermission');
-    _hasNotifsPermission = hasNotifsPermission;
+    final bool _hasNotifsPermission = await platformChannel.invokeMethod('checkNotificationsPermission');
+    hasNotifsPermission = _hasNotifsPermission;
   } on PlatformException catch (e) {
       debugPrint("Failed to check permission: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: requestNotifsPermission
+///   
+/// Description: Invokes method from platform channel to 
+/// send a request for notification permissions
+///*********************************
+Future<void> requestNotifsPermission() async {
+  try {
+    await platformChannel.invokeMethod('requestNotificationsPermission');
+    await checkNotifsPermission();
+  } on PlatformException catch (e) {
+    debugPrint("Failed to request permission: ${e.message}");
   }
 }
 
@@ -348,7 +378,7 @@ Future<void> _checkNotifsPermission() async {
 /// start sending the test notification
 ///*********************************
 Future<void> _startTestNotifications() async {
-  if(!_hasNotifsPermission) {
+  if(!hasNotifsPermission) {
     return;
   }
   try {
@@ -358,6 +388,7 @@ Future<void> _startTestNotifications() async {
   }
 }
 
+
 ///*********************************
 /// Name: _getScreenTime
 ///   
@@ -366,7 +397,7 @@ Future<void> _startTestNotifications() async {
 ///*********************************
 Future<void> _getScreenTime() async {
   //Checks if user has permission, if not it requests the permissions
-  if (!_hasPermission) {
+  if (!hasPermission) {
     await _requestSTPermission();
     return;
   }
@@ -375,7 +406,7 @@ Future<void> _getScreenTime() async {
     //Raw data from screentime method of platform channel 
     final Map<dynamic, dynamic> result = await platformChannel.invokeMethod('getScreenTime');
     //Convert data obtained by kotlin method to dart equivalent
-    _screenTimeData = Map<String, Map<String, String>>.from(
+    screenTimeData = Map<String, Map<String, String>>.from(
       result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
     );
     debugPrint('Got screen time!');
@@ -395,7 +426,7 @@ Future<void> _getScreenTime() async {
 Future<void> _writeScreenTimeData() async {
   //Update ref to user's doc if UID has changed
   updateUserRef();
-  if(_screenTimeData.isNotEmpty){
+  if(screenTimeData.isNotEmpty){
     double totalDaily = 0.0;
     final current = userRef.collection('appUsageCurrent');
     // Create a batch to handle multiple writes
@@ -408,7 +439,7 @@ Future<void> _writeScreenTimeData() async {
         batch.delete(doc.reference);
       }
       // Iterate through each app and its screen time
-      for (final entry in _screenTimeData.entries) {
+      for (final entry in screenTimeData.entries) {
         final appName = entry.key;
         final screenTimeHours = double.parse(entry.value['hours']!);
         final category = entry.value['category'];
