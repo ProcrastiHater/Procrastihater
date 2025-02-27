@@ -11,7 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 //Page Imports
-import 'package:app_screen_time/main.dart';
+import '/main.dart';
 
 //Global variables
 Map<String, Color> appNameToColor = {}; 
@@ -44,21 +44,24 @@ List<Color> generateDistinctColors(int count) {
 /// Name: initializeAppNameColorMapping
 ///
 /// Description: Loads all apps the user
-/// has stored in the database before
-/// mapping all apps to a distinct color
-/// provided by generateDistinctColor()
+/// has stored in the database(historical 
+/// and current) before mapping all apps 
+/// to a distinct color provided by 
+/// generateDistinctColor()
 ///*******************************
 Future<void> initializeAppNameColorMapping() async {
   updateUserRef();
   //Attempt to connect to database
   try {
-    final current = userRef.collection('appUsageHistory');
+    final currentHistory = userRef.collection('appUsageHistory');
     //Take a snapshot of all docs in appUsageHistory
-    QuerySnapshot snapshot = await current.get();
+    QuerySnapshot historySnapshot = await currentHistory.get();
     //Set for holding app Names
+
     Set<String> allAppNames = {};
-    //Loop through each doc
-    for (var doc in snapshot.docs) {
+    
+    //Loop through each doc in appUsageHistory
+    for (var doc in historySnapshot.docs) {
       //Extract weekly data from each doc
       Map<String, dynamic> weeklyData = doc.data() as Map<String, dynamic>;
       //Loop through weekly data
@@ -74,10 +77,17 @@ Future<void> initializeAppNameColorMapping() async {
               //Add app names to set
               allAppNames.add(appName);
             }
-          });
+          }
+          );
         }
-      });
+      }
+      );
     }
+
+    //Loop through each doc in appUsageHistory
+    screenTimeData.forEach((key, value) {
+      allAppNames.add(key);
+    });
     //Sorts unordered set before assigning colors to names, ensuring consistency across whole app
     List<String> sortedAppNames = allAppNames.toList()..sort();
     //Get distinct colors
