@@ -32,6 +32,13 @@ class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserve
     super.dispose();
   }
 
+///*********************************************************
+/// Name: didChangeAppLifecycleState
+/// 
+/// Description: Monitors the app's widet to detect if it has been
+/// paused or force closed. If detected it applys the point penalty
+/// and resets the timer page back to its default state
+///*********************************************************
  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (_isStudying) {
@@ -46,6 +53,12 @@ class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserve
     }
   }
 
+///*********************************************************
+/// Name: _startStudySession
+/// 
+/// Description: Sets the isStudying flag to true, begins the 
+/// stopwatch, and refreshes the UI to display the new components
+///*********************************************************
 void _startStudySession() {
     setState(() {
     _isStudying = true;
@@ -62,7 +75,13 @@ void _startStudySession() {
   });
   }
 
- Future<void> endSession() async {
+///*********************************************************
+/// Name: _endSession
+/// 
+/// Description: Sets the isStudying flag to true, begins the 
+/// stopwatch, and refreshes the UI to display the new components
+///*********************************************************
+ Future<void> _endSession() async {
     final user = auth.currentUser;
     int earnedPoints = _stopwatch.elapsed.inMinutes;
 
@@ -80,8 +99,13 @@ void _startStudySession() {
     }
   }
 
+  ///*********************************************************
+  /// Name: applyPenalty
+  /// 
+  /// Description: applys the point deduction to the user's 
+  /// firestore object.
+  ///*********************************************************
   Future<void> applyPenalty() async {
-
     final user = auth.currentUser;
     if (user != null) {
       await firestore.collection('UID').doc(user.uid).update({
@@ -90,6 +114,12 @@ void _startStudySession() {
     }
   }
 
+///*********************************************************
+/// Name: formatTime
+/// 
+/// Description: converts the stop watches duration object to
+/// a nicer looking string to display
+///*********************************************************
 String formatTime(Duration duration) {
   String hours = duration.inHours.toString().padLeft(2, '0');
   String minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
@@ -112,7 +142,7 @@ String formatTime(Duration duration) {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: endSession,
+                    onPressed: _endSession,
                     child: const Text("End Study Session"),
                   ),
                 ],
