@@ -101,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text("ProcrastiStats"),
+        //title: Text("ProcrastiStats"),
         actions: [
           // Creating little user icon you can press to view account info
           IconButton(
