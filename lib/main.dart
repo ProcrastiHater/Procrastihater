@@ -62,21 +62,17 @@ void main() async {
   //Firebase initialization
   await Firebase.initializeApp();
   //launch the main app
-  checkNotifsPermission().whenComplete((){
-    _currentToHistorical().whenComplete(() {
-      _checkSTPermission().whenComplete((){
-        _getScreenTime().whenComplete((){
-          fetchWeeklyScreenTime().whenComplete((){
-            initializeAppNameColorMapping().whenComplete((){
-              _writeScreenTimeData();
-              if(hasNotifsPermission) {
-                _startTestNotifications();
-              }
-              //Launches login screen first which returns ProcrasiHater app if success
-              runApp(const LoginScreen());
-            });
-          }); 
-        });
+  _currentToHistorical().whenComplete(() {
+    _checkSTPermission().whenComplete((){
+      _getScreenTime().whenComplete((){
+        fetchWeeklyScreenTime().whenComplete((){
+          initializeAppNameColorMapping().whenComplete((){
+            _writeScreenTimeData();
+            checkNotifsPermission();
+            //Launches login screen first which returns ProcrasiHater app if success
+            runApp(const LoginScreen());
+          });
+        }); 
       });
     });
   });
