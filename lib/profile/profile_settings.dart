@@ -13,6 +13,7 @@ import 'profile_picture_selection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:app_screen_time/main.dart';
 
 
 final CollectionReference MAIN_COLLECTION = FirebaseFirestore.instance.collection('UID');
@@ -43,7 +44,6 @@ class ProfileSettingsState extends State<ProfileSettings> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late TextEditingController _displayNameController;
   User? _user;
-
   @override
   void initState() {
     super.initState();
@@ -103,12 +103,12 @@ class ProfileSettingsState extends State<ProfileSettings> {
     Navigator.of(context).pop(); 
   }
 
-///***************************************************
-/// Name: _deleteAccount
-/// 
-/// Description: Deletes the user's account and return
-/// them to sign in screen
-///***************************************************
+  ///***************************************************
+  /// Name: _deleteAccount
+  /// 
+  /// Description: Deletes the user's account and return
+  /// them to sign in screen
+  ///***************************************************
   Future<void> _deleteAccount() async {
     try {
       await _auth.currentUser!.delete();
@@ -120,10 +120,19 @@ class ProfileSettingsState extends State<ProfileSettings> {
       );
     }
   }
+  
+  //Icon for Notification Toggles
+  static const WidgetStateProperty<Icon> thumbIcon = WidgetStateProperty<Icon>.fromMap(
+    <WidgetStatesConstraint, Icon>{
+      WidgetState.selected: Icon(Icons.check),
+      WidgetState.any: Icon(Icons.close),
+    },
+  );
 
-///***************************************************
-@override
+  ///***************************************************
+  @override
   Widget build(BuildContext context) {
+    bool _hasNotifsPermission = hasNotifsPermission;
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile Settings'),
@@ -176,6 +185,40 @@ class ProfileSettingsState extends State<ProfileSettings> {
               onPressed: _signOut,
               child: Text('Sign Out'),
             ),
+            //Buttons for Total ST Notifications
+            Text("Daily Screen Time Notifications"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: (){
+                    if (_hasNotifsPermission)
+                    {
+                      _startTotalSTNotifications();
+                    }else
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('I don\'t have permission to send notifications')),
+                      );
+                    }
+                  }, 
+                  child: Text("Turn On")
+                ),
+                ElevatedButton(
+                  onPressed: (){
+                    if (_hasNotifsPermission)
+                    {
+                      _cancelTotalSTNotifications();
+                    }else
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Notifications aren\'t on anyways, genius')),
+                      );
+                    }
+                  }, 
+                  child: Text("Turn Off"))
+              ],
+            ),
             SizedBox(height: 10),
             // Button to delete account
             ElevatedButton(
@@ -189,5 +232,36 @@ class ProfileSettingsState extends State<ProfileSettings> {
         )
       )
     );
+  }
+}
+
+///*********************************
+/// Name: _cancelTotalSTNotifications
+///   
+/// Description: Invokes method from platform channel to 
+/// stop sending the total screen time notification
+///*********************************
+Future<void> _cancelTotalSTNotifications() async {
+  try {
+    await platformChannel.invokeMethod('cancelTotalSTNotifications');
+  } on PlatformException catch (e) {
+    debugPrint("Failed to stop notifications: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: _startTotalSTNotifications
+///   
+/// Description: Invokes method from platform channel to 
+/// start sending the total screen time notification
+///*********************************
+Future<void> _startTotalSTNotifications() async {
+  if(!hasPermission) {
+    return;
+  }
+  try {
+    await platformChannel.invokeMethod('startTotalSTNotifications');
+  } on PlatformException catch (e) {
+    debugPrint("Failed to start notifications: ${e.message}");
   }
 }
