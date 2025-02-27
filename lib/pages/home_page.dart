@@ -100,7 +100,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         title: Text("ProcrastiStats"),
         actions: [
@@ -121,6 +120,37 @@ class _MyHomePageState extends State<MyHomePage> {
             },
           )
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            SizedBox(
+              height: 100,
+              child:  DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blueGrey,
+              ),
+              child: Center(child: Text("Other Pages:", style: TextStyle(color: Colors.white))),
+              ),
+            ),
+            ListTile(
+              trailing: Icon(Icons.calendar_today),
+              title: Text("Calendar"),
+              onTap:() {
+                Navigator.pushNamed(context, '/calendarPage');
+              },
+            ),
+            const Divider(),
+            ListTile(
+              trailing: Icon(Icons.school),
+              title: Text("Study Mody"),
+              onTap: () {
+                Navigator.pushNamed(context, '/studyModePage');
+              },
+            )
+          ],
+        ),
       ),
       body: Column(
         children: [ 

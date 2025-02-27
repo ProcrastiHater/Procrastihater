@@ -29,6 +29,8 @@ import 'pages/friend_page.dart';
 import 'profile/login_screen.dart';
 import 'profile/profile_picture_selection.dart';
 import 'profile/profile_settings.dart';
+import 'pages/calendar.dart';
+import 'pages/study_mode.dart';
 
 //Global Variables 
 //Native Kotlin method channel
@@ -80,6 +82,7 @@ void main() async {
   });
 }
 
+
 ///*********************************
 /// Name: MyApp
 /// 
@@ -105,7 +108,7 @@ class ProcrastiHater extends StatelessWidget {
               settings: settings,
             );
           //Home page case builds default navigation
-          case '/homePage':
+          case '/homePage': 
             return MaterialPageRoute(
               builder: (context) => HomePage(),
               settings: settings,
@@ -132,6 +135,16 @@ class ProcrastiHater extends StatelessWidget {
           case '/profilePictureSelection':
             return MaterialPageRoute(
               builder: (context) => ProfilePictureSelectionScreen(),
+              settings: settings,
+            );
+          case '/studyModePage':
+            return MaterialPageRoute(
+              builder: (context) => StudyModePage(),
+              settings: settings,
+            );
+          case '/calendarPage':
+            return MaterialPageRoute(
+              builder: (context) => CalendarPage(),
               settings: settings,
             );
           /*//Default case builds default navigation to the home page

@@ -166,7 +166,8 @@ class _ExpandedListViewState extends State<ExpandedListView> {
         );
       //Monthly list view
       case 2:
-        return Center(child: CircularProgressIndicator());
+        return Center(child: Text("Monthly Graph Display"),);
+        //Center(child: CircularProgressIndicator());
       default: 
         return Center(child: CircularProgressIndicator());
     }
