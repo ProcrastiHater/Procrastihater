@@ -44,7 +44,6 @@ class ProfileSettingsState extends State<ProfileSettings> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late TextEditingController _displayNameController;
   User? _user;
-
   @override
   void initState() {
     super.initState();
@@ -130,8 +129,6 @@ class ProfileSettingsState extends State<ProfileSettings> {
     },
   );
 
-  bool notifsOnForST = false;
-
   ///***************************************************
   @override
   Widget build(BuildContext context) {
@@ -188,34 +185,39 @@ class ProfileSettingsState extends State<ProfileSettings> {
               onPressed: _signOut,
               child: Text('Sign Out'),
             ),
-            //Toggle for Total ST Notifications
+            //Buttons for Total ST Notifications
             Text("Daily Screen Time Notifications"),
-            Switch(
-              thumbIcon: thumbIcon,
-              value: notifsOnForST, 
-              onChanged: (bool val){
-                if(!val){
-                  _cancelTotalSTNotifications();
-                  setState(() {
-                    notifsOnForST = val; //false
-                  });
-                }
-                else{
-                  if(_hasNotifsPermission){
-                    _startTotalSTNotifications();
-                    setState(() {
-                      notifsOnForST = val; //true
-                    });
-                  }else{
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('I don\'t have permission to send notifications')),
-                    );
-                    setState(() {
-                      notifsOnForST = false; //false
-                    });
-                  }
-                }
-              }
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: (){
+                    if (_hasNotifsPermission)
+                    {
+                      _startTotalSTNotifications();
+                    }else
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('I don\'t have permission to send notifications')),
+                      );
+                    }
+                  }, 
+                  child: Text("Turn On")
+                ),
+                ElevatedButton(
+                  onPressed: (){
+                    if (_hasNotifsPermission)
+                    {
+                      _cancelTotalSTNotifications();
+                    }else
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Notifications aren\'t on anyways, genius')),
+                      );
+                    }
+                  }, 
+                  child: Text("Turn Off"))
+              ],
             ),
             SizedBox(height: 10),
             // Button to delete account

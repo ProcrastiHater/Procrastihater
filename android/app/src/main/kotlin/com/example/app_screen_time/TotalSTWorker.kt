@@ -67,16 +67,16 @@ class TotalSTWorker(context: Context, workerParams: WorkerParameters) : Worker (
         val totalDaily = getTotalDaily()
         var notifText = "";
         if(totalDaily <= 3){
-            notifText += "3 or less"
+            notifText += "You've been somewhat productive, haven't you?"
         }
         else if (totalDaily <= 6){
-            notifText += "6 or less"
+            notifText += "You still have studying to do, right?"
         }
         else if (totalDaily <= 9){
             notifText += "You've clocked a full work day on your phone!"
         }
         else{
-            notifText += "More than 9"
+            notifText += "When's the last time you had a life?"
         }
         var builder = NotificationCompat.Builder(context, "ProcrastiNotif")
             .setSmallIcon(R.mipmap.ic_launcher)

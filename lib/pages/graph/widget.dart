@@ -8,16 +8,19 @@ library;
 
 //Dart Imports
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 //fl_chart imports
 import 'package:fl_chart/fl_chart.dart';
 
 //Page Imports
-import 'fetch_data.dart';
+import '/pages/graph/fetch_data.dart';
 import '/pages/graph/colors.dart';
-import '../friend_page.dart';
+import '/pages/friend_page.dart';
+import '/main.dart';
 
-List<String> availableDays = historicalData.keys.toList();
+List<String> availableApps = screenTimeData.keys.toList();
+List<String> availableDays = weeklyData.keys.toList();
 
 
 ///********************************
@@ -31,17 +34,17 @@ List<BarChartGroupData> generateWeeklyChart(Map<String, Map<String, Map<String, 
   //Return a list of bars for each day contain daily data
   return [
     for (int i= 0; i < availableDays.length; i++) 
-      generatedGroupData(i, data[availableDays[i]]!)
+      generatedWeeklyGroupData(i, data[availableDays[i]]!)
   ]; 
 }
 
 ///*********************************
-/// Name: generatedGroupData
+/// Name: generatedWeeklyGroupData
 /// 
 /// Description: Generate a stacked bar
 /// for a stacked bar chart and return it
 ///*********************************
-BarChartGroupData generatedGroupData(int index, Map<String, Map<String, dynamic>> dailyData) {
+BarChartGroupData generatedWeeklyGroupData(int index, Map<String, Map<String, dynamic>> dailyData) {
   //List to hold individual stack item(rod)
   List<BarChartRodStackItem> rodStackItems = [];
   double cumulativeHeight = 0;
@@ -73,15 +76,102 @@ BarChartGroupData generatedGroupData(int index, Map<String, Map<String, dynamic>
   );
 }
 
+///********************************
+/// Name: generateDailyChart
+/// 
+/// Description: Generate a chart in 
+/// day long segements with apps as 
+/// individual bars
 ///*********************************
-/// Name: getBarTouch
+List<BarChartGroupData> generateDailyChart(Map<String, Map<String, dynamic>> data) {
+  return [
+    for (int i= 0; i < data.length; i++) 
+      generatedDayData(i, data.keys.toList()[i], data[data.keys.toList()[i]]!)
+  ]; 
+}
+
+///*********************************
+/// Name: generatedDayData
+/// 
+/// Description: Generate a bar with 
+/// individual app data 
+///*********************************
+BarChartGroupData generatedDayData(int index, String appName,Map<String, dynamic> appData) {
+  //Return individual bars with data
+  return BarChartGroupData(
+    x: index,
+    barRods: [
+      BarChartRodData(
+        fromY: 0,
+        toY: double.parse(appData['hours'] ?? 0.0),
+        width: 15, 
+        color: appNameToColor[appName],
+        borderRadius: BorderRadius.circular(5),
+      ),
+    ],
+  );
+}
+
+///*********************************
+/// Name: getBarDayTouch
+/// 
+/// Description: Displays all the app
+/// information as a tooltip when 
+/// selecting a bar
+///*********************************
+BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function(String) onBarSelected) {
+  return BarTouchData(
+    enabled: true,
+    //Loads app data on touch of specific bar
+    touchTooltipData: BarTouchTooltipData(
+      fitInsideVertically: true,
+      fitInsideHorizontally: true,
+      getTooltipColor: (_) => Colors.blueGrey,
+      tooltipPadding: const EdgeInsets.all(8.0),
+      tooltipMargin: 8.0,
+      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+        double totalHours = rod.toY;
+        String appName = availableApps[groupIndex];
+        String? category = data[appName]?['category'];
+        return BarTooltipItem(
+          "$appName\n",
+          const TextStyle(
+            decoration: TextDecoration.none,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+          children: [
+            TextSpan(
+            text: 'Hours: $totalHours\n',
+            style: const TextStyle(
+              decoration: TextDecoration.none,
+              color: Colors.white
+              ),
+            ),
+            TextSpan(
+            text: 'Category: $category',
+            style: const TextStyle(
+              decoration: TextDecoration.none,
+              color: Colors.white
+              ),
+            ),
+          ],
+        );
+      },
+    )
+  );
+}
+
+///*********************************
+/// Name: getBarWeekTouch
 /// 
 /// Description: Display a tooltip with 
 /// the total number of hours in the day
 /// associated with the touched bar and
 /// loads listview of daily data
 ///*********************************
-BarTouchData getBarTouch(Map<String, Map<String, Map<String, dynamic>>> data, void Function(String) onDaySelected) {
+BarTouchData getBarWeekTouch(Map<String, Map<String, Map<String, dynamic>>> data, void Function(String) onDaySelected) {
   return BarTouchData(
     enabled: true,
     //Reads touch and updates the selectedDay to load list view
@@ -121,13 +211,46 @@ BarTouchData getBarTouch(Map<String, Map<String, Map<String, dynamic>>> data, vo
     )
   );
 }
+
 ///*********************************
-/// Name: bottomTiles
+/// Name: bottomDailyTiles
 /// 
-/// Description: Widget to load bottom 
-/// tiles of graph
+/// Description: Widget to load app
+/// names of apps when daily view is selected
 ///*********************************
-Widget bottomTitles(double value, TitleMeta meta) {
+Widget bottomAppTitles(double value, TitleMeta meta) {
+  const style = TextStyle(
+    decoration: TextDecoration.none,
+    fontSize: 10.0, 
+    color: Colors.black,
+  );
+  String text = availableApps[value.toInt()];
+  return SideTitleWidget(
+    meta: meta,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 70),
+          child: Text(
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        text, 
+        style: style
+      )
+        )
+      ]
+    )
+  );
+}
+
+///*********************************
+/// Name: bottomWeeklyTiles
+/// 
+/// Description: Widget to load days for 
+/// when weekly view is selected
+///*********************************
+Widget bottomDayTitles(double value, TitleMeta meta) {
   const style = TextStyle(
     decoration: TextDecoration.none,
     fontSize: 10.0, 

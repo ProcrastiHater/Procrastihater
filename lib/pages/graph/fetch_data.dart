@@ -18,7 +18,9 @@ import 'package:app_screen_time/main.dart';
 
 
 //Global Variables
-Map<String, Map<String, Map<String, dynamic>>> historicalData = {};
+Map<String, Map<String, Map<String, dynamic>>> weeklyData = {};
+//Monthly data variable placeholder
+
 //Variables for multi-week view
 List<String> availableWeekKeys = [];
 DateTime currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
@@ -49,7 +51,7 @@ Future<List<String>> getAvailableWeeks() async{
 }
 
 ///*********************************
-/// Name: fetchScreenTime
+/// Name: fetchWeeklyScreenTime
 /// 
 /// Description: Fetch the screentime 
 /// for the current week which is  
@@ -57,7 +59,7 @@ Future<List<String>> getAvailableWeeks() async{
 /// database. Data is fetched using a map
 /// of map of maps and is returned.
 ///*********************************
-Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime() async {
+Future<Map<String, Map<String, Map<String, dynamic>>>> fetchWeeklyScreenTime() async {
   //Update the reference to the user doc before accessing
   updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
@@ -104,4 +106,3 @@ Future<Map<String, Map<String, Map<String, dynamic>>>> fetchHistoricalScreenTime
   }
   return fetchedData;
 }
-

@@ -22,7 +22,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 //Page Imports
-import 'package:app_screen_time/main.dart';
+import '/pages/graph/graph.dart';
+
+import '/main.dart';
+import '/pages/graph/list_view.dart';
 import '/profile/profile_settings.dart';
 import '/pages/graph/fetch_data.dart';
 import '/pages/graph/widget.dart';
@@ -78,11 +81,17 @@ class MyHomePage extends StatefulWidget {
 /// holds main layout widget for page
 ///*********************************
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   //State management for loading list view
-  String selectedDay = "null";
-  void updateSelectedDay(String day) {
+  String selectedBar = "null";
+  int graphIndex = 0;
+  void updateSelectedBar(String bar) {
     setState(() {
-      selectedDay = day;
+      selectedBar = bar;
     });
   }
 
@@ -91,9 +100,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
-        title: Text("ProcrastiStats"),
+        //title: Text("ProcrastiStats"),
         actions: [
           // Creating little user icon you can press to view account info
           IconButton(
@@ -113,29 +121,90 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            SizedBox(
+              height: 100,
+              child:  DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blueGrey,
+              ),
+              child: Center(child: Text("Other Pages:", style: TextStyle(color: Colors.white))),
+              ),
+            ),
+            ListTile(
+              trailing: Icon(Icons.calendar_today),
+              title: Text("Calendar"),
+              onTap:() {
+                Navigator.pushNamed(context, '/calendarPage');
+              },
+            ),
+            const Divider(),
+            ListTile(
+              trailing: Icon(Icons.school),
+              title: Text("Study Mode"),
+              onTap: () {
+                Navigator.pushNamed(context, '/studyModePage');
+              },
+            )
+          ],
+        ),
+      ),
       body: Column(
-        children: [
-          
+        children: [ 
           Expanded(
             //Container holding graph in top portion of screen
             child: Scaffold(
-              body: Container(
-                padding: const EdgeInsets.all(4.0),
-                color: Colors.indigo.shade50,
-                child: GraphView(onDaySelected: updateSelectedDay),
-              ),
-             /* bottomNavigationBar: SizedBox(
+              body: [
+                //Daily Graph
+                Container(
+                  padding: const EdgeInsets.all(4.0),
+                  color: Colors.indigo.shade50,
+                  child: DailyGraphView(onBarSelected: updateSelectedBar),
+                ),
+                //Weekly Graph
+                 Container(
+                  padding: const EdgeInsets.all(4.0),
+                  color: Colors.indigo.shade50,
+                  child: WeeklyGraphView(onBarSelected: updateSelectedBar),
+                ),
+                //Monthly Graph
+                 Container(
+                  padding: const EdgeInsets.all(4.0),
+                  color: Colors.indigo.shade50,
+                  child: Center(child: Text("Monthly Graph Display"),)
+                  //MonthlyGraphView(onBarSelected: updateSelectedBar),
+                ),
+              ][graphIndex],
+              bottomNavigationBar: SizedBox(
                 height: 50,
                 child: NavigationBar(
-                  selectedIndex: 1,
+                  selectedIndex: graphIndex,
                   backgroundColor: Colors.indigo.shade50,
+                  onDestinationSelected: (int index) {
+                    setState(() {
+                      selectedBar == "null";
+                      graphIndex = index;
+                    });
+                  },
                   destinations: const <Widget>[
-                  NavigationDestination(icon: Icon(Icons.calendar_today_rounded), label: 'Daily'),
-                  NavigationDestination(icon: Icon(Icons.calendar_view_week_rounded), label: 'Weekly'),
-                  NavigationDestination(icon: Icon(Icons.calendar_month_rounded), label: 'Monthly'),
+                    NavigationDestination(
+                      icon: Icon(Icons.calendar_today_rounded), 
+                      label: 'Daily'
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.calendar_view_week_rounded), 
+                      label: 'Weekly'
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.calendar_month_rounded), 
+                      label: 'Monthly'
+                    ),
                   ],  
                 ), 
-              )   */        
+              )         
             )
           ),
           const SizedBox(height: 4.0),
@@ -144,248 +213,11 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               padding: const EdgeInsets.all(4.0),
               color: Colors.indigo.shade100,
-              child: ExpandedListView(selectedDay: selectedDay, appColors: appNameToColor),
+              child: ExpandedListView(selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-///*********************************
-/// Name: GraphView
-/// 
-/// Description: Root stateful widget
-/// for GraphView
-///*********************************
-class GraphView extends StatefulWidget {
-  final Function(String) onDaySelected;
-  const GraphView({super.key, required this.onDaySelected});
-
-  @override
-  State<GraphView> createState() => _GraphViewState();
-}
-
-///*********************************
-/// Name: _MyGraphViewState
-/// 
-/// Description: State for GraphView,
-/// builds graph and displays the current
-/// week of data with ability to see
-/// previous weeks
-///*********************************
-class _GraphViewState extends State<GraphView> {
-  String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
-  bool isLoading = false;
-  //Fetch data from the database and intialize to global variable
-  Future<void> _initializeData() async {
-    //currentDataset = DateTime.now().subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
-    final weeksToView = await getAvailableWeeks();
-    availableWeekKeys = weeksToView;
-    formattedCurrent = availableWeekKeys.last;
-    currentWeek = formattedCurrent;
-    currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-    final result = await fetchHistoricalScreenTime();
-    setState(() {
-      historicalData = result;
-      availableDays = historicalData.keys.toList();
-    });
-  }
-
-  //Wrapper for loading bar touch, 
-  BarTouchData loadTouch(Map<String, Map<String, Map<String, dynamic>>> data) {
-    return getBarTouch(data, widget.onDaySelected);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    initializeAppNameColorMapping();
-    _initializeData();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    //Display loading screen if data is not present
-    if (historicalData.isEmpty) {
-      return Center(child: CircularProgressIndicator());
-    }
-    return Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 80),
-            Expanded(
-              child: AspectRatio(
-                  aspectRatio: 1.25,
-                  //Bar chart 
-                  child: BarChart(BarChartData(
-                    alignment: BarChartAlignment.center,
-                    //Title Widgets
-                    titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                        maxIncluded: false,
-                        showTitles: true,
-                        interval: 1,
-                        reservedSize: 25,
-                        getTitlesWidget: sideTitles,
-                      )),
-                      rightTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                        maxIncluded: false,
-                        showTitles: true,
-                        interval: 1,
-                        reservedSize: 25,
-                        getTitlesWidget: sideTitles,
-                      )),
-                      topTitles: const AxisTitles(),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: bottomTitles,
-                        reservedSize: 20,
-                      )),
-                    ),
-                      //Style Widgets
-                      backgroundColor: Colors.white,
-                      borderData: FlBorderData(show: true),
-                      gridData: FlGridData(
-                      drawVerticalLine: false,
-                      show: true,
-                    ),
-                    //Functionality Widgets
-                    barTouchData: loadTouch(historicalData),
-                    barGroups: generateWeeklyChart(historicalData),
-                  ))),
-            ),
-            Row(
-              //Equal spacing between children
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                //Previous arrow button
-                IconButton(
-                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) > 0 && !isLoading
-                      ? () async {
-                        setState(() {
-                          isLoading = true;
-                        });
-                          int currentIndex = availableWeekKeys.indexOf(currentWeek);
-                          currentWeek = availableWeekKeys[currentIndex - 1];
-                          currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                          historicalData = await fetchHistoricalScreenTime();
-                          availableDays = historicalData.keys.toList();
-                          setState(() {
-                            isLoading = false;
-                          });
-                        } : null,
-                  icon: Icon(Icons.arrow_back),
-                ),
-                Text(currentWeek),
-                //Next arrow button
-                IconButton(
-                  onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) < availableWeekKeys.length - 1 && !isLoading
-                      ? () async {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          int currentIndex = availableWeekKeys.indexOf(currentWeek);
-                          currentWeek = availableWeekKeys[currentIndex + 1];
-                          currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                          historicalData = await fetchHistoricalScreenTime();
-                          availableDays = historicalData.keys.toList();
-                          setState(() {
-                            isLoading = false;
-                          });
-                        } : null,
-                  icon: Icon(Icons.arrow_forward),
-                ),
-              ],
-            ),
-          ],
-        )
-    );
-  }
-}
-
-///*********************************
-/// Name: ExpandedListView
-/// 
-/// Description: Root stateful widget
-/// for ExpandedListView
-///*********************************
-class ExpandedListView extends StatefulWidget {
-  final String selectedDay;
-  final Map<String, Color> appColors;
-  const ExpandedListView(
-      {super.key, required this.selectedDay, required this.appColors});
-  @override
-  State<ExpandedListView> createState() => _ExpandedListViewState();
-}
-
-///*********************************
-/// Name: _MyExpandedListViewState
-/// 
-/// Description: Root stateful widget
-/// for ExpandedListView
-///*********************************
-class _ExpandedListViewState extends State<ExpandedListView> {
-  @override
-  //Load text as placeholder while waiting for bar touch
-  Widget build(BuildContext context) {
-    if (widget.selectedDay == "null") {
-      return Center(
-        child: Text("Select a day to view",
-            style: const TextStyle(
-              decoration: TextDecoration.none,
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            )),
-      );
-    }
-
-    //Load loading screen if data is empty
-    if (!historicalData.containsKey(widget.selectedDay)) {
-      if (historicalData.isEmpty) {
-        return Center(child: CircularProgressIndicator());
-      }  
-      return Center(
-          child: Text("No data available for ${widget.selectedDay}",
-              style: const TextStyle(
-                decoration: TextDecoration.none,
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              )
-           )
-        );
-      }
-
-    //List view built of daily data from bar touch
-    final dayData = historicalData[widget.selectedDay]!;
-    final reversedEntries = dayData.entries.toList().reversed.toList();
-    return ListView.builder(
-      padding: EdgeInsets.zero,
-      itemCount: dayData.length,
-      itemBuilder: (context, index) {
-        final entry = reversedEntries.elementAt(index);
-        final appName = entry.key;
-        final appHours = entry.value['hours'];
-        final appType = entry.value['appType'];
-        return ListTile(
-          title: Text(
-            appName,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: widget.appColors[appName],
-            ),
-          ),
-          subtitle: Text('$appHours hours'),
-          trailing: Text(appType),
-        );
-      },
     );
   }
 }
