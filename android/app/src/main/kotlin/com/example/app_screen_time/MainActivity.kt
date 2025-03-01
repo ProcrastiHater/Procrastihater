@@ -27,7 +27,8 @@ import java.time.LocalDate
 import java.text.SimpleDateFormat
 import java.time.temporal.TemporalAdjusters
 import java.time.format.DateTimeFormatter
-
+import java.time.ZoneId
+import java.time.DayOfWeek
 //Allows access to category titles
 import android.content.pm.ApplicationInfo
 //Notification imports
@@ -44,9 +45,10 @@ import com.example.app_screen_time.BGWritesWorker
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 //Firebase imports
-import com.google.firebase.Firebase
+import com.google.firebase.*
 import com.google.firebase.firestore.*
 import com.google.firebase.auth.*
+import com.google.android.gms.tasks.Task
 
 public var screenTimeMap = mutableMapOf<String, MutableMap<String, String>>();
 
@@ -417,13 +419,17 @@ fun updateUserRef(){
 private fun currentToHistorical() {
     updateUserRef()
 
-    var fetchedData = mutableMapOf<String, Map<String, Any>>()
+    var fetchedData = mutableMapOf<String, MutableMap<String, Any>>()
 
-    Timestamp currentTime = Timestamp.now()
-    Boolean needToMoveData = false
+    val currentTime = Timestamp
+        .now()
+        .toDate()
+        .toInstant()
+        .atZone(ZoneId.of("PST"))
+        .toLocalDate()
+    var needToMoveData : Boolean = false
     //Grab data from current
-    try
-    {
+    try{
         val current = userRef.collection("appUsageCurrent");
         val currentSnap = current
             .get()
@@ -431,87 +437,119 @@ private fun currentToHistorical() {
                 //Loop to access all current screentime data from user
                 for(doc in result.getDocuments())
                 {
-                    String? docName = doc.getId()
-                    Double? hours = doc.getDouble("dailyHours")
-                    Timestamp? timestamp = doc.getTimestamp("lastUpdated")
-                    String? category = doc.getString("appType")
-                    fetchedData[docName] = mutableMapOf<String, dynamic>()
-                    if(hours != null){
+                    val docName : String = doc.getId()
+                    val hours : Double? = doc.getDouble("dailyHours")
+                    val timestamp : Timestamp? = doc.getTimestamp("lastUpdated")
+                    val category : String? = doc.getString("appType")
+                    fetchedData[docName] = mutableMapOf<String, Any>()
+                    if(hours != null && timestamp != null && category != null){
                         fetchedData[docName]!!.put("dailyHours", hours)
                         fetchedData[docName]!!.put("lastUpdated", timestamp)
                         fetchedData[docName]!!.put("appType", category)
                     }
+                    val dateUpdated = timestamp!!
+                        .toDate()
+                        .toInstant()
+                        .atZone(ZoneId.of("PST"))
+                        .toLocalDate()
                     //Check if any data needs to be written to history
-                    if (dateUpdated.compareTo(currentTime) != 0){
+                    if (dateUpdated.dayOfMonth != currentTime.dayOfMonth
+                        || dateUpdated.monthValue != currentTime.monthValue
+                        || dateUpdated.year != currentTime.year) {
                         needToMoveData = true;
                     }
                 }
+                //If any data needs to be written to history
+                if(needToMoveData) {
+                    //Create batch
+                    val batch = firestore.batch()
+                    var totalDaily : Double = 0.0
+                    var totalWeekly : Double = 0.0
+                    var histTask : Task<DocumentSnapshot>? = null
+                    var histSnapshot : DocumentSnapshot? = null
+                    val sdf = SimpleDateFormat("EEEE") //SimpleDateFormat
+                    val dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy") //DateTimeFormatter
+                    try{
+                        //Iterate through each app and its screen time
+                        for(appMap in fetchedData.entries.iterator()) {
+                            val screenTimeHours: Double = appMap.component2()["dailyHours"] as Double
+                            val timestamp: Timestamp = appMap.component2()["lastUpdated"] as Timestamp
+                            val category: String = appMap.component2()["appType"] as String
+                            val dateUpdated = timestamp!!
+                                .toDate()
+                                .toInstant()
+                                .atZone(ZoneId.of("PST"))
+                                .toLocalDate()
+                            if (dateUpdated.dayOfMonth != currentTime.dayOfMonth
+                                || dateUpdated.monthValue != currentTime.monthValue
+                                || dateUpdated.year != currentTime.year ) {
+                                //Get name of the day of the week for the last update day
+                                val timestmp = timestamp.toDate()
+                                val dayOfWeekStr = sdf.format(timestmp)
+                                //Get LocalDate for that Monday
+                                val startOfWeek = dateUpdated.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                                //Get str of date for that Monday
+                                val startOfWeekStr = startOfWeek.format(dtf)
+                                val historical = userRef.collection("appUsageHistory").document(startOfWeekStr)
+                                if(histTask == null) {
+                                    histTask = historical
+                                        .get()
+                                        .addOnSuccessListener{ result2 ->
+                                            if(totalWeekly == 0.0 && result2.contains("totalWeeklyHours"))
+                                            {
+                                                val weekly = result2.getDouble("totalWeeklyHours")
+                                                if(weekly != null)
+                                                {
+                                                    totalWeekly += weekly
+                                                }
+                                            }
+                                            histSnapshot = result2
+                                        }
+                                        .addOnFailureListener{
+                                            Log.e("BGWritesWorker", "Error getting week in history")
+                                        }
+                                }
+                                totalDaily += screenTimeHours
+                                totalWeekly += screenTimeHours
+                                batch.set(
+                                    historical,
+                                    hashMapOf(
+                                        dayOfWeekStr to hashMapOf(
+                                            appMap.component1() to hashMapOf(
+                                                "hours" to screenTimeHours,
+                                                "lastUpdated" to timestamp,
+                                                "appType" to category
+                                            ),
+                                            "totalDailyHours" to Math.round(totalDaily * 100.0) / 100.0
+                                        ),
+                                        "totalWeeklyHours" to Math.round(totalWeekly * 100.0) / 100.0
+                                    ),
+                                    SetOptions.merge()
+                                )
+                            }
+                        }
+
+                        while (!histTask!!.isSuccessful())
+                        {
+                            TimeUnit.MILLISECONDS.sleep(500)
+                        }
+                        if(histTask!!.isSuccessful())
+                        {
+                            TimeUnit.MILLISECONDS.sleep(500)
+                            batch.commit()
+                            Log.e("BGWritesWorker", "Successfully wrote screen time data to history")
+                        }
+                    } catch (e: Exception){
+                        Log.e("BGWritesWorker", "Error writing screen time data to Firestore: $e")
+                        throw e
+                    }
+                }
+                else{
+                    Log.d("BGWritesWorker", "No data needed to be written to history")
+                }
+
             }
     } catch (e: Exception) {
         Log.e("BGWritesWorker", "Error fetching screen time data from Firestore: $e")
     }
-
-        //If any data needs to be written to history
-    if(needToMoveData) {
-        //Create batch
-        val batch = firestore.batch
-        var totalDaily : Double = 0.0
-        var totalWeekly : Double = 0.0
-        val histSnapshot : DocumentSnapshot<Map<String,Any>>? = null
-        val sdf = SimpleDateFormat("EEEE") //SimpleDateFormat
-        val dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy") //DateTimeFormatter
-        try{
-            //Iterate through each app and its screen time
-            for(appMap in fetchedData.entries.iterator()) {
-                val screenTimeHours: Double = (appMap.component2()["dailyHours"])
-                val timestamp: Timestamp = (appMap.component2()["lastUpdated"])
-                val category: String = (appMap.component2()["appType"])
-                Timestamp currentTime = Timestamp . now ()
-                if (currentTime.compareTo(timestamp) != 0) {
-                    val dateUpdated = timestamp.toDate()
-                    //Get name of the day of the week for the last update day
-                    val dayOfWeekStr = sdf.format(dateUpdated)
-                    //Get LocalDate for that Monday
-                    val startOfWeek = input
-                        .toInstant()
-                        .toLocalDate()
-                        .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                    //Get str of date for that Monday
-                    val startOfWeekStr = startOfWeek.format(dtf)
-                    val historical = userRef.collection("appUsageHistory").document(startOfWeekStr)
-                    histSnapshot ?? = historical.get().await()
-                    if (totalWeekly == 0.0 && histSnapshot.exists() && histSnapshot.contains("totalWeeklyHours")) {
-                        totalWeekly = histSnapshot.getDouble("totalWeeklyHours")
-                    }
-                    totalDaily += screenTimeHours
-                    totalWeekly += screenTimeHours
-                    batch.set(
-                        historical,
-                        hashMapOf(
-                            dayOfWeekStr to hashMapOf(
-                                appMap.component1() to hashMapOf(
-                                    "hours" to screenTimeHours,
-                                    "lastUpdated" to timestamp
-                                    "appType" to category
-                                ),
-                                "totalDailyHours" to Math.round(totalDaily * 100.0) / 100.0
-                            ),
-                            "totalWeeklyHours" to Math.round(totalWeekly * 100.0) / 100.0
-                        ),
-                        SetOptions.merge()
-                    )
-                }
-            }
-
-            batch.commit().await()
-            Log.d("BGWritesWorker", "Successfully wrote screen time data to history")
-        } catch (e: Exception){
-            Log.e("BGWritesWorker", "Error writing screen time data to Firestore: $e")
-            throw e
-        }
-    }
-    else{
-        Log.d("BGWritesWorkser", "No data needed to be written to history")
-    }
-    
 }

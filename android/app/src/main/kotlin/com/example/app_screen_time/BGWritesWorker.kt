@@ -26,6 +26,7 @@ import android.app.usage.UsageStatsManager
 import com.google.firebase.*
 import com.google.firebase.firestore.*
 import com.google.firebase.auth.*
+import com.google.android.gms.tasks.Task
 //Allows access to category titles
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -98,7 +99,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
             val batch = firestore.batch()
             var totalDaily : Double = 0.0
             var totalWeekly : Double = 0.0
-            var histSnapshot : Any? = null
+            var histSnapshot : DocumentSnapshot? = null
             val sdf = SimpleDateFormat("EEEE") //SimpleDateFormat
             val dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy") //DateTimeFormatter
             try{
@@ -124,15 +125,10 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                         if(histSnapshot == null) {
                             histSnapshot = historical
                                 .get()
-                                .addOnSuccessListener{
-                                    Log.d("BGWritesWorker", "Got week in history")
-                                }
-                                .addOnFailureListener{
-                                    Log.e("BGWritesWorker", "Failed to get week in history")
-                                }
+                                .getResult()
                         }
-                        if (totalWeekly == 0.0 && histSnapshot.exists() && histSnapshot.contains("totalWeeklyHours")) {
-                            totalWeekly = histSnapshot.getDouble("totalWeeklyHours")
+                        if (totalWeekly == 0.0 && histSnapshot.contains("totalWeeklyHours")) {
+                            totalWeekly = histSnapshot.getDouble("totalWeeklyHours")!!
                         }
                         totalDaily += screenTimeHours
                         totalWeekly += screenTimeHours
@@ -142,7 +138,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                                 dayOfWeekStr to hashMapOf(
                                     appMap.component1() to hashMapOf(
                                         "hours" to screenTimeHours,
-                                        "lastUpdated" to timestamp
+                                        "lastUpdated" to timestamp,
                                         "appType" to category
                                     ),
                                     "totalDailyHours" to Math.round(totalDaily * 100.0) / 100.0
@@ -153,7 +149,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                         )
                     }
                 }
-                batch.commit().await()
+                batch.commit()
                 Log.d("BGWritesWorker", "Successfully wrote screen time data to history")
             } catch (e: Exception){
                 Log.e("BGWritesWorker", "Error writing screen time data to Firestore: $e")
