@@ -495,13 +495,23 @@ private fun currentToHistorical() {
                                     histTask = historical
                                         .get()
                                         .addOnSuccessListener{ result2 ->
-                                            if(totalWeekly == 0.0 && result2.contains("totalWeeklyHours"))
+                                            if(result2.contains("totalWeeklyHours"))
                                             {
                                                 val weekly = result2.getDouble("totalWeeklyHours")
                                                 if(weekly != null)
                                                 {
                                                     totalWeekly += weekly
+                                                    batch.set(
+                                                        historical,
+                                                        hashMapOf(
+                                                            "totalWeeklyHours" to Math.round(totalWeekly * 100.0) / 100.0
+                                                        ),
+                                                        SetOptions.merge()
+                                                    )
                                                 }
+                                                
+                                                batch.commit()
+                                                Log.d("BGWritesWorker", "Successfully wrote screen time data to history")
                                             }
                                             histSnapshot = result2
                                         }
@@ -529,16 +539,6 @@ private fun currentToHistorical() {
                             }
                         }
 
-                        while (!histTask!!.isSuccessful())
-                        {
-                            TimeUnit.MILLISECONDS.sleep(500)
-                        }
-                        if(histTask!!.isSuccessful())
-                        {
-                            TimeUnit.MILLISECONDS.sleep(500)
-                            batch.commit()
-                            Log.e("BGWritesWorker", "Successfully wrote screen time data to history")
-                        }
                     } catch (e: Exception){
                         Log.e("BGWritesWorker", "Error writing screen time data to Firestore: $e")
                         throw e
