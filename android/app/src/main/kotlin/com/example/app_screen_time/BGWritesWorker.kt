@@ -16,11 +16,14 @@ import java.util.Date
 import java.time.LocalDate
 import java.text.SimpleDateFormat
 import java.time.temporal.TemporalAdjusters
-java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter
+import java.time.Instant
+import java.time.ZoneId
+import java.time.DayOfWeek
 //Screen time usage import
 import android.app.usage.UsageStatsManager
 //Firebase imports
-import com.google.firebase.Firebase
+import com.google.firebase.*
 import com.google.firebase.firestore.*
 import com.google.firebase.auth.*
 //Allows access to category titles
@@ -53,13 +56,13 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
     /// Description: Moves data from the current collection to
     /// history in Firestore
     ///********************************************************
-    public fun currentToHistorical() {
+    private fun currentToHistorical() {
         updateUserRef()
 
-        var fetchedData = mutableMapOf<String, Map<String, Any>>()
+        var fetchedData = mutableMapOf<String, MutableMap<String, Any>>()
 
-        Timestamp currentTime = Timestamp.now()
-        Boolean needToMoveData = false
+        val currentTime : Timestamp = Timestamp.now()
+        var needToMoveData : Boolean = false
         //Grab data from current
         try{
             val current = userRef.collection("appUsageCurrent");
@@ -69,18 +72,18 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                 //Loop to access all current screentime data from user
                 for(doc in result.getDocuments())
                 {
-                    String? docName = doc.getId()
-                    Double? hours = doc.getDouble("dailyHours")
-                    Timestamp? timestamp = doc.getTimestamp("lastUpdated")
-                    String? category = doc.getString("appType")
-                    fetchedData[docName] = mutableMapOf<String, dynamic>()
-                    if(hours != null){
+                    val docName : String = doc.getId()
+                    val hours : Double? = doc.getDouble("dailyHours")
+                    val timestamp : Timestamp? = doc.getTimestamp("lastUpdated")
+                    val category : String? = doc.getString("appType")
+                    fetchedData[docName] = mutableMapOf<String, Any>()
+                    if(hours != null && timestamp != null && category != null){
                         fetchedData[docName]!!.put("dailyHours", hours)
                         fetchedData[docName]!!.put("lastUpdated", timestamp)
                         fetchedData[docName]!!.put("appType", category)
                     }
                     //Check if any data needs to be written to history
-                    if (dateUpdated.compareTo(currentTime) != 0){
+                    if (timestamp!!.compareTo(currentTime) != 0){
                         needToMoveData = true;
                     }
                 }
@@ -92,33 +95,42 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
         //If any data needs to be written to history
         if(needToMoveData) {
             //Create batch
-            val batch = firestore.batch
+            val batch = firestore.batch()
             var totalDaily : Double = 0.0
             var totalWeekly : Double = 0.0
-            val histSnapshot : DocumentSnapshot<Map<String,Any>>? = null
+            var histSnapshot : Any? = null
             val sdf = SimpleDateFormat("EEEE") //SimpleDateFormat
             val dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy") //DateTimeFormatter
             try{
                 //Iterate through each app and its screen time
                 for(appMap in fetchedData.entries.iterator()) {
-                    val screenTimeHours: Double = (appMap.component2()["dailyHours"])
-                    val timestamp: Timestamp = (appMap.component2()["lastUpdated"])
-                    val category: String = (appMap.component2()["appType"])
-                    Timestamp currentTime = Timestamp . now ()
+                    val screenTimeHours: Double = appMap.component2()["dailyHours"] as Double
+                    val timestamp: Timestamp = appMap.component2()["lastUpdated"] as Timestamp
+                    val category: String = appMap.component2()["appType"] as String
+                    val currentTime : Timestamp = Timestamp.now()
                     if (currentTime.compareTo(timestamp) != 0) {
                         val dateUpdated = timestamp.toDate()
                         //Get name of the day of the week for the last update day
                         val dayOfWeekStr = sdf.format(dateUpdated)
                         //Get LocalDate for that Monday
-                        val startOfWeek = input
+                        val startOfWeek = dateUpdated
                             .toInstant()
+                            .atZone(ZoneId.of("PST"))
                             .toLocalDate()
                             .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                         //Get str of date for that Monday
                         val startOfWeekStr = startOfWeek.format(dtf)
-                        val historical =
-                            userRef.collection("appUsageHistory").document(startOfWeekStr)
-                        histSnapshot ?? = historical.get().await()
+                        val historical = userRef.collection("appUsageHistory").document(startOfWeekStr)
+                        if(histSnapshot == null) {
+                            histSnapshot = historical
+                                .get()
+                                .addOnSuccessListener{
+                                    Log.d("BGWritesWorker", "Got week in history")
+                                }
+                                .addOnFailureListener{
+                                    Log.e("BGWritesWorker", "Failed to get week in history")
+                                }
+                        }
                         if (totalWeekly == 0.0 && histSnapshot.exists() && histSnapshot.contains("totalWeeklyHours")) {
                             totalWeekly = histSnapshot.getDouble("totalWeeklyHours")
                         }

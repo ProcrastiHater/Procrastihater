@@ -23,6 +23,11 @@ import java.util.Calendar
 import java.util.TimeZone
 import java.util.Locale
 import java.util.Date
+import java.time.LocalDate
+import java.text.SimpleDateFormat
+import java.time.temporal.TemporalAdjusters
+import java.time.format.DateTimeFormatter
+
 //Allows access to category titles
 import android.content.pm.ApplicationInfo
 //Notification imports
@@ -145,7 +150,8 @@ class MainActivity: FlutterActivity() {
                         result.success(true)
                     }
                     "curToHist" ->{
-                        c
+                        currentToHistorical()
+                        result.success(true)
                     }
                     else -> {
                         Log.e("MainActivity", "Method not implemented: ${call.method}")
