@@ -35,6 +35,7 @@ import android.app.NotificationChannel
 import androidx.work.*
 import com.example.app_screen_time.TestNotifWorker
 import com.example.app_screen_time.TotalSTWorker
+import com.example.app_screen_time.BGWritesWorker
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 //Firebase imports
@@ -81,7 +82,7 @@ class MainActivity: FlutterActivity() {
         {
             openNotificationSettings()
         }
-        startBGWrites()
+        //startBGWrites()
     }
 
     ///**********************************************
@@ -142,6 +143,9 @@ class MainActivity: FlutterActivity() {
                         WorkManager.getInstance(this).cancelUniqueWork("totalSTNotification")
                         Log.d("MainActivity", "Canceled Screen Time Notifications")
                         result.success(true)
+                    }
+                    "curToHist" ->{
+                        c
                     }
                     else -> {
                         Log.e("MainActivity", "Method not implemented: ${call.method}")
@@ -396,4 +400,112 @@ fun updateUserRef(){
     }else{
         Log.d("Kotlin", "UID did not change");
     }
+}
+
+///*******************************************************
+/// Name: currentToHistorical
+///
+/// Description: Moves data from the current collection to
+/// history in Firestore
+///********************************************************
+private fun currentToHistorical() {
+    updateUserRef()
+
+    var fetchedData = mutableMapOf<String, Map<String, Any>>()
+
+    Timestamp currentTime = Timestamp.now()
+    Boolean needToMoveData = false
+    //Grab data from current
+    try
+    {
+        val current = userRef.collection("appUsageCurrent");
+        val currentSnap = current
+            .get()
+            .addOnSuccessListener{ result ->
+                //Loop to access all current screentime data from user
+                for(doc in result.getDocuments())
+                {
+                    String? docName = doc.getId()
+                    Double? hours = doc.getDouble("dailyHours")
+                    Timestamp? timestamp = doc.getTimestamp("lastUpdated")
+                    String? category = doc.getString("appType")
+                    fetchedData[docName] = mutableMapOf<String, dynamic>()
+                    if(hours != null){
+                        fetchedData[docName]!!.put("dailyHours", hours)
+                        fetchedData[docName]!!.put("lastUpdated", timestamp)
+                        fetchedData[docName]!!.put("appType", category)
+                    }
+                    //Check if any data needs to be written to history
+                    if (dateUpdated.compareTo(currentTime) != 0){
+                        needToMoveData = true;
+                    }
+                }
+            }
+    } catch (e: Exception) {
+        Log.e("BGWritesWorker", "Error fetching screen time data from Firestore: $e")
+    }
+
+        //If any data needs to be written to history
+    if(needToMoveData) {
+        //Create batch
+        val batch = firestore.batch
+        var totalDaily : Double = 0.0
+        var totalWeekly : Double = 0.0
+        val histSnapshot : DocumentSnapshot<Map<String,Any>>? = null
+        val sdf = SimpleDateFormat("EEEE") //SimpleDateFormat
+        val dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy") //DateTimeFormatter
+        try{
+            //Iterate through each app and its screen time
+            for(appMap in fetchedData.entries.iterator()) {
+                val screenTimeHours: Double = (appMap.component2()["dailyHours"])
+                val timestamp: Timestamp = (appMap.component2()["lastUpdated"])
+                val category: String = (appMap.component2()["appType"])
+                Timestamp currentTime = Timestamp . now ()
+                if (currentTime.compareTo(timestamp) != 0) {
+                    val dateUpdated = timestamp.toDate()
+                    //Get name of the day of the week for the last update day
+                    val dayOfWeekStr = sdf.format(dateUpdated)
+                    //Get LocalDate for that Monday
+                    val startOfWeek = input
+                        .toInstant()
+                        .toLocalDate()
+                        .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                    //Get str of date for that Monday
+                    val startOfWeekStr = startOfWeek.format(dtf)
+                    val historical = userRef.collection("appUsageHistory").document(startOfWeekStr)
+                    histSnapshot ?? = historical.get().await()
+                    if (totalWeekly == 0.0 && histSnapshot.exists() && histSnapshot.contains("totalWeeklyHours")) {
+                        totalWeekly = histSnapshot.getDouble("totalWeeklyHours")
+                    }
+                    totalDaily += screenTimeHours
+                    totalWeekly += screenTimeHours
+                    batch.set(
+                        historical,
+                        hashMapOf(
+                            dayOfWeekStr to hashMapOf(
+                                appMap.component1() to hashMapOf(
+                                    "hours" to screenTimeHours,
+                                    "lastUpdated" to timestamp
+                                    "appType" to category
+                                ),
+                                "totalDailyHours" to Math.round(totalDaily * 100.0) / 100.0
+                            ),
+                            "totalWeeklyHours" to Math.round(totalWeekly * 100.0) / 100.0
+                        ),
+                        SetOptions.merge()
+                    )
+                }
+            }
+
+            batch.commit().await()
+            Log.d("BGWritesWorker", "Successfully wrote screen time data to history")
+        } catch (e: Exception){
+            Log.e("BGWritesWorker", "Error writing screen time data to Firestore: $e")
+            throw e
+        }
+    }
+    else{
+        Log.d("BGWritesWorkser", "No data needed to be written to history")
+    }
+    
 }

@@ -13,6 +13,10 @@ import java.util.Calendar
 import java.util.TimeZone
 import java.util.Locale
 import java.util.Date
+import java.time.LocalDate
+import java.text.SimpleDateFormat
+import java.time.temporal.TemporalAdjusters
+java.time.format.DateTimeFormatter
 //Screen time usage import
 import android.app.usage.UsageStatsManager
 //Firebase imports
@@ -43,6 +47,111 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
         return Result.success()
     }
 
+    ///*******************************************************
+    /// Name: currentToHistorical
+    ///
+    /// Description: Moves data from the current collection to
+    /// history in Firestore
+    ///********************************************************
+    public fun currentToHistorical() {
+        updateUserRef()
+
+        var fetchedData = mutableMapOf<String, Map<String, Any>>()
+
+        Timestamp currentTime = Timestamp.now()
+        Boolean needToMoveData = false
+        //Grab data from current
+        try{
+            val current = userRef.collection("appUsageCurrent");
+            val currentSnap = current
+            .get()
+            .addOnSuccessListener{ result ->
+                //Loop to access all current screentime data from user
+                for(doc in result.getDocuments())
+                {
+                    String? docName = doc.getId()
+                    Double? hours = doc.getDouble("dailyHours")
+                    Timestamp? timestamp = doc.getTimestamp("lastUpdated")
+                    String? category = doc.getString("appType")
+                    fetchedData[docName] = mutableMapOf<String, dynamic>()
+                    if(hours != null){
+                        fetchedData[docName]!!.put("dailyHours", hours)
+                        fetchedData[docName]!!.put("lastUpdated", timestamp)
+                        fetchedData[docName]!!.put("appType", category)
+                    }
+                    //Check if any data needs to be written to history
+                    if (dateUpdated.compareTo(currentTime) != 0){
+                        needToMoveData = true;
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("BGWritesWorker", "Error fetching screen time data from Firestore: $e")
+        }
+
+        //If any data needs to be written to history
+        if(needToMoveData) {
+            //Create batch
+            val batch = firestore.batch
+            var totalDaily : Double = 0.0
+            var totalWeekly : Double = 0.0
+            val histSnapshot : DocumentSnapshot<Map<String,Any>>? = null
+            val sdf = SimpleDateFormat("EEEE") //SimpleDateFormat
+            val dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy") //DateTimeFormatter
+            try{
+                //Iterate through each app and its screen time
+                for(appMap in fetchedData.entries.iterator()) {
+                    val screenTimeHours: Double = (appMap.component2()["dailyHours"])
+                    val timestamp: Timestamp = (appMap.component2()["lastUpdated"])
+                    val category: String = (appMap.component2()["appType"])
+                    Timestamp currentTime = Timestamp . now ()
+                    if (currentTime.compareTo(timestamp) != 0) {
+                        val dateUpdated = timestamp.toDate()
+                        //Get name of the day of the week for the last update day
+                        val dayOfWeekStr = sdf.format(dateUpdated)
+                        //Get LocalDate for that Monday
+                        val startOfWeek = input
+                            .toInstant()
+                            .toLocalDate()
+                            .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                        //Get str of date for that Monday
+                        val startOfWeekStr = startOfWeek.format(dtf)
+                        val historical =
+                            userRef.collection("appUsageHistory").document(startOfWeekStr)
+                        histSnapshot ?? = historical.get().await()
+                        if (totalWeekly == 0.0 && histSnapshot.exists() && histSnapshot.contains("totalWeeklyHours")) {
+                            totalWeekly = histSnapshot.getDouble("totalWeeklyHours")
+                        }
+                        totalDaily += screenTimeHours
+                        totalWeekly += screenTimeHours
+                        batch.set(
+                            historical,
+                            hashMapOf(
+                                dayOfWeekStr to hashMapOf(
+                                    appMap.component1() to hashMapOf(
+                                        "hours" to screenTimeHours,
+                                        "lastUpdated" to timestamp
+                                        "appType" to category
+                                    ),
+                                    "totalDailyHours" to Math.round(totalDaily * 100.0) / 100.0
+                                ),
+                                "totalWeeklyHours" to Math.round(totalWeekly * 100.0) / 100.0
+                            ),
+                            SetOptions.merge()
+                        )
+                    }
+                }
+                batch.commit().await()
+                Log.d("BGWritesWorker", "Successfully wrote screen time data to history")
+            } catch (e: Exception){
+                Log.e("BGWritesWorker", "Error writing screen time data to Firestore: $e")
+                throw e
+            }
+        }
+        else{
+            Log.d("BGWritesWorkser", "No data needed to be written to history")
+        }
+    }
 
     ///**************************************************
     /// Name: writeScreenTimeData
@@ -54,7 +163,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
     ///***************************************************
     private fun writeScreenTimeData(){
         //Update ref to user's doc if UID has changed
-        updateUserRef();
+        updateUserRef()
         if(screenTimeMap.isNotEmpty()){
             var totalDaily: Double = 0.0
             val current = userRef.collection("appUsageCurrent");
