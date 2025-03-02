@@ -184,10 +184,19 @@ class _FriendsListState extends State<FriendsList>{
                             'Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
                             style: TextStyle(color: Colors.grey), 
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.close, color: Colors.grey),
-                            onPressed: () => _deleteFriend(friendUID), 
-                          ),
+                          trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.waving_hand, color: Colors.blue),
+                              onPressed: () => {},
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close, color: Colors.grey),
+                              onPressed: () => _deleteFriend(friendUID),
+                            ),
+                          ],
+                        ),
                         );
                       },
                     );
