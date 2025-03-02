@@ -157,6 +157,18 @@ void _pokeFriend(String friendUID) async {
     return Scaffold(
       body: Column(
       children: [
+        IconButton(
+  icon: const Icon(Icons.notifications),
+  onPressed: () {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const PokeNotificationsPage(),
+    );
+  },
+),
         Padding(
           padding: const EdgeInsets.all(8),
           child:TextField(
@@ -225,6 +237,59 @@ void _pokeFriend(String friendUID) async {
           ),
        ],
       )
+    );
+  }
+}
+
+
+///*********************************************************
+/// Name: PokeNotificationsPage
+/// 
+/// Description: Class for displaying to the user who has poked
+/// them when the notifications button is pressed
+///*********************************************************
+class PokeNotificationsPage extends StatelessWidget {
+  const PokeNotificationsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Poke Notifications'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: firestore.collection('UID').doc(auth.currentUser?.uid).collection('pokes').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+
+          var pokes = snapshot.data!.docs;
+
+          if (pokes.isEmpty) {
+            return const Center(child: Text('No pokes yet!'));
+          }
+
+          return ListView.builder(
+            itemCount: pokes.length,
+            itemBuilder: (context, index) {
+              var pokeData = pokes[index].data() as Map<String, dynamic>;
+              String fromUID = pokeData['from'];
+
+              return ListTile(
+                title: Text('Poked by: $fromUID'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () async {
+                    await firestore.collection('UID').doc(auth.currentUser?.uid).collection('pokes').doc(fromUID).delete();
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
