@@ -9,6 +9,9 @@ library;
 
 //Dart Imports
 import 'dart:async';
+import 'dart:io';
+import 'package:app_screen_time/pages/graph/colors.dart';
+import 'package:app_screen_time/pages/graph/fetch_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -24,16 +27,19 @@ import 'pages/home_page.dart';
 import 'pages/leaderboard_page.dart';
 import 'pages/friend_page.dart';
 import 'profile/login_screen.dart';
-import 'friends_list.dart';
-import 'pages/calendar_page.dart';
+import 'profile/profile_picture_selection.dart';
+import 'profile/profile_settings.dart';
+import 'pages/calendar.dart';
+import 'pages/study_mode.dart';
 
 //Global Variables
 //Native Kotlin method channel
-const screenTimeChannel = MethodChannel('kotlin.methods/screentime');
+const platformChannel = MethodChannel('kotlin.methods/procrastihater');
 //Maps for reading/writing data from the database
-Map<String, Map<String, String>> _screenTimeData = {};
+Map<String, Map<String, String>> screenTimeData = {};
 //Permission variables for screen time usage permission
-bool _hasPermission = false;
+bool hasPermission = false;
+bool hasNotifsPermission = false;
 
 //Firestore Connection Variables
 final FirebaseAuth auth = FirebaseAuth.instance;
@@ -48,7 +54,8 @@ DocumentReference userRef = mainCollection.doc(uid);
 ///
 /// Description: Initializes Firebase,
 ///
-/// launches the main app
+/// launches the main app and instantiates
+/// all neccesary connections and permissions
 ///*********************************
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,91 +63,129 @@ void main() async {
   await Firebase.initializeApp();
   //launch the main app
   _currentToHistorical().whenComplete(() {
-    _checkPermission().whenComplete(() {
+    _checkSTPermission().whenComplete(() {
       _getScreenTime().whenComplete(() {
-        _writeScreenTimeData();
+        fetchWeeklyScreenTime().whenComplete(() {
+          initializeAppNameColorMapping().whenComplete(() {
+            _writeScreenTimeData();
+            checkNotifsPermission();
+            //Launches login screen first which returns ProcrasiHater app if success
+            runApp(const LoginScreen());
+          });
+        });
       });
     });
   });
-
-  runApp(const LoginScreen());
 }
 
 ///*********************************
 /// Name: MyApp
 ///
 /// Description: Root stateless widget of
-/// the app, builds and displays main page view
+/// the app, builds naviagation tree for app
 ///*********************************
 class ProcrastiHater extends StatelessWidget {
   const ProcrastiHater({super.key});
 
   @override
+  //Main material app for app
   Widget build(BuildContext context) {
-    return MaterialApp(home: MyPageView());
-  }
-}
-
-///*********************************
-/// Name: MyPageView
-///
-/// Description: Stateful widget that
-/// manages the PageView for app navigation
-///*********************************
-class MyPageView extends StatefulWidget {
-  const MyPageView({super.key});
-  @override
-  State<MyPageView> createState() => _MyPageViewState();
-}
-
-///*********************************
-/// Name: MyPageViewState
-///
-/// Description: Manages state for MyPageView,
-/// sets up PageView controller, tracks current
-/// page, and handles navigation
-///*********************************
-class _MyPageViewState extends State<MyPageView> {
-  //Controller for page navigation
-  late PageController _pageController;
-
-  //Tracks current index
-  int currentPage = 0;
-
-  //Initialize page controller and set initial page
-  @override
-  void initState() {
-    _pageController = PageController(initialPage: 1);
-    currentPage = 1;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        //PageView widget for navigation
-        body: PageView(
-      controller: _pageController,
-      //Update current page index on page change
-      onPageChanged: (index) {
-        setState(() {
-          currentPage = index;
-        });
+    return MaterialApp(
+      //Main route of the app
+      initialRoute: '/homePage',
+      //Route generation based on what the route needs to do
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          //Login screen case builds default navigation
+          case '/loginScreen':
+            return MaterialPageRoute(
+              builder: (context) => LoginScreen(),
+              settings: settings,
+            );
+          //Home page case builds default navigation
+          case '/homePage':
+            return MaterialPageRoute(
+              builder: (context) => HomePage(),
+              settings: settings,
+            );
+          //Leaderboard page case builds animated right swiping navigation
+          case '/leaderBoardPage':
+            return createSwipingRoute(LeaderBoardPage(), Offset(1.0, 0.0));
+          //Leaderboard page back case builds animated left swiping navigation
+          case '/leaderBoardPageBack':
+            return createSwipingRoute(HomePage(), Offset(-1.0, 0.0));
+          //Friends page case builds animated left swiping navigation
+          case '/friendsPage':
+            return createSwipingRoute(FriendsPage(), Offset(-1.0, 0.0));
+          //Friends page back case builds animated right swiping navigation
+          case '/friendsPageBack':
+            return createSwipingRoute(HomePage(), Offset(1.0, 0.0));
+          //Profile settings case builds default navigation
+          case '/profileSettings':
+            return MaterialPageRoute(
+              builder: (context) => ProfileSettings(),
+              settings: settings,
+            );
+          //Profile picture selection case builds default navigation
+          case '/profilePictureSelection':
+            return MaterialPageRoute(
+              builder: (context) => ProfilePictureSelectionScreen(),
+              settings: settings,
+            );
+          case '/studyModePage':
+            return MaterialPageRoute(
+              builder: (context) => StudyModePage(),
+              settings: settings,
+            );
+          case '/calendarPage':
+            return MaterialPageRoute(
+              builder: (context) => CalendarPage(),
+              settings: settings,
+            );
+          /*//Default case builds default navigation to the home page
+          default:
+            return MaterialPageRoute(
+              builder: (context) => HomePage(),
+              settings: settings,
+            );*/
+        }
       },
-      //Pages to display
-      children: const [
-        FriendsList(),
-        HomePage(),
-        HistoricalDataPage(),
-        CalendarPage(),
-      ],
-    ));
+    );
+  }
+
+  ///*********************************
+  /// Name: createSwipingRoute
+  ///
+  /// Description: Function to build the
+  /// navigation and swiping animation for
+  /// main pages of the app
+  ///*********************************
+  static Route createSwipingRoute(Widget page, Offset beginOffset) {
+    return PageRouteBuilder(
+        //Navigation for the page param
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        //Duration of the animation
+        transitionDuration: Duration(milliseconds: 400),
+        //Animation builder
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          //Animation style for swipe
+          final curvedAnimation = CurvedAnimation(
+            parent: animation,
+            curve: Curves.fastEaseInToSlowEaseOut,
+          );
+          //Tween variable for animation
+          final tween = Tween(begin: beginOffset, end: Offset.zero)
+              .chain(CurveTween(curve: Curves.fastEaseInToSlowEaseOut));
+          //Actual slide transition variable
+          return SlideTransition(
+            position: curvedAnimation.drive(tween),
+            //Fade transition for smoothness
+            child: FadeTransition(
+              opacity: curvedAnimation,
+              child: child,
+            ),
+          );
+        });
   }
 }
 
@@ -151,7 +196,6 @@ class _MyPageViewState extends State<MyPageView> {
 ///***************************************************
 void updateUserRef() {
   //Grab current UID
-
   var curUid = uid;
   //Regrab UID in case it's changed
   uid = auth.currentUser?.uid;
@@ -235,10 +279,10 @@ Future<void> _currentToHistorical() async {
           var historical =
               userRef.collection('appUsageHistory').doc(startOfWeek);
           histSnapshot ??= await historical.get();
-          if (totalWeekly == 0 &&
+          if (totalWeekly == 0.0 &&
               histSnapshot.data() != null &&
               histSnapshot.data()!.containsKey('totalWeeklyHours')) {
-            totalWeekly = histSnapshot['totalWeeklyHours'];
+            totalWeekly = histSnapshot['totalWeeklyHours'].toDouble();
           }
           totalDaily += screenTimeHours;
           totalWeekly += screenTimeHours;
@@ -252,9 +296,9 @@ Future<void> _currentToHistorical() async {
                   'lastUpdated': dateUpdated,
                   'appType': category
                 },
-                'totalDailyHours': (totalDaily * 100).round() / 100
+                'totalDailyHours': (totalDaily * 100).round().toDouble() / 100
               },
-              'totalWeeklyHours': (totalWeekly * 100).round() / 100
+              'totalWeeklyHours': (totalWeekly * 100).round().toDouble() / 100
             },
             SetOptions(merge: true),
           );
@@ -275,35 +319,81 @@ Future<void> _currentToHistorical() async {
 }
 
 ///*********************************
-/// Name: _checkPermission
+/// Name: _checkSTPermission
 ///
-/// Description: Invokes method from screentime channel
+/// Description: Invokes method from platform channel
 /// to check for screetime usage permissions
 ///*********************************
-Future<void> _checkPermission() async {
+Future<void> _checkSTPermission() async {
   try {
-    final bool hasPermission =
-        await screenTimeChannel.invokeMethod('checkPermission');
-    //setState(() {
-    _hasPermission = hasPermission;
-    // });
+    final bool _hasPermission =
+        await platformChannel.invokeMethod('checkScreenTimePermission');
+    hasPermission = _hasPermission;
   } on PlatformException catch (e) {
     debugPrint("Failed to check permission: ${e.message}");
   }
 }
 
 ///*********************************
-/// Name: _requestPermission
+/// Name: _requestSTPermission
 ///
-/// Description: Invokes method from screentime channel to
+/// Description: Invokes method from platform channel to
 /// send a request for screentime usage permissions
 ///*********************************
-Future<void> _requestPermission() async {
+Future<void> _requestSTPermission() async {
   try {
-    await screenTimeChannel.invokeMethod('requestPermission');
-    await _checkPermission();
+    await platformChannel.invokeMethod('requestScreenTimePermission');
+    await _checkSTPermission();
   } on PlatformException catch (e) {
     debugPrint("Failed to request permission: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: checkNotifsPermission
+///
+/// Description: Invokes method from platform channel
+/// to check for notification permissions
+///*********************************
+Future<void> checkNotifsPermission() async {
+  try {
+    final bool _hasNotifsPermission =
+        await platformChannel.invokeMethod('checkNotificationsPermission');
+    hasNotifsPermission = _hasNotifsPermission;
+  } on PlatformException catch (e) {
+    debugPrint("Failed to check permission: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: requestNotifsPermission
+///
+/// Description: Invokes method from platform channel to
+/// send a request for notification permissions
+///*********************************
+Future<void> requestNotifsPermission() async {
+  try {
+    await platformChannel.invokeMethod('requestNotificationsPermission');
+    await checkNotifsPermission();
+  } on PlatformException catch (e) {
+    debugPrint("Failed to request permission: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: _startTestNotifications
+///
+/// Description: Invokes method from platform channel to
+/// start sending the test notification
+///*********************************
+Future<void> _startTestNotifications() async {
+  if (!hasNotifsPermission) {
+    return;
+  }
+  try {
+    await platformChannel.invokeMethod('startTestNotifications');
+  } on PlatformException catch (e) {
+    debugPrint("Failed to start notifications: ${e.message}");
   }
 }
 
@@ -315,22 +405,20 @@ Future<void> _requestPermission() async {
 ///*********************************
 Future<void> _getScreenTime() async {
   //Checks if user has permission, if not it requests the permissions
-  if (!_hasPermission) {
-    await _requestPermission();
+  if (!hasPermission) {
+    await _requestSTPermission();
     return;
   }
 
   try {
-    //Raw data from screentime channel
+    //Raw data from screentime method of platform channel
     final Map<dynamic, dynamic> result =
-        await screenTimeChannel.invokeMethod('getScreenTime');
-    //State for writing raw data in formatted map
-    //setState(() {
-    _screenTimeData = Map<String, Map<String, String>>.from(
+        await platformChannel.invokeMethod('getScreenTime');
+    //Convert data obtained by kotlin method to dart equivalent
+    screenTimeData = Map<String, Map<String, String>>.from(
       result.map((key, value) =>
           MapEntry(key as String, Map<String, String>.from(value))),
     );
-    //});
     debugPrint('Got screen time!');
   } on PlatformException catch (e) {
     debugPrint("Failed to get screen time: ${e.message}");
@@ -348,14 +436,19 @@ Future<void> _getScreenTime() async {
 Future<void> _writeScreenTimeData() async {
   //Update ref to user's doc if UID has changed
   updateUserRef();
-  if (_screenTimeData.isNotEmpty) {
+  if (screenTimeData.isNotEmpty) {
     double totalDaily = 0.0;
     final current = userRef.collection('appUsageCurrent');
     // Create a batch to handle multiple writes
     final batch = firestore.batch();
     try {
+      //Purge old data
+      final currentSnap = await current.get();
+      for (final doc in currentSnap.docs) {
+        batch.delete(doc.reference);
+      }
       // Iterate through each app and its screen time
-      for (final entry in _screenTimeData.entries) {
+      for (final entry in screenTimeData.entries) {
         final appName = entry.key;
         final screenTimeHours = double.parse(entry.value['hours']!);
         final category = entry.value['category'];
@@ -380,7 +473,7 @@ Future<void> _writeScreenTimeData() async {
       batch.set(
         userRef,
         {
-          'totalDailyHours': (totalDaily * 100).round() / 100,
+          'totalDailyHours': (totalDaily * 100).round().toDouble() / 100,
           'lastUpdated': FieldValue.serverTimestamp()
         },
         SetOptions(merge: true),
