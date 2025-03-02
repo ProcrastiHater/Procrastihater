@@ -133,6 +133,24 @@ class _FriendsListState extends State<FriendsList>{
     );
   }  
 
+///*********************************************************
+/// Name: _pokeFriend
+/// 
+/// Description: Sends a poke to a friend by adding an entry
+/// to there firebase document under the pokes collection.
+///*********************************************************
+void _pokeFriend(String friendUID) async {
+  DocumentReference friendDocRef = _firestore.collection('UID').doc(friendUID);
+  
+  await friendDocRef.collection('pokes').doc(_auth.currentUser?.uid).set({
+    'from': _auth.currentUser?.uid,
+    'timestamp': FieldValue.serverTimestamp(),
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Poked your friend!'))
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +207,7 @@ class _FriendsListState extends State<FriendsList>{
                           children: [
                             IconButton(
                               icon: const Icon(Icons.waving_hand, color: Colors.blue),
-                              onPressed: () => {},
+                              onPressed: () => _pokeFriend(friendUID),
                             ),
                             IconButton(
                               icon: const Icon(Icons.close, color: Colors.grey),
