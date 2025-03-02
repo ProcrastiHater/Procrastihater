@@ -307,7 +307,7 @@ class MainActivity: FlutterActivity() {
             .build()
 
         //Create bg work request
-        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<BGWritesWorker>(
+        val bgWritesRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<BGWritesWorker>(
             60, TimeUnit.MINUTES
         )
             .setConstraints(constraints)
@@ -318,7 +318,7 @@ class MainActivity: FlutterActivity() {
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "BackgroundWrites",
             ExistingPeriodicWorkPolicy.REPLACE,
-            notifRequest,
+            bgWritesRequest,
         )
     }
 
