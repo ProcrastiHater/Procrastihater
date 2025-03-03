@@ -36,25 +36,6 @@ class _CalendarPageState extends State<CalendarPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
 
-  final List<Map<String, dynamic>> recurrenceOptions = [
-    {'label': 'None', 'value': null},
-    {'label': 'Weekly', 'value': Frequency.weekly},
-    {'label': 'Monthly', 'value': Frequency.monthly},
-    {'label': 'Yearly', 'value': Frequency.yearly},
-  ];
-
-  Recurrence? getRecurrenceFromSelection() {
-    for (var option in recurrenceOptions) {
-      if (option['label'] == reccurance) {
-        Frequency? frequency = option['value'];
-        return frequency != null
-            ? Recurrence(frequency: frequency, interval: 1, ocurrences: 1)
-            : null;
-      }
-    }
-    return null;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -140,38 +121,6 @@ class _CalendarPageState extends State<CalendarPage> {
               },
               child: const Text('Select Event Time'),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Checkbox(
-                  value: isAllDay,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      isAllDay = value ?? false;
-                    });
-                  },
-                ),
-                const Text('All Day Event'),
-                const Spacer(),
-                const Text('Repeats: '),
-                const SizedBox(width: 8),
-                DropdownButton<String>(
-                  value: reccurance,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      reccurance = newValue;
-                    });
-                  },
-                  items:
-                      recurrenceOptions.map<DropdownMenuItem<String>>((option) {
-                    return DropdownMenuItem<String>(
-                      value: option['label'],
-                      child: Text(option['label']),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () async {
@@ -190,7 +139,7 @@ class _CalendarPageState extends State<CalendarPage> {
               trailing: const Icon(Icons.calendar_today),
               onTap: () {
                 Add2Calendar.addEvent2Cal(
-                  buildEvent(recurrence: getRecurrenceFromSelection()),
+                  buildEvent(),
                 );
               },
             ),
