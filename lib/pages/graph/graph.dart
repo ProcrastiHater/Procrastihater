@@ -52,36 +52,29 @@ class WeeklyGraphView extends StatefulWidget {
 class _WeeklyGraphViewState extends State<WeeklyGraphView> {
   String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
   bool isLoading = false;
-  //Fetch data from the database and intialize to global variable
-  Future<void> _initializeData() async {
-    final weeksToView = await getAvailableWeeks();
-    availableWeekKeys = weeksToView;
-    formattedCurrent = availableWeekKeys.last;
-    currentWeek = formattedCurrent;
-    currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-    final result = await fetchWeeklyScreenTime();
-    setState(() {
-      weeklyData = result;
-      availableDays = weeklyData.keys.toList();
-    });
-  }
-
+  
   //Wrapper for loading bar touch, 
   BarTouchData loadTouch(Map<String, Map<String, Map<String, dynamic>>> data) {
     return getBarWeekTouch(data, widget.onBarSelected);
   }
 
+
   @override
   void initState() {
     super.initState();
-    _initializeData();
+    setState(() {
+      formattedCurrent = availableWeekKeys.last;
+      currentWeek = formattedCurrent;
+      currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
+      availableDays = weeklyData.keys.toList();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     //Display loading screen if data is not present
     if (weeklyData.isEmpty) {
-      return Center(child: CircularProgressIndicator());
+      return Center(child: Text("No data available"));
     }
     return Padding(
       padding: const EdgeInsets.all(10.0),
@@ -150,7 +143,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   int currentIndex = availableWeekKeys.indexOf(currentWeek);
                   currentWeek = availableWeekKeys[currentIndex - 1];
                   currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                  weeklyData = await fetchWeeklyScreenTime();
+                  /*weeklyData = */await fetchWeeklyScreenTime();
                   availableDays = weeklyData.keys.toList();
                   setState(() {
                     isLoading = false;
@@ -169,7 +162,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   int currentIndex = availableWeekKeys.indexOf(currentWeek);
                   currentWeek = availableWeekKeys[currentIndex + 1];
                   currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                  weeklyData = await fetchWeeklyScreenTime();
+                  /*weeklyData = */await fetchWeeklyScreenTime();
                   availableDays = weeklyData.keys.toList();
                   setState(() {
                     isLoading = false;
@@ -229,9 +222,9 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   @override
   Widget build(BuildContext context) {
     //Display loading screen if data is not present
-    if (screenTimeData.isEmpty) {
+    /*if (screenTimeData.isEmpty) {
       return Center(child: CircularProgressIndicator());
-    }
+    }*/
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
