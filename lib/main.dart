@@ -143,6 +143,11 @@ class ProcrastiHater extends StatelessWidget {
               builder: (context) => CalendarPage(),
               settings: settings,
             );
+          case '/appLimitsPage':
+            return MaterialPageRoute(
+              builder: (context) => AppLimitsPage(),
+              settings: settings,
+            );
           /*//Default case builds default navigation to the home page
           default:
             return MaterialPageRoute(
@@ -434,8 +439,7 @@ Future<void> _writeScreenTimeData() async {
     try {
       //Purge old data
       final currentSnap = await current.get();
-      for (final doc in currentSnap.docs)
-      {
+      for (final doc in currentSnap.docs) {
         batch.delete(doc.reference);
       }
       // Iterate through each app and its screen time
