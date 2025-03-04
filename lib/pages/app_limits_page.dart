@@ -7,8 +7,11 @@
 ///*********************************
 library;
 
+import 'dart:ffi';
+
 import 'package:app_screen_time/apps_list.dart';
 import 'package:app_screen_time/main.dart';
+import 'package:app_screen_time/pages/graph/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,7 +32,7 @@ class AppLimitsPage extends StatefulWidget{
 }
 
 class AppLimitsPageState extends State<AppLimitsPage>{
-  final TextEditingController _appLimitController = TextEditingController();
+  final List<TextEditingController> _appLimitControllers = List.generate(appNames.length, (int i) => TextEditingController());
   @override
   void initState() {
     super.initState();
@@ -46,13 +49,22 @@ class AppLimitsPageState extends State<AppLimitsPage>{
         itemCount: appNames.length,
         itemBuilder: (context, index){
           return ListTile(
-              leading: Text('App Icon?'),
-              title: Text(appNames[index]),
+              tileColor: Colors.indigo.shade100,
+              //leading: Text('App Icon?'),
+              title: Text(
+                appNames[index],
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: appNameToColor[appNames[index]],
+                ),
+              ),
               trailing: SizedBox(
                 width: 100,
                 child: TextField(
-                  controller: _appLimitController,
-                  decoration: InputDecoration(labelText: 'Time limit')
+                  controller: _appLimitControllers[index],
+                  decoration: InputDecoration(
+                    labelText: 'Time limit',
+                  )
                 )
               )
           );
@@ -61,3 +73,11 @@ class AppLimitsPageState extends State<AppLimitsPage>{
     );
   }
 }
+
+//Future<void> _updateAppLimit(String appName, int newLimit)
+//{
+  //updateUserRef();
+  //if(newLimit == 0){
+
+  //}
+//}
