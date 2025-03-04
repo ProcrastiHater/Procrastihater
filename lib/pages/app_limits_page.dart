@@ -7,6 +7,7 @@
 ///*********************************
 library;
 
+import 'package:app_screen_time/main.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,6 +28,6 @@ class AppLimitsPageState extends State<AppLimitsPage>{
 
   @override
   Widget build(BuildContext context) {
-
+    return Text("Placeholder");
   }
 }
