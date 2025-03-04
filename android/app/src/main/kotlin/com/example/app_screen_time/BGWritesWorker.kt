@@ -151,10 +151,9 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                                                             SetOptions.merge()
                                                         )
                                                     }
-
-                                                    batch.commit()
-                                                    Log.d("BGWritesWorker", "Successfully wrote screen time data to history")
                                                 }
+                                                batch.commit()
+                                                Log.d("BGWritesWorker", "Successfully wrote screen time data to history")
                                                 histSnapshot = result2
                                             }
                                             .addOnFailureListener{
@@ -296,7 +295,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
 
         //Sets the time range for data to be from midnight this morning to midnight tonight
         val calendar = Calendar.getInstance()
-        calendar.setTimeZone(TimeZone.getTimeZone("PST"))
+        //calendar.setTimeZone(TimeZone.getTimeZone("PST"))
         val startTime = getMidnight(calendar)
         calendar.add(Calendar.DAY_OF_YEAR, 1)
         val endTime = getMidnight(calendar)
@@ -332,6 +331,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
             }
         }
 
+        Log.d("BGWritesWorker", "Screen time data: $screenTimeMap")
         return screenTimeMap
     }
 }

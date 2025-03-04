@@ -311,7 +311,7 @@ class MainActivity: FlutterActivity() {
             60, TimeUnit.MINUTES
         )
             .setConstraints(constraints)
-            .setInitialDelay(10, TimeUnit.MINUTES)
+            .setInitialDelay(5, TimeUnit.MINUTES)
             .build()
 
         //Put work into queue
@@ -351,7 +351,7 @@ class MainActivity: FlutterActivity() {
     
         //Sets the time range for data to be from midnight this morning to midnight tonight
         val calendar = Calendar.getInstance()
-        calendar.setTimeZone(TimeZone.getTimeZone("PST"))
+        //calendar.setTimeZone(TimeZone.getTimeZone("PST"))
         val startTime = getMidnight(calendar)
         calendar.add(Calendar.DAY_OF_YEAR, 1)
         val endTime = getMidnight(calendar)
