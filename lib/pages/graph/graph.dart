@@ -222,9 +222,9 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   @override
   Widget build(BuildContext context) {
     //Display loading screen if data is not present
-    /*if (screenTimeData.isEmpty) {
-      return Center(child: CircularProgressIndicator());
-    }*/
+    if (screenTimeData.isEmpty) {
+      return Center(child: Text("No data recorded"));
+    }
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
