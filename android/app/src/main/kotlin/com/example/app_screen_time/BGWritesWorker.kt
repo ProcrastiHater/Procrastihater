@@ -48,7 +48,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
         currentToHistorical()
         getScreenTimeStats()
         writeScreenTimeData()
-        Log.d("doWork", "Screen time should be written")
+        Log.d("BGWritesWorker", "Screen time should be written")
         return Result.success()
     }
 
@@ -326,7 +326,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                     screenTimeMap[appName]!!.put("category", "Other")
                 }
             } catch (e: Exception) {
-                Log.e("MainActivity", "Error getting app info for ${stats.packageName}", e)
+                Log.e("BGWritesWorker", "Error getting app info for ${stats.packageName}", e)
                 continue
             }
         }
