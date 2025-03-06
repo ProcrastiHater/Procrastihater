@@ -36,7 +36,7 @@ class TotalSTWorker(context: Context, workerParams: WorkerParameters) : Worker (
     ///**********************************************    
     override fun doWork(): Result {
         showNotification()
-        Log.d("doWork", "Notification should be showing")
+        Log.d("TotalSTWorker", "Notification should be showing")
         return Result.success()
     }
 
@@ -119,6 +119,7 @@ class TotalSTWorker(context: Context, workerParams: WorkerParameters) : Worker (
     
         //Sets the time range for data to be from midnight this morning to midnight tonight
         val calendar = Calendar.getInstance()
+        //calendar.setTimeZone(TimeZone.getTimeZone("PST"))
         val startTime = getMidnight(calendar)
         calendar.add(Calendar.DAY_OF_YEAR, 1)
         val endTime = getMidnight(calendar)
@@ -149,7 +150,7 @@ class TotalSTWorker(context: Context, workerParams: WorkerParameters) : Worker (
                     screenTimeMap[appName]!!.put("category", "Other")
                 }
             } catch (e: Exception) {
-                Log.e("MainActivity", "Error getting app info for ${stats.packageName}", e)
+                Log.e("TotalSTWorker", "Error getting app info for ${stats.packageName}", e)
                 continue
             }
         }

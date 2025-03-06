@@ -133,12 +133,42 @@ class _FriendsListState extends State<FriendsList>{
     );
   }  
 
+///*********************************************************
+/// Name: _pokeFriend
+/// 
+/// Description: Sends a poke to a friend by adding an entry
+/// to there firebase document under the pokes collection.
+///*********************************************************
+void _pokeFriend(String friendUID) async {
+  DocumentReference friendDocRef = _firestore.collection('UID').doc(friendUID);
+  
+  await friendDocRef.collection('pokes').doc(_auth.currentUser?.uid).set({
+    'from': _auth.currentUser?.uid,
+    'timestamp': FieldValue.serverTimestamp(),
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Poked your friend!'))
+  );
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
       children: [
+        IconButton(
+  icon: const Icon(Icons.notifications),
+  onPressed: () {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const PokeNotificationsPage(),
+    );
+  },
+),
         Padding(
           padding: const EdgeInsets.all(8),
           child:TextField(
@@ -184,10 +214,19 @@ class _FriendsListState extends State<FriendsList>{
                             'Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
                             style: TextStyle(color: Colors.grey), 
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.close, color: Colors.grey),
-                            onPressed: () => _deleteFriend(friendUID), 
-                          ),
+                          trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.waving_hand, color: Colors.blue),
+                              onPressed: () => _pokeFriend(friendUID),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close, color: Colors.grey),
+                              onPressed: () => _deleteFriend(friendUID),
+                            ),
+                          ],
+                        ),
                         );
                       },
                     );
@@ -198,6 +237,59 @@ class _FriendsListState extends State<FriendsList>{
           ),
        ],
       )
+    );
+  }
+}
+
+
+///*********************************************************
+/// Name: PokeNotificationsPage
+/// 
+/// Description: Class for displaying to the user who has poked
+/// them when the notifications button is pressed
+///*********************************************************
+class PokeNotificationsPage extends StatelessWidget {
+  const PokeNotificationsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Poke Notifications'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: firestore.collection('UID').doc(auth.currentUser?.uid).collection('pokes').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+
+          var pokes = snapshot.data!.docs;
+
+          if (pokes.isEmpty) {
+            return const Center(child: Text('No pokes yet!'));
+          }
+
+          return ListView.builder(
+            itemCount: pokes.length,
+            itemBuilder: (context, index) {
+              var pokeData = pokes[index].data() as Map<String, dynamic>;
+              String fromUID = pokeData['from'];
+
+              return ListTile(
+                title: Text('Poked by: $fromUID'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () async {
+                    await firestore.collection('UID').doc(auth.currentUser?.uid).collection('pokes').doc(fromUID).delete();
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
