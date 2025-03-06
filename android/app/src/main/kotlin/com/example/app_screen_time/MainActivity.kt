@@ -42,6 +42,7 @@ import androidx.work.*
 import com.example.app_screen_time.TestNotifWorker
 import com.example.app_screen_time.TotalSTWorker
 import com.example.app_screen_time.BGWritesWorker
+import com.example.app_screen_time.AppLimitWorker
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 //Firebase imports
@@ -90,6 +91,7 @@ class MainActivity: FlutterActivity() {
             openNotificationSettings()
         }
         startBGWrites()
+        startAppLimitNotifs()
     }
 
     ///**********************************************
@@ -288,6 +290,33 @@ class MainActivity: FlutterActivity() {
         //Put work into queue
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "totalSTNotification",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            notifRequest,
+        )
+    }
+
+    ///**********************************************
+    /// Name: startAppLimitNotifs
+    /// 
+    /// Description: Starts background task for
+    /// sending app limit notifications
+    ///**********************************************
+    fun startAppLimitNotifs() {
+        // Give bg work requirements for working
+        // In this case, make it require internet connection
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        //Create bg work request
+        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<AppLimitWorker>(
+            15, TimeUnit.MINUTES
+        )
+            .setInitialDelay(5, TimeUnit.MINUTES)
+            .setConstraints(constraints)
+            .build()
+        //Put work into queue
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "appLimitNotification",
             ExistingPeriodicWorkPolicy.REPLACE,
             notifRequest,
         )
