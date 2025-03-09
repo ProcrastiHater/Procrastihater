@@ -176,6 +176,8 @@ void _pokeFriend(String friendUID) async {
           ),
           BottomNavigationBar(
           currentIndex: _selectedIndex,
+          selectedItemColor: Colors.grey[700],  
+          unselectedItemColor: Colors.grey[700],
             onTap: (index) {
               if (index == 1) { // Assuming the 'Pokes' button is at index 1
                 showModalBottomSheet(
@@ -185,7 +187,7 @@ void _pokeFriend(String friendUID) async {
                   ),
                   builder: (context) => const PokeNotificationsPage(),
                 );
-              } else if (index == 0) { // If "Add Friends" is tapped
+              } else if (index == 0) { 
             showModalBottomSheet(
               context: context,
               shape: const RoundedRectangleBorder(
@@ -193,7 +195,7 @@ void _pokeFriend(String friendUID) async {
               ),
               builder: (context) => ShowAddFriendsSheet(),
             );
-              } else if (index == 2) { // If "Add Friends" is tapped
+              } else if (index == 2) { 
             showModalBottomSheet(
               context: context,
               shape: const RoundedRectangleBorder(
@@ -209,7 +211,7 @@ void _pokeFriend(String friendUID) async {
             },
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_add_alt_1),
+                icon: Icon(Icons.person_add_alt_1_sharp),
                 label: 'Add Friends',
               ),
               BottomNavigationBarItem(
@@ -236,7 +238,6 @@ void _pokeFriend(String friendUID) async {
 /// them when the notifications button is pressed
 ///*********************************************************
 class PokeNotificationsPage extends StatelessWidget {
-
   const PokeNotificationsPage({super.key});
 
   @override
@@ -249,12 +250,17 @@ class PokeNotificationsPage extends StatelessWidget {
         title: const Text('Poke Notifications'),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: firestore.collection('UID').doc(auth.currentUser?.uid).collection('pokes').snapshots(),
+        stream: firestore
+            .collection('UID')
+            .doc(auth.currentUser?.uid)
+            .collection('pokes')
+            .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
           var pokes = snapshot.data!.docs;
-
           if (pokes.isEmpty) {
             return const Center(child: Text('No pokes yet!'));
           }
@@ -265,14 +271,36 @@ class PokeNotificationsPage extends StatelessWidget {
               var pokeData = pokes[index].data() as Map<String, dynamic>;
               String fromUID = pokeData['from'];
 
-              return ListTile(
-                title: Text('Poked by: $fromUID'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () async {
-                    await firestore.collection('UID').doc(auth.currentUser?.uid).collection('pokes').doc(fromUID).delete();
-                  },
-                ),
+              return FutureBuilder<DocumentSnapshot>(
+                future: firestore.collection('UID').doc(fromUID).get(),
+                builder: (context, userSnapshot) {
+                  if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+                    return const SizedBox(); 
+                  }
+
+                  var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                  String displayName = userData['displayName'] ?? 'Unknown';
+                  String profilePic = userData['pfp'] ?? 'https://picsum.photos/200';
+
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(profilePic)
+                    ),
+                    title: Text(displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: const Text('poked you!'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.red),
+                      onPressed: () async {
+                        await firestore
+                            .collection('UID')
+                            .doc(auth.currentUser?.uid)
+                            .collection('pokes')
+                            .doc(fromUID)
+                            .delete();
+                      },
+                    ),
+                  );
+                },
               );
             },
           );
@@ -281,7 +309,6 @@ class PokeNotificationsPage extends StatelessWidget {
     );
   }
 }
-
 ///*********************************************************
 /// Name: ShowAddFriendsSheet
 /// 
