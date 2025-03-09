@@ -73,28 +73,7 @@ class _FriendsListState extends State<FriendsList>{
     super.initState();
   }
 
-///*********************************************************
-/// Name: _handleFriendRequest
-/// 
-/// Description: Handles when a user accepts or denies a friend
-/// request.
-///*********************************************************
-void _handleFriendRequest(String friendUID, bool accept) async {
-    DocumentReference userDocRef = _firestore.collection('UID').doc(_auth.currentUser?.uid);
-    DocumentReference friendDocRef = _firestore.collection('UID').doc(friendUID);
 
-    if (accept) {
-      await userDocRef.update({
-        'friends': FieldValue.arrayUnion([friendUID]),
-      });
-      await friendDocRef.update({
-        'friends': FieldValue.arrayUnion([_auth.currentUser?.uid]),
-      });
-    }
-    else{
-    await userDocRef.collection('friend_requests').doc(friendUID).delete();
-  }
-  }
 
 
 ///*********************************************************
@@ -226,6 +205,14 @@ void _pokeFriend(String friendUID) async {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               builder: (context) => ShowAddFriendsSheet(),
+            );
+              } else if (index == 2) { // If "Add Friends" is tapped
+            showModalBottomSheet(
+              context: context,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (context) => FriendRequestsSheet(),
             );
           } else {
                 setState(() {
@@ -437,66 +424,89 @@ class FriendRequestsSheet extends StatelessWidget {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          Expanded(child: _buildRequestsList()), // List of requests
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('UID')
+                  .doc(_auth.currentUser?.uid)
+                  .collection('friendRequests')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text("No friend requests"));
+                }
+
+                var requests = snapshot.data!.docs;
+        
+                return ListView.builder(
+                  itemCount: requests.length,
+                  itemBuilder: (context, index) {
+                    var request = requests[index];
+                    var senderUID = request['from'];
+
+                    return FutureBuilder<DocumentSnapshot>(
+                      future: _firestore.collection('UID').doc(senderUID).get(),
+                      builder: (context, userSnapshot) {
+                        if (!userSnapshot.hasData) return const SizedBox.shrink();
+                      var friendData = userSnapshot.data!.data() as Map<String, dynamic>;
+                        String senderName = friendData['displayName'] ?? 'Unknown';
+                        String senderPhoto = friendData['pfp'] ?? 'https://picsum.photos/200';
+
+                        return Card(
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: NetworkImage(senderPhoto),
+                            ),
+                            title: Text(senderName),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.check, color: Colors.green),
+                                  onPressed: () => _handleFriendRequest(senderUID, true),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close, color: Colors.red),
+                                  onPressed: () => _handleFriendRequest(senderUID, false),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildRequestsList() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore
-          .collection('UID')
-          .doc(_auth.currentUser?.uid)
-          .collection('friendRequests')
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text("No friend requests"));
-        }
+  ///*********************************************************
+/// Name: _handleFriendRequest
+/// 
+/// Description: Handles when a user accepts or denies a friend
+/// request.
+///*********************************************************
+void _handleFriendRequest(String friendUID, bool accept) async {
+    DocumentReference userDocRef = _firestore.collection('UID').doc(_auth.currentUser?.uid);
+    DocumentReference friendDocRef = _firestore.collection('UID').doc(friendUID);
 
-        var requests = snapshot.data!.docs;
+    if (accept) {
+      await userDocRef.update({
+        'friends': FieldValue.arrayUnion([friendUID]),
+      });
+      await friendDocRef.update({
+        'friends': FieldValue.arrayUnion([_auth.currentUser?.uid]),
+      });
 
-        return ListView.builder(
-          itemCount: requests.length,
-          itemBuilder: (context, index) {
-            var request = requests[index];
-            var senderUID = request['from'];
-
-            return FutureBuilder<DocumentSnapshot>(
-              future: _firestore.collection('UID').doc(senderUID).get(),
-              builder: (context, userSnapshot) {
-                if (!userSnapshot.hasData) return const SizedBox.shrink();
-
-                var senderData = userSnapshot.data!;
-                var senderName = senderData['name'] ?? 'Unknown';
-                var senderPhoto = senderData['photoURL'] ?? 'https://picsum.photos/200';
-
-                return Card(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(senderPhoto),
-                    ),
-                    title: Text(senderName),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.check, color: Colors.green),
-                          onPressed: () => _acceptRequest(senderUID),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close, color: Colors.red),
-                          onPressed: () => _rejectRequest(senderUID),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
+    await userDocRef.collection('friendRequests').doc(friendUID).delete();
+    }
+    else{
+    await userDocRef.collection('friendRequests').doc(friendUID).delete();
   }
+  }
+}
