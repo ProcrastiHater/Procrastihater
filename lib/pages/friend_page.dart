@@ -74,54 +74,6 @@ class _FriendsListState extends State<FriendsList>{
   }
 
 ///*********************************************************
-/// Name: _addFriend
-/// 
-/// Description: Takes in a entered UID and searches
-/// the db for that user. If found adds to the friend list
-///*********************************************************
-  void _addFriend(String friendUID) async {
-  
-  if(friendUID == _auth.currentUser?.uid as String)
-  {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Cannot add self as friend'))
-    );
-    return; // Not AI code just bad code. Would be better to throw error in here but *shrug* it works
-  }
- 
-  CollectionReference uidCollection = _firestore.collection('UID');
-  DocumentSnapshot friendDocRef = await uidCollection.doc(friendUID).get();
-
-  if (friendDocRef.exists) { // This will be true even if the document has no fields
-    DocumentReference friendsRequests = uidCollection
-          .doc(friendUID)
-          .collection('friendRequests')
-          .doc(_auth.currentUser?.uid);
-
-      await friendsRequests.set({
-        'from': _auth.currentUser?.uid,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Friend request sent!')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User not found')),
-      );
-    }
-
-    // await userDocRef.set({
-    //   'friends': FieldValue.arrayUnion([friendUID])
-    // }, SetOptions(merge: true));
-
-    // await userDocRef.collection('friends').doc(friendUID).set({
-    //   'UID': friendUID
-    // });
-}
-
-///*********************************************************
 /// Name: _handleFriendRequest
 /// 
 /// Description: Handles when a user accepts or denies a friend
@@ -202,16 +154,6 @@ void _pokeFriend(String friendUID) async {
 ),
         Padding(
           padding: const EdgeInsets.all(8),
-          child:TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              labelText: 'Enter Friend UID',
-              suffixIcon: IconButton(
-              icon: const Icon(Icons.search),
-               onPressed: () => _addFriend(_searchController.text),
-              ),
-            ),
-          )
         ),
          Expanded(
             child: StreamBuilder<DocumentSnapshot>(
@@ -283,7 +225,7 @@ void _pokeFriend(String friendUID) async {
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              builder: (context) => const ShowAddFriendsSheet(),
+              builder: (context) => ShowAddFriendsSheet(),
             );
           } else {
                 setState(() {
@@ -375,14 +317,63 @@ class PokeNotificationsPage extends StatelessWidget {
 /// button to copy their UID.
 ///*********************************************************
 class ShowAddFriendsSheet extends StatelessWidget {
-  const ShowAddFriendsSheet({super.key});
+  ShowAddFriendsSheet({super.key});
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final FirebaseAuth auth = FirebaseAuth.instance;
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    final TextEditingController _searchController = TextEditingController();
     
+
+   ///*********************************************************
+/// Name: _addFriend
+/// 
+/// Description: Takes in a entered UID and searches
+/// the db for that user. If found adds to the friend list
+///*********************************************************
+  void _addFriend(String friendUID,  BuildContext context) async {
+  
+  if(friendUID == _auth.currentUser?.uid as String)
+  {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Cannot add self as friend'))
+    );
+    return; // Not AI code just bad code. Would be better to throw error in here but *shrug* it works
+  }
+ 
+  CollectionReference uidCollection = _firestore.collection('UID');
+  DocumentSnapshot friendDocRef = await uidCollection.doc(friendUID).get();
+
+  if (friendDocRef.exists) { // This will be true even if the document has no fields
+    DocumentReference friendsRequests = uidCollection
+          .doc(friendUID)
+          .collection('friendRequests')
+          .doc(_auth.currentUser?.uid);
+
+      await friendsRequests.set({
+        'from': _auth.currentUser?.uid,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Friend request sent!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not found')),
+      );
+    }
+
+    // await userDocRef.set({
+    //   'friends': FieldValue.arrayUnion([friendUID])
+    // }, SetOptions(merge: true));
+
+    // await userDocRef.collection('friends').doc(friendUID).set({
+    //   'UID': friendUID
+    // });
+}
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -391,7 +382,7 @@ class ShowAddFriendsSheet extends StatelessWidget {
           // User profile picture
           CircleAvatar(
             radius: 50,
-            backgroundImage: NetworkImage(auth.currentUser?.photoURL ?? 'https://picsum.photos/200/200'),
+            backgroundImage: NetworkImage(_auth.currentUser?.photoURL ?? 'https://picsum.photos/200/200'),
           ),
           const SizedBox(height: 16),
 
@@ -400,7 +391,7 @@ class ShowAddFriendsSheet extends StatelessWidget {
             icon: const Icon(Icons.copy),
             label: const Text("Copy UID"),
             onPressed: () {
-              Clipboard.setData(ClipboardData(text: auth.currentUser?.uid ?? ""));
+              Clipboard.setData(ClipboardData(text: _auth.currentUser?.uid ?? ""));
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('UID copied to clipboard!'))
               );
@@ -416,8 +407,7 @@ class ShowAddFriendsSheet extends StatelessWidget {
               suffixIcon: IconButton(
                 icon: const Icon(Icons.search),
                 onPressed: () {
-                  // Call add friend function here
-                  // Example: _addFriend(_searchController.text);
+                _addFriend(_searchController.text, context);
                 },
               ),
             ),
@@ -427,3 +417,86 @@ class ShowAddFriendsSheet extends StatelessWidget {
     );
   }
 }
+
+class FriendRequestsSheet extends StatelessWidget {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  FriendRequestsSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      height: 400, // Adjust height as needed
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "Friend Requests",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Expanded(child: _buildRequestsList()), // List of requests
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequestsList() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('UID')
+          .doc(_auth.currentUser?.uid)
+          .collection('friendRequests')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text("No friend requests"));
+        }
+
+        var requests = snapshot.data!.docs;
+
+        return ListView.builder(
+          itemCount: requests.length,
+          itemBuilder: (context, index) {
+            var request = requests[index];
+            var senderUID = request['from'];
+
+            return FutureBuilder<DocumentSnapshot>(
+              future: _firestore.collection('UID').doc(senderUID).get(),
+              builder: (context, userSnapshot) {
+                if (!userSnapshot.hasData) return const SizedBox.shrink();
+
+                var senderData = userSnapshot.data!;
+                var senderName = senderData['name'] ?? 'Unknown';
+                var senderPhoto = senderData['photoURL'] ?? 'https://picsum.photos/200';
+
+                return Card(
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(senderPhoto),
+                    ),
+                    title: Text(senderName),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.check, color: Colors.green),
+                          onPressed: () => _acceptRequest(senderUID),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.red),
+                          onPressed: () => _rejectRequest(senderUID),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
