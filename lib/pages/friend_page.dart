@@ -277,7 +277,15 @@ void _pokeFriend(String friendUID) async {
                   ),
                   builder: (context) => const PokeNotificationsPage(),
                 );
-              } else {
+              } else if (index == 0) { // If "Add Friends" is tapped
+            showModalBottomSheet(
+              context: context,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (context) => const ShowAddFriendsSheet(),
+            );
+          } else {
                 setState(() {
                   _selectedIndex = index;
                 });
@@ -285,12 +293,16 @@ void _pokeFriend(String friendUID) async {
             },
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home),
+                icon: Icon(Icons.person_add_alt_1),
                 label: 'Add Friends',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.waving_hand),
                 label: 'Pokes',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_pin_rounded),
+                label: 'Friend Requests',
               ),
             ],
           )
@@ -355,3 +367,63 @@ class PokeNotificationsPage extends StatelessWidget {
 }
 
 
+///*********************************************************
+/// Name: ShowAddFriendsSheet
+/// 
+/// Description: Displays a bottom sheet for adding friends.
+/// Contains a search bar, the user's profile picture, and a 
+/// button to copy their UID.
+///*********************************************************
+class ShowAddFriendsSheet extends StatelessWidget {
+  const ShowAddFriendsSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final TextEditingController _searchController = TextEditingController();
+    
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // User profile picture
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: NetworkImage(auth.currentUser?.photoURL ?? 'https://picsum.photos/200/200'),
+          ),
+          const SizedBox(height: 16),
+
+          // Copy UID button
+          TextButton.icon(
+            icon: const Icon(Icons.copy),
+            label: const Text("Copy UID"),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: auth.currentUser?.uid ?? ""));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('UID copied to clipboard!'))
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Friend search bar
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              labelText: 'Enter Friend UID',
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  // Call add friend function here
+                  // Example: _addFriend(_searchController.text);
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
