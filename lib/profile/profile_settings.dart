@@ -220,10 +220,6 @@ class ProfileSettingsState extends State<ProfileSettings> {
                 )
               ],
             ),
-            ElevatedButton(
-              onPressed: _currentToHistKotlin, 
-              child: Text("Migrate Data")
-            ),
             SizedBox(height: 10),
             // Button to delete account
             ElevatedButton(
@@ -251,14 +247,6 @@ Future<void> _cancelTotalSTNotifications() async {
     await platformChannel.invokeMethod('cancelTotalSTNotifications');
   } on PlatformException catch (e) {
     debugPrint("Failed to stop notifications: ${e.message}");
-  }
-}
-
-Future<void> _currentToHistKotlin() async {
-  try{
-    await platformChannel.invokeMethod('curToHist');
-  } on PlatformException catch(e){
-    debugPrint("Failed to migrate date: ${e.message}");
   }
 }
 
