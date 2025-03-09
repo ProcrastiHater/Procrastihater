@@ -65,7 +65,6 @@ class FriendsList extends StatefulWidget {
 class _FriendsListState extends State<FriendsList>{
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final TextEditingController _searchController = TextEditingController();
   int _selectedIndex = 0;
 
   @override
@@ -119,18 +118,6 @@ void _pokeFriend(String friendUID) async {
     return Scaffold(
       body: Column(
       children: [
-        IconButton(
-  icon: const Icon(Icons.notifications),
-  onPressed: () {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => const PokeNotificationsPage(),
-    );
-  },
-),
         Padding(
           padding: const EdgeInsets.all(8),
         ),
@@ -295,7 +282,6 @@ class PokeNotificationsPage extends StatelessWidget {
   }
 }
 
-
 ///*********************************************************
 /// Name: ShowAddFriendsSheet
 /// 
@@ -405,6 +391,12 @@ class ShowAddFriendsSheet extends StatelessWidget {
   }
 }
 
+///*********************************************************
+/// Name: FriendRequestsSheet
+/// 
+/// Description: Displays a bottom sheet of all pending friend
+/// requests the user has
+///*********************************************************
 class FriendRequestsSheet extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
