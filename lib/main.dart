@@ -434,8 +434,7 @@ Future<void> _writeScreenTimeData() async {
     try {
       //Purge old data
       final currentSnap = await current.get();
-      for (final doc in currentSnap.docs)
-      {
+      for (final doc in currentSnap.docs) {
         batch.delete(doc.reference);
       }
       // Iterate through each app and its screen time
