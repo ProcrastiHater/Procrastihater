@@ -122,6 +122,30 @@ class _FriendsListState extends State<FriendsList>{
 }
 
 ///*********************************************************
+/// Name: _handleFriendRequest
+/// 
+/// Description: Handles when a user accepts or denies a friend
+/// request.
+///*********************************************************
+void _handleFriendRequest(String friendUID, bool accept) async {
+    DocumentReference userDocRef = _firestore.collection('UID').doc(_auth.currentUser?.uid);
+    DocumentReference friendDocRef = _firestore.collection('UID').doc(friendUID);
+
+    if (accept) {
+      await userDocRef.update({
+        'friends': FieldValue.arrayUnion([friendUID]),
+      });
+      await friendDocRef.update({
+        'friends': FieldValue.arrayUnion([_auth.currentUser?.uid]),
+      });
+    }
+    else{
+    await userDocRef.collection('friend_requests').doc(friendUID).delete();
+  }
+  }
+
+
+///*********************************************************
 /// Name: _deleteFriend
 /// 
 /// Description: When the small X near a friend's card in the 
