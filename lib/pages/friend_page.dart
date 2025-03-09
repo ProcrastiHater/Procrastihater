@@ -161,7 +161,7 @@ void _pokeFriend(String friendUID) async {
                               onPressed: () => _pokeFriend(friendUID),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close, color: Colors.grey),
+                              icon: const Icon(Icons.close, color: Colors.red),
                               onPressed: () => _deleteFriend(friendUID),
                             ),
                           ],
@@ -190,10 +190,16 @@ void _pokeFriend(String friendUID) async {
               } else if (index == 0) { 
             showModalBottomSheet(
               context: context,
+               isScrollControlled: true,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              builder: (context) => ShowAddFriendsSheet(),
+             builder: (context) => Padding(
+    padding: EdgeInsets.only(
+      bottom: MediaQuery.of(context).viewInsets.bottom, // Adjusts for keyboard
+    ),
+    child: ShowAddFriendsSheet(),
+  ),
             );
               } else if (index == 2) { 
             showModalBottomSheet(
