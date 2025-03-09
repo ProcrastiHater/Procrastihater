@@ -90,19 +90,35 @@ class _FriendsListState extends State<FriendsList>{
   }
  
   CollectionReference uidCollection = _firestore.collection('UID');
-
   DocumentSnapshot friendDocRef = await uidCollection.doc(friendUID).get();
 
   if (friendDocRef.exists) { // This will be true even if the document has no fields
-    DocumentReference userDocRef = _firestore.collection('UID').doc(_auth.currentUser?.uid);
+    DocumentReference friendsRequests = uidCollection
+          .doc(friendUID)
+          .collection('friend_requests')
+          .doc(_auth.currentUser?.uid);
 
-    await userDocRef.set({
-      'friends': FieldValue.arrayUnion([friendUID])
-    }, SetOptions(merge: true));
+      await friendsRequests.set({
+        'from': _auth.currentUser?.uid,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
-    await userDocRef.collection('friends').doc(friendUID).set({
-      'UID': friendUID
-    });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Friend request sent!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not found')),
+      );
+    }
+
+    // await userDocRef.set({
+    //   'friends': FieldValue.arrayUnion([friendUID])
+    // }, SetOptions(merge: true));
+
+    // await userDocRef.collection('friends').doc(friendUID).set({
+    //   'UID': friendUID
+    // });
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Friend added!'))
