@@ -66,7 +66,7 @@ class _FriendsListState extends State<FriendsList>{
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _searchController = TextEditingController();
-
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -266,6 +266,34 @@ void _pokeFriend(String friendUID) async {
               },
             ),
           ),
+          BottomNavigationBar(
+          currentIndex: _selectedIndex,
+            onTap: (index) {
+              if (index == 1) { // Assuming the 'Pokes' button is at index 1
+                showModalBottomSheet(
+                  context: context,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (context) => const PokeNotificationsPage(),
+                );
+              } else {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              }
+            },
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Add Friends',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.waving_hand),
+                label: 'Pokes',
+              ),
+            ],
+          )
        ],
       )
     );
@@ -280,6 +308,7 @@ void _pokeFriend(String friendUID) async {
 /// them when the notifications button is pressed
 ///*********************************************************
 class PokeNotificationsPage extends StatelessWidget {
+
   const PokeNotificationsPage({super.key});
 
   @override
@@ -324,3 +353,5 @@ class PokeNotificationsPage extends StatelessWidget {
     );
   }
 }
+
+
