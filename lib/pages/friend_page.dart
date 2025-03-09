@@ -95,7 +95,7 @@ class _FriendsListState extends State<FriendsList>{
   if (friendDocRef.exists) { // This will be true even if the document has no fields
     DocumentReference friendsRequests = uidCollection
           .doc(friendUID)
-          .collection('friend_requests')
+          .collection('friendRequests')
           .doc(_auth.currentUser?.uid);
 
       await friendsRequests.set({
@@ -119,15 +119,6 @@ class _FriendsListState extends State<FriendsList>{
     // await userDocRef.collection('friends').doc(friendUID).set({
     //   'UID': friendUID
     // });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Friend added!'))
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User not found')),
-    );
-  }
 }
 
 ///*********************************************************
