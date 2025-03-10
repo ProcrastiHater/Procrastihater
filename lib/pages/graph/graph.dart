@@ -83,6 +83,65 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       child: Column(
         children: [
           const SizedBox(height: 60),
+          CustomDropdown.search(
+            closedHeaderPadding: EdgeInsets.all(8.0),
+            expandedHeaderPadding: EdgeInsets.all(8.0),
+            items: appNameToColor.keys.toList(), 
+            hintBuilder: (context, hint, enabled) {
+              return Text(
+                "App Search", 
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16.0,
+                  ),
+                );
+              },   
+            onChanged: (value) {            
+            }
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: CustomDropdown.multiSelect(
+                  items: categories, 
+                  overlayHeight: 475,
+                  closedHeaderPadding: EdgeInsets.all(8.0),
+                  expandedHeaderPadding: EdgeInsets.all(8.0),
+                  hintBuilder: (context, hint, enabled) {
+                    return Text(
+                      "All Categories", 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                        ),
+                    );
+                  },                
+                  onListChanged: (value) {  
+                  },
+                ),
+              ),
+              Expanded(
+                child: CustomDropdown(
+                  closedHeaderPadding: EdgeInsets.all(8.0),
+                  expandedHeaderPadding: EdgeInsets.all(8.0),
+                  items: filters, 
+                  hintBuilder: (context, hint, enabled) {
+                    return Text(
+                      "Filters", 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                        ),
+                    );
+                  },
+                  onChanged: (value) {
+                    
+                  }
+                ),
+              ),
+            ],
+          ),
           //Graph Title
           Text("Weekly Graph", style: TextStyle(fontSize: 18),),
           Expanded(
@@ -164,7 +223,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   int currentIndex = availableWeekKeys.indexOf(currentWeek);
                   currentWeek = availableWeekKeys[currentIndex + 1];
                   currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                  /*weeklyData = */await fetchWeeklyScreenTime();
+                  await fetchWeeklyScreenTime();
                   availableDays = weeklyData.keys.toList();
                   setState(() {
                     isLoading = false;
@@ -237,14 +296,42 @@ class _DailyGraphViewState extends State<DailyGraphView> {
             children: [
               Expanded(
                 child: CustomDropdown.multiSelect(
-                items: categories, 
-                initialItems: categories,
-                closedHeaderPadding: EdgeInsets.all(8.0),
-                expandedHeaderPadding: EdgeInsets.all(8.0),
-                onListChanged: (value) {  
-                },
+                  items: categories, 
+                  overlayHeight: 475,
+                  closedHeaderPadding: EdgeInsets.all(8.0),
+                  expandedHeaderPadding: EdgeInsets.all(8.0),
+                  hintBuilder: (context, hint, enabled) {
+                    return Text(
+                      "All Categories", 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                        ),
+                    );
+                  },                
+                  onListChanged: (value) {  
+                  },
+                ),
               ),
-              ),
+              Expanded(
+                child: CustomDropdown(
+                  closedHeaderPadding: EdgeInsets.all(8.0),
+                  expandedHeaderPadding: EdgeInsets.all(8.0),
+                  items: filters, 
+                  hintBuilder: (context, hint, enabled) {
+                    return Text(
+                      "Filters", 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                        ),
+                    );
+                  },
+                  onChanged: (value) {
+                    
+                  }
+                ),
+              )
             ],
           ),
           //Title for graph

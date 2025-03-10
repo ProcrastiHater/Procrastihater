@@ -170,12 +170,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: WeeklyGraphView(onBarSelected: updateSelectedBar),
                 ),
                 //Monthly Graph
-                 Container(
+                 /*Container(
                   padding: const EdgeInsets.all(4.0),
                   color: Colors.indigo.shade50,
                   child: Center(child: Text("Monthly Graph Display"),)
                   //MonthlyGraphView(onBarSelected: updateSelectedBar),
-                ),
+                ),*/
               ][graphIndex],
               bottomNavigationBar: SizedBox(
                 height: 50,
@@ -197,10 +197,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       icon: Icon(Icons.calendar_view_week_rounded), 
                       label: 'Weekly'
                     ),
-                    NavigationDestination(
+                    /*NavigationDestination(
                       icon: Icon(Icons.calendar_month_rounded), 
                       label: 'Monthly'
-                    ),
+                    ),*/
                   ],  
                 ), 
               )         

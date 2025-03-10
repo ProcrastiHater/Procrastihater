@@ -23,7 +23,7 @@ import '/main.dart';
 List<String> availableApps = screenTimeData.keys.toList();
 List<String> availableDays = weeklyData.keys.toList();
 List<String> categories = ["Social & Communication", "Productivity", "Music & Audio", "Movies & Video", "News & Magazines", "Games", "Photos & Images", "Maps & Navigation", "Accessibility"];
-
+List<String> filters = [ "Alphabet(asc)", "Alphabet(desc)", "Hours(asc)", "Hours(desc)"];
 
 ///********************************
 /// Name: generateWeeklyChart
