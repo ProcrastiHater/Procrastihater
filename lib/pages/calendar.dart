@@ -30,7 +30,7 @@ class _CalendarPageState extends State<CalendarPage> {
   String? description;
   String? location;
   String? reccurance;
-  bool? isAllDay;
+  bool? isAllDay = false;
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -56,6 +56,18 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
+  Color getColor(Set<WidgetState> states) {
+    const Set<WidgetState> interactiveStates = <WidgetState>{
+      WidgetState.pressed,
+      WidgetState.hovered,
+      WidgetState.focused,
+    };
+    if (states.any(interactiveStates.contains)) {
+      return Colors.blue;
+    }
+    return Colors.grey;
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -69,8 +81,12 @@ class _CalendarPageState extends State<CalendarPage> {
       title: title ?? 'Test event',
       description: description ?? 'example',
       location: location ?? 'Flutter app',
-      startDate: dateTime ?? DateTime.now(),
-      endDate: (dateTime ?? DateTime.now()).add(const Duration(minutes: 30)),
+      startDate: dateTimeRange != null && dateTimeRange!.isNotEmpty
+          ? dateTimeRange![0]
+          : (dateTime ?? DateTime.now()),
+      endDate: dateTimeRange != null && dateTimeRange!.length > 1
+          ? dateTimeRange![1]
+          : (dateTime ?? DateTime.now()).add(const Duration(minutes: 30)),
       allDay: isAllDay ?? false,
       recurrence: recurrence,
     );
@@ -109,29 +125,29 @@ class _CalendarPageState extends State<CalendarPage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () async {
-                final result = await showOmniDateTimePicker(
-                    context: context, is24HourMode: true);
-                setState(() {
-                  dateTime = result;
-                });
-                debugPrint('dateTime: $dateTime');
-              },
-              child: const Text('Select Event Time'),
-            ),
+            ListTile(
+                title: const Text('All Day'),
+                trailing: Checkbox(
+                  checkColor: Colors.white,
+                  fillColor: WidgetStateProperty.resolveWith(getColor),
+                  value: isAllDay,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      isAllDay = value!;
+                    });
+                  },
+                )),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () async {
                 final result = await showOmniDateTimeRangePicker(
-                    context: context, is24HourMode: false);
+                    context: context, is24HourMode: true);
                 setState(() {
                   dateTimeRange = result;
                 });
                 debugPrint('dateTime: $dateTime');
               },
-              child: const Text('Open Calendar'),
+              child: const Text('Event Times'),
             ),
             const SizedBox(height: 16),
             ListTile(
