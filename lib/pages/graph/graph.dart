@@ -12,8 +12,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-//fl_chart imports
+//Plugin imports
 import 'package:fl_chart/fl_chart.dart';
+import 'package:animated_custom_dropdown/custom_dropdown.dart';
 
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
@@ -27,6 +28,7 @@ import '/profile/profile_settings.dart';
 import '/pages/graph/fetch_data.dart';
 import '/pages/graph/widget.dart';
 import '/pages/graph/colors.dart';
+
 
 ///*********************************
 /// Name: WeeklyGraphView
@@ -143,7 +145,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   int currentIndex = availableWeekKeys.indexOf(currentWeek);
                   currentWeek = availableWeekKeys[currentIndex - 1];
                   currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                  /*weeklyData = */await fetchWeeklyScreenTime();
+                  await fetchWeeklyScreenTime();
                   availableDays = weeklyData.keys.toList();
                   setState(() {
                     isLoading = false;
@@ -230,13 +232,26 @@ class _DailyGraphViewState extends State<DailyGraphView> {
       child: Column(
         children: [
           const SizedBox(height: 60),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: CustomDropdown.multiSelect(
+                items: categories, 
+                initialItems: categories,
+                closedHeaderPadding: EdgeInsets.all(8.0),
+                expandedHeaderPadding: EdgeInsets.all(8.0),
+                onListChanged: (value) {  
+                },
+              ),
+              ),
+            ],
+          ),
           //Title for graph
           Text("Daily Graph", style: TextStyle(fontSize: 18),),
           Expanded(
             //Widget to allow scrolling of graph if it overflows the screen
             child: SingleChildScrollView(
-              //Allow tooltips to display above graph
-              //clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 //Sets a minimum size for graph

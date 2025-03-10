@@ -19,8 +19,10 @@ import '/pages/graph/colors.dart';
 import '/pages/friend_page.dart';
 import '/main.dart';
 
+//Global Variables
 List<String> availableApps = screenTimeData.keys.toList();
 List<String> availableDays = weeklyData.keys.toList();
+List<String> categories = ["Social & Communication", "Productivity", "Music & Audio", "Movies & Video", "News & Magazines", "Games", "Photos & Images", "Maps & Navigation", "Accessibility"];
 
 
 ///********************************
@@ -282,3 +284,7 @@ Widget sideTitles(double value, TitleMeta meta) {
     ),
   );
 }
+
+//List<DropdownMenuItem<Object>> getCategoryFilters() {
+  
+//}
