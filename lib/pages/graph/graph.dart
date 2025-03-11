@@ -162,8 +162,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
             children: [
               Expanded(
                 child: CustomDropdown.multiSelect(
-                   items: categories, 
-                  overlayHeight: 475,
+                  items: categories, 
+                  overlayHeight: 525,
                   closedHeaderPadding: EdgeInsets.all(8.0),
                   expandedHeaderPadding: EdgeInsets.all(8.0),
                   hintBuilder: (context, hint, enabled) {
@@ -415,7 +415,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
               Expanded(
                 child: CustomDropdown.multiSelect(
                   items: categories, 
-                  overlayHeight: 475,
+                  overlayHeight: 525,
                   closedHeaderPadding: EdgeInsets.all(8.0),
                   expandedHeaderPadding: EdgeInsets.all(8.0),
                   hintBuilder: (context, hint, enabled) {
