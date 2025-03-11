@@ -52,6 +52,7 @@ import com.google.firebase.auth.*
 import com.google.android.gms.tasks.Task
 
 public var screenTimeMap = mutableMapOf<String, MutableMap<String, String>>();
+public var prevScreenTime = mutableMapOf<String, MutableMap<String, String>>();
 
 lateinit var firestore: FirebaseFirestore
 lateinit var auth: FirebaseAuth
@@ -66,6 +67,7 @@ lateinit var userRef: DocumentReference
 /// and doing other kotlin code
 ///**********************************************
 class MainActivity: FlutterActivity() {
+    public val wm = WorkManagerInitializer.create(this)
     private val CHANNEL = "kotlin.methods/procrastihater"
     private lateinit var channel: MethodChannel
 
@@ -83,14 +85,14 @@ class MainActivity: FlutterActivity() {
         userRef = mainCollection.document(uid)
 
         //Purge old instances of notifications
-        WorkManager.getInstance().cancelAllWork()
+        wm.cancelAllWork()
         //WorkManager.getInstance().cancelUniqueWork("totalSTNotification")
         createNotificationChannel()
         if(!checkNotificationsPermission())
         {
             openNotificationSettings()
         }
-        startBGWrites()
+        //startBGWrites()
         startAppLimitNotifs()
     }
 
@@ -149,7 +151,7 @@ class MainActivity: FlutterActivity() {
                         result.success(true)
                     }
                     "cancelTotalSTNotifications" -> {
-                        WorkManager.getInstance(this).cancelUniqueWork("totalSTNotification")
+                        wm.cancelUniqueWork("totalSTNotification")
                         Log.d("MainActivity", "Canceled Screen Time Notifications")
                         result.success(true)
                     }
@@ -268,7 +270,7 @@ class MainActivity: FlutterActivity() {
         )
             .build()
         //Put work into queue
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        wm.enqueueUniquePeriodicWork(
             "testNotification",
             ExistingPeriodicWorkPolicy.REPLACE,
             notifRequest,
@@ -288,7 +290,7 @@ class MainActivity: FlutterActivity() {
         )
             .build()
         //Put work into queue
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        wm.enqueueUniquePeriodicWork(
             "totalSTNotification",
             ExistingPeriodicWorkPolicy.REPLACE,
             notifRequest,
@@ -315,7 +317,7 @@ class MainActivity: FlutterActivity() {
             .setConstraints(constraints)
             .build()
         //Put work into queue
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        wm.enqueueUniquePeriodicWork(
             "appLimitNotification",
             ExistingPeriodicWorkPolicy.REPLACE,
             notifRequest,
@@ -344,7 +346,7 @@ class MainActivity: FlutterActivity() {
             .build()
 
         //Put work into queue
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        wm.enqueueUniquePeriodicWork(
             "BackgroundWrites",
             ExistingPeriodicWorkPolicy.REPLACE,
             bgWritesRequest,
@@ -416,6 +418,7 @@ class MainActivity: FlutterActivity() {
             }
         }
     
+        prevScreenTime.putAll(screenTimeMap)
         return screenTimeMap
     }
 }
