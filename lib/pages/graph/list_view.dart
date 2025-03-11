@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 
 //Page Imports
 import '/pages/graph/fetch_data.dart';
+import '/pages/graph/graph.dart';
 import '/main.dart';
 
 
@@ -27,7 +28,8 @@ class ExpandedListView extends StatefulWidget {
   final String selectedBar;
   final Map<String, Color> appColors;
   final int graphIndex;
-  const ExpandedListView({super.key, required this.selectedBar, required this.appColors, required this.graphIndex});
+  final Map<String, Map<String, String>> dayFilteredData;
+  const ExpandedListView({super.key, required this.selectedBar, required this.appColors, required this.graphIndex, required this.dayFilteredData});
   @override
   State<ExpandedListView> createState() => _ExpandedListViewState();
 }
@@ -49,7 +51,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
           return Center(child: CircularProgressIndicator());
         } 
         //Data to be displayed 
-        final dayData = screenTimeData;
+        Map<String, Map<String, String>> dayData = widget.dayFilteredData;
         final entries = dayData.entries.toList();
         //Builder to display list
         return ListView.builder(

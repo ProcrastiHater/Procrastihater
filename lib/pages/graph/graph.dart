@@ -9,6 +9,7 @@ library;
 
 //Dart imports
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -26,9 +27,9 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import '/main.dart';
 import '/profile/profile_settings.dart';
 import '/pages/graph/fetch_data.dart';
+import '/pages/graph/list_view.dart';
 import '/pages/graph/widget.dart';
 import '/pages/graph/colors.dart';
-
 
 ///*********************************
 /// Name: WeeklyGraphView
@@ -247,7 +248,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
 ///*********************************
 class DailyGraphView extends StatefulWidget {
   final Function(String) onBarSelected;
-  const DailyGraphView({super.key, required this.onBarSelected});
+  final Function(Map<String, Map<String, String>>) onFilteredData;
+  const DailyGraphView({super.key, required this.onBarSelected, required this.onFilteredData});
 
   @override
   State<DailyGraphView> createState() => _DailyGraphViewState();
@@ -261,11 +263,15 @@ class DailyGraphView extends StatefulWidget {
 /// daily graph
 ///*********************************
 class _DailyGraphViewState extends State<DailyGraphView> {
+  Map<String, Map<String, String>> dailyData = {};
+  List<String> selectedCategories = [];
+  String? selectedFilter = "Alphabet(asc)";
 
   @override
   //Initialize colors making sure all apps are mapped to a color before displaying
   void initState() {
     super.initState();
+    dailyData = screenTimeData;
     _initializeData();
   }
 
@@ -275,17 +281,52 @@ class _DailyGraphViewState extends State<DailyGraphView> {
     });
   }
 
-  //Wrapper for loading bar touch, 
+  Map<String, Map<String, String>> filterData() {
+    Map<String, Map<String, String>> filteredData  = Map<String, Map<String, String>>.from(screenTimeData);
+    if (selectedCategories.isNotEmpty){
+      filteredData.removeWhere((key, value){
+      String? category = value['category'];
+      return category == null || !selectedCategories.contains(category);
+    }); 
+    }
+    final entries = filteredData.entries.toList();
+    switch (selectedFilter) {
+      case 'Alphabet(asc)':
+        entries.sort((a, b) =>
+          a.key.toLowerCase().compareTo(b.key.toLowerCase())
+        );
+        break;
+      case 'Alphabet(desc)':
+        entries.sort((a, b) =>
+          b.key.toLowerCase().compareTo(a.key.toLowerCase())
+        );
+        break;
+      case 'Hours(asc)':
+        entries.sort((a, b) =>
+          (a.value['hours'])!.compareTo(b.value['hours']!)
+        );
+        break;
+      case 'Hours(desc)':
+        entries.sort((a, b) =>
+          (b.value['hours'])!.compareTo(a.value['hours']!)
+        );
+        break;
+      default:
+        break;
+    }
+    return Map<String, Map<String, String>>.fromEntries(entries);  
+  }
+
+  //Wrapper for loading bar touch
   BarTouchData loadTouch(Map<String, Map<String, String>> data) {
     return getBarDayTouch(data, widget.onBarSelected);
   }
-
   @override
   Widget build(BuildContext context) {
     //Display loading screen if data is not present
-    if (screenTimeData.isEmpty) {
+    /*if (screenTimeData.isEmpty) {
       return Center(child: Text("No data recorded"));
-    }
+    }*/
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
@@ -309,7 +350,21 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                         ),
                     );
                   },                
-                  onListChanged: (value) {  
+                  onListChanged: (value) {
+                    if (value.isEmpty) {
+                      setState(() {
+                        selectedCategories = [];
+                        dailyData = screenTimeData;
+                        widget.onFilteredData(dailyData);
+                      });
+                    }
+                    else { 
+                      setState(() {
+                        selectedCategories = value;
+                        dailyData = filterData();
+                        widget.onFilteredData(dailyData);
+                      });
+                    }
                   },
                 ),
               ),
@@ -328,7 +383,11 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                     );
                   },
                   onChanged: (value) {
-                    
+                    setState(() {
+                      selectedFilter = value;
+                      dailyData = filterData();
+                      widget.onFilteredData(dailyData);
+                    });
                   }
                 ),
               )
@@ -387,8 +446,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                         show: true,
                       ),
                       //Functionality Widgets
-                      barTouchData: loadTouch(screenTimeData),
-                      barGroups: generateDailyChart(screenTimeData),
+                      barTouchData: loadTouch(dailyData),
+                      barGroups: generateDailyChart(dailyData),
                     )
                   )
                 ),
