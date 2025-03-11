@@ -39,7 +39,8 @@ import '/pages/graph/colors.dart';
 ///*********************************
 class WeeklyGraphView extends StatefulWidget {
   final Function(String) onBarSelected;
-  const WeeklyGraphView({super.key, required this.onBarSelected});
+  final Function(Map<String, Map<String, Map<String, dynamic>>>) onFilteredData;
+  const WeeklyGraphView({super.key, required this.onBarSelected, required this.onFilteredData});
 
   @override
   State<WeeklyGraphView> createState() => _WeeklyGraphViewState();
@@ -53,6 +54,9 @@ class WeeklyGraphView extends StatefulWidget {
 /// weekly graph
 ///*********************************
 class _WeeklyGraphViewState extends State<WeeklyGraphView> {
+  List<String> selectedCategories = [];
+  Map<String, Map<String, Map<String, dynamic>>> weekData = {};
+  String? selectedFilter = "";
   String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
   bool isLoading = false;
   
@@ -61,18 +65,71 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     return getBarWeekTouch(data, widget.onBarSelected);
   }
 
+  
 
   @override
   void initState() {
     super.initState();
     setState(() {
+      weekData = weeklyData;
       formattedCurrent = availableWeekKeys.last;
       currentWeek = formattedCurrent;
       currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-      availableDays = weeklyData.keys.toList();
+      availableDays = weekData.keys.toList();
     });
   }
 
+  Map<String, Map<String, Map<String, dynamic>>> filterData() {
+    Map<String, Map<String, Map<String, dynamic>>> filteredData = {};
+    weeklyData.forEach((outerKey, innerMap) {
+      Map<String, Map<String, dynamic>> newInnerMap = {};
+      innerMap.forEach((key, value) {
+        newInnerMap[key] = Map<String, dynamic>.from(value);
+      });
+      filteredData[outerKey] = newInnerMap;
+    });
+    if (selectedCategories.isNotEmpty){
+      filteredData.forEach((key, dailyData) {
+        dailyData.removeWhere((key, value){
+        String? category = value['appType'] as String?;
+        return category == null || !selectedCategories.contains(category);
+      });
+    }); 
+    }
+    /*final entries = filteredData.entries.toList();
+    switch (selectedFilter) {
+      case 'Alphabet(asc)':
+        entries.sort((a, b) =>
+          a.key.compareTo(b.key)
+        );
+        break;
+      case 'Alphabet(desc)':
+        entries.sort((a, b) =>
+          b.key.compareTo(a.key)
+        );
+        break;
+      case 'Hours(asc)':
+        entries.sort((a, b) =>
+          (a.value['hours'])!.compareTo(b.value['hours']!)
+        );
+        break;
+      case 'Hours(desc)':
+        entries.sort((a, b) =>
+          (b.value['hours'])!.compareTo(a.value['hours']!)
+        );
+        break;
+      default:
+        break;
+    }*/
+    return filteredData;//Map<String, Map<S tring, String>>.fromEntries(entries);  
+  }
+
+  void resetFilters() {
+    setState(() {
+      selectedCategories = [];
+      selectedFilter = "";
+    });
+  }
   @override
   Widget build(BuildContext context) {
     //Display loading screen if data is not present
@@ -105,7 +162,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
             children: [
               Expanded(
                 child: CustomDropdown.multiSelect(
-                  items: categories, 
+                   items: categories, 
                   overlayHeight: 475,
                   closedHeaderPadding: EdgeInsets.all(8.0),
                   expandedHeaderPadding: EdgeInsets.all(8.0),
@@ -118,7 +175,23 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                         ),
                     );
                   },                
-                  onListChanged: (value) {  
+                  onListChanged: (value) {
+                    if (value.isEmpty) {
+                      setState(() {
+                        selectedCategories = [];
+                        weekData = weeklyData;
+                        availableApps = weekData.keys.toList();
+                        widget.onFilteredData(weekData);
+                      });
+                    }
+                    else { 
+                      setState(() {
+                        selectedCategories = value;
+                        weekData = filterData();
+                        availableApps = weekData.keys.toList();
+                        widget.onFilteredData(weekData);
+                      });
+                    }
                   },
                 ),
               ),
@@ -186,8 +259,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   show: true,
                 ),
                 //Functionality Widgets
-                barTouchData: loadTouch(weeklyData),
-                barGroups: generateWeeklyChart(weeklyData),
+                barTouchData: loadTouch(weekData),
+                barGroups: generateWeeklyChart(weekData),
               )
             )
           ),
@@ -206,8 +279,10 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   currentWeek = availableWeekKeys[currentIndex - 1];
                   currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
                   await fetchWeeklyScreenTime();
-                  availableDays = weeklyData.keys.toList();
+                  weekData = weeklyData;
+                  availableDays = weekData.keys.toList();
                   setState(() {
+                    resetFilters();
                     isLoading = false;
                   });
                 } : null,
@@ -225,8 +300,10 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   currentWeek = availableWeekKeys[currentIndex + 1];
                   currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
                   await fetchWeeklyScreenTime();
-                  availableDays = weeklyData.keys.toList();
+                  weekData = weeklyData;
+                  availableDays = weekData.keys.toList();
                   setState(() {
+                    resetFilters();
                     isLoading = false;
                   });
                 } : null,
@@ -265,7 +342,7 @@ class DailyGraphView extends StatefulWidget {
 class _DailyGraphViewState extends State<DailyGraphView> {
   List<String> selectedCategories = [];
   Map<String, Map<String, String>> dailyData = {};
-  String? selectedFilter = "Alphabet(asc)";
+  String? selectedFilter = "";
 
   @override
   //Initialize colors making sure all apps are mapped to a color before displaying

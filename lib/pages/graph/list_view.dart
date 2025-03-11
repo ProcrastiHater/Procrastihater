@@ -29,7 +29,8 @@ class ExpandedListView extends StatefulWidget {
   final Map<String, Color> appColors;
   final int graphIndex;
   final Map<String, Map<String, String>> dayFilteredData;
-  const ExpandedListView({super.key, required this.selectedBar, required this.appColors, required this.graphIndex, required this.dayFilteredData});
+  final Map<String, Map<String, Map<String, dynamic>>> weekFilteredData;
+  const ExpandedListView({super.key, required this.selectedBar, required this.appColors, required this.graphIndex, required this.dayFilteredData, required this.weekFilteredData});
   @override
   State<ExpandedListView> createState() => _ExpandedListViewState();
 }

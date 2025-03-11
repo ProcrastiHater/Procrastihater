@@ -89,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
   //State management for loading list view
   String selectedBar = "null";
   Map<String, Map<String, String>> dayData = screenTimeData;
+  Map<String, Map<String, Map<String, dynamic>>> weekData = weeklyData;
   int graphIndex = 0;
   void updateSelectedBar(String bar) {
     setState(() {
@@ -98,6 +99,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void updateFilteredDayData(Map<String, Map<String, String>> data) {
     setState(() {
       dayData = data;
+    });
+  }
+  void updateFilteredWeekData(Map<String, Map<String, Map<String, dynamic>>> data) {
+    setState(() {
+      weekData = data;
     });
   }
 
@@ -173,7 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
                  Container(
                   padding: const EdgeInsets.all(4.0),
                   color: Colors.indigo.shade50,
-                  child: WeeklyGraphView(onBarSelected: updateSelectedBar),
+                  child: WeeklyGraphView(onFilteredData: updateFilteredWeekData, onBarSelected: updateSelectedBar),
                 ),
                 //Monthly Graph
                  /*Container(
@@ -218,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               padding: const EdgeInsets.all(4.0),
               color: Colors.indigo.shade100,
-              child: ExpandedListView(dayFilteredData: dayData, selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
+              child: ExpandedListView(dayFilteredData: dayData, weekFilteredData: weekData, selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
             ),
           ),
         ],
