@@ -263,8 +263,8 @@ class DailyGraphView extends StatefulWidget {
 /// daily graph
 ///*********************************
 class _DailyGraphViewState extends State<DailyGraphView> {
-  Map<String, Map<String, String>> dailyData = {};
   List<String> selectedCategories = [];
+  Map<String, Map<String, String>> dailyData = {};
   String? selectedFilter = "Alphabet(asc)";
 
   @override
@@ -293,12 +293,12 @@ class _DailyGraphViewState extends State<DailyGraphView> {
     switch (selectedFilter) {
       case 'Alphabet(asc)':
         entries.sort((a, b) =>
-          a.key.toLowerCase().compareTo(b.key.toLowerCase())
+          a.key.compareTo(b.key)
         );
         break;
       case 'Alphabet(desc)':
         entries.sort((a, b) =>
-          b.key.toLowerCase().compareTo(a.key.toLowerCase())
+          b.key.compareTo(a.key)
         );
         break;
       case 'Hours(asc)':
@@ -355,6 +355,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                       setState(() {
                         selectedCategories = [];
                         dailyData = screenTimeData;
+                        availableApps = dailyData.keys.toList();
                         widget.onFilteredData(dailyData);
                       });
                     }
@@ -362,6 +363,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                       setState(() {
                         selectedCategories = value;
                         dailyData = filterData();
+                        availableApps = dailyData.keys.toList();
                         widget.onFilteredData(dailyData);
                       });
                     }
@@ -386,6 +388,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                     setState(() {
                       selectedFilter = value;
                       dailyData = filterData();
+                      availableApps = dailyData.keys.toList();
                       widget.onFilteredData(dailyData);
                     });
                   }

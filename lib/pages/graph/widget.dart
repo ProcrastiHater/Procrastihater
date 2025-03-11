@@ -7,6 +7,7 @@
 library;
 
 //Dart Imports
+import 'package:app_screen_time/pages/graph/graph.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
