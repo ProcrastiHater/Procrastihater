@@ -23,7 +23,6 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  //DateTime? dateTime;
   List<DateTime>? dateTimeRange;
   String? title;
   String? description;
