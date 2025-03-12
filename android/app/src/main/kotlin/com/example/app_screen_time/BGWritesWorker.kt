@@ -72,7 +72,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
         var needToMoveData : Boolean = false
         //Grab data from current
         try{
-            val current = userRef.collection("appUsageCurrent");
+            val current = userRef!!.collection("appUsageCurrent");
             val currentSnap = current
                 .get()
                 .addOnSuccessListener{ result ->
@@ -132,7 +132,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                                     val startOfWeek = dateUpdated.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                                     //Get str of date for that Monday
                                     val startOfWeekStr = startOfWeek.format(dtf)
-                                    val historical = userRef.collection("appUsageHistory").document(startOfWeekStr)
+                                    val historical = userRef!!.collection("appUsageHistory").document(startOfWeekStr)
                                     if(histTask == null) {
                                         histTask = historical
                                             .get()
@@ -209,7 +209,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
         updateUserRef()
         if(screenTimeMap.isNotEmpty()){
             var totalDaily: Double = 0.0
-            val current = userRef.collection("appUsageCurrent");
+            val current = userRef!!.collection("appUsageCurrent");
             // Create a batch to handle multiple writes
             val batch = firestore.batch()
             try {
@@ -245,7 +245,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                             )
                         }
                         batch.set(
-                            userRef,
+                            userRef!!,
                             hashMapOf(
                                 "totalDailyHours" to Math.round(totalDaily * 100.0) / 100.0,
                                 "lastUpdated" to FieldValue.serverTimestamp(),

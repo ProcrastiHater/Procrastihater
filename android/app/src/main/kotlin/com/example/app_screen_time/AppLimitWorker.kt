@@ -94,7 +94,7 @@ class AppLimitWorker(context: Context, workerParams: WorkerParameters) : Worker(
         var fetchedData = mutableMapOf<String, Double>()
 
         try{
-            val limitsRef = userRef.collection("limits")
+            val limitsRef = userRef!!.collection("limits")
             val limitsSnap = limitsRef
                 .get()
                 .addOnSuccessListener{ result ->

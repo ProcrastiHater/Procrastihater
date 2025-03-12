@@ -57,8 +57,8 @@ public var prevScreenTime = mutableMapOf<String, MutableMap<String, String>>();
 lateinit var firestore: FirebaseFirestore
 lateinit var auth: FirebaseAuth
 lateinit var mainCollection: CollectionReference
-lateinit var uid: String
-lateinit var userRef: DocumentReference
+var uid: String? = null
+var userRef: DocumentReference? = null
 
 ///*********************************************
 /// Name: MainActivity
@@ -67,7 +67,7 @@ lateinit var userRef: DocumentReference
 /// and doing other kotlin code
 ///**********************************************
 class MainActivity: FlutterActivity() {
-    public val wm = WorkManagerInitializer.create(this)
+    public val wm = WorkManager.getInstance(this)
     private val CHANNEL = "kotlin.methods/procrastihater"
     private lateinit var channel: MethodChannel
 
@@ -81,8 +81,14 @@ class MainActivity: FlutterActivity() {
         firestore = Firebase.firestore
         auth = Firebase.auth
         mainCollection = firestore.collection("UID")
-        uid = auth.currentUser!!.getUid()
-        userRef = mainCollection.document(uid)
+        if(auth.currentUser != null)
+        {
+            uid = auth.currentUser!!.getUid()
+        }
+        if(uid != null)
+        {
+            userRef = mainCollection.document(uid!!)
+        }
 
         //Purge old instances of notifications
         wm.cancelAllWork()
@@ -208,9 +214,14 @@ class MainActivity: FlutterActivity() {
     /// permission for receiving notifications
     ///**********************************************
     private fun checkNotificationsPermission(): Boolean {
-        return checkSelfPermission(
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
+        if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            return checkSelfPermission(
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+        else {
+            return NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
     }
 
     ///**********************************************
@@ -432,7 +443,7 @@ fun updateUserRef(){
     var curUid = uid
     uid = auth.currentUser!!.getUid()
     if(curUid != uid){
-        userRef = mainCollection.document(uid);
+        userRef = mainCollection.document(uid!!);
         Log.d("Kotlin", "UID updated");
     }else{
         Log.d("Kotlin", "UID did not change");
