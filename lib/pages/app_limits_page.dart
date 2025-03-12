@@ -28,10 +28,16 @@ class AppLimitsPage extends StatefulWidget{
   const AppLimitsPage({super.key});
 
   @override
-  State<StatefulWidget> createState() => AppLimitsPageState();
+  State<StatefulWidget> createState() => _AppLimitsPageState();
 }
 
-class AppLimitsPageState extends State<AppLimitsPage>{
+///*********************************
+/// Name: _AppLimitsPageState
+///
+/// Description: State for AppLimitsPage,
+/// holds main layout widget for page
+///*********************************
+class _AppLimitsPageState extends State<AppLimitsPage>{
   final List<TextEditingController> _appLimitControllers = List.generate(appNames.length, (int i) => TextEditingController());
   @override
   void initState() {
@@ -51,7 +57,6 @@ class AppLimitsPageState extends State<AppLimitsPage>{
           return ListTile(
             contentPadding: EdgeInsets.only(bottom: 5, left: 10, right: 10),
             tileColor: Colors.indigo.shade100,
-            //leading: Text('App Icon?'),
             title: Text(
               appNames[index],
               style: TextStyle(
@@ -60,16 +65,23 @@ class AppLimitsPageState extends State<AppLimitsPage>{
               ),
             ),
             trailing: SizedBox(
-              width: 150,
+              width: 200,
               child: TextField(
                 controller: _appLimitControllers[index],
                 decoration: InputDecoration(
                   labelText: 'Time limit',
-                  suffixIcon: IconButton(
+                  prefixIcon: IconButton(
                     icon: Icon(
                       Icons.save
                     ),
                     onPressed: () => _updateAppLimit(appNames[index], _appLimitControllers[index].text),
+                  ),
+                  suffixIcon: IconButton(
+                    onPressed: () => _deleteAppLimit(appNames[index]), 
+                    icon: Icon(
+                      Icons.close,
+                      color: Colors.red,
+                    )
                   )
                 )
               )
@@ -80,6 +92,12 @@ class AppLimitsPageState extends State<AppLimitsPage>{
     );
   }
 
+  ///*********************************
+  /// Name: _updateAppLimit
+  ///
+  /// Description: Updates the limit
+  /// for the specific app
+  ///*********************************
   Future<void> _updateAppLimit(String appName, String newLimitStr) async {
     updateUserRef();
     int? newLimit = int.tryParse(newLimitStr);
@@ -90,24 +108,10 @@ class AppLimitsPageState extends State<AppLimitsPage>{
     }
     else{
       var limitRef = userRef.collection('limits').doc(appName);
-      if (newLimit < 0){
+      if (newLimit < 3){
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Limit must be greater than or equal to 0'))
+          const SnackBar(content: Text('Limit must be greater than or equal to 3'))
         );
-      }
-      else if (newLimit == 0){
-        try {
-          var limitDoc = await limitRef.get();
-          //Delete limit if it already exists
-          if (limitDoc.exists) {
-            limitRef.delete();
-          } else {
-            //Print "Limit doesn't exist yet" or something
-          }
-        }
-        catch(e){
-          debugPrint("Error deleting limit: $e");
-        }
       }
       else{
         try {
@@ -120,6 +124,29 @@ class AppLimitsPageState extends State<AppLimitsPage>{
           debugPrint("Error setting limit: $e");
         }
       }
+    }
+  }
+
+  ///*********************************
+  /// Name: _deleteAppLimit
+  ///
+  /// Description: Deletes the limit for
+  /// the given app
+  ///*********************************
+  Future<void> _deleteAppLimit(String appName) async {
+    updateUserRef();
+    try {
+      var limitRef = userRef.collection('limits').doc(appName);
+      var limitDoc = await limitRef.get();
+      //Delete limit if it already exists
+      if (limitDoc.exists) {
+        limitRef.delete();
+      } else {
+        //Print "Limit doesn't exist yet" or something
+      }
+    }
+    catch(e){
+      debugPrint("Error deleting limit: $e");
     }
   }
 }

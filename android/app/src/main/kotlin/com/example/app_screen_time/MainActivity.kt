@@ -98,7 +98,7 @@ class MainActivity: FlutterActivity() {
         {
             openNotificationSettings()
         }
-        //startBGWrites()
+        startBGWrites()
         startAppLimitNotifs()
     }
 

@@ -57,8 +57,6 @@ class AppLimitWorker(context: Context, workerParams: WorkerParameters) : Worker(
     /// displaying the app limit notification
     ///**********************************************    
     private fun showNotification(){
-        getScreenTimeStats()
-        
         for(app in limits.entries.iterator())
         {
             if (screenTimeMap[app.component1()] != null)
@@ -69,10 +67,9 @@ class AppLimitWorker(context: Context, workerParams: WorkerParameters) : Worker(
                     prevhours = prevScreenTime[app.component1()]!!["hours"]!!.toDouble()
                 }
                 val hours = screenTimeMap[app.component1()]!!["hours"]!!.toDouble()
-                Log.d("AppLimitWorker", "Limit: ${app.component2()}")
-                Log.d("AppLimitWorker", "Cur Hours: $hours")
                 Log.d("AppLimitWorker", "Prev Hours: $prevhours")
-                if(hours >= app.component2() && prevhours < app.component2()){
+                Log.d("AppLimitWorker", "Cur Hours: $hours")
+                if(hours >= app.component2() && prevhours <= app.component2()){
                     var builder = NotificationCompat.Builder(context, "ProcrastiNotif")
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("You've exceeded your screen time limit for ${app.component1()}")
@@ -91,6 +88,7 @@ class AppLimitWorker(context: Context, workerParams: WorkerParameters) : Worker(
     private fun getAppLimits() : MutableMap<String, Double>{
         //Update ref to user's doc if UID has changed
         updateUserRef()
+        getScreenTimeStats()        
         var fetchedData = mutableMapOf<String, Double>()
 
         try{
