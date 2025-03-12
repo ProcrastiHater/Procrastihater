@@ -15,6 +15,12 @@ import 'package:flutter/material.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:add_2_calendar/add_2_calendar.dart';
 
+///*********************************
+/// Name: CalendarPage
+///
+/// Description: Root stateful widget of
+/// the CalendarPage
+///*********************************
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
 
@@ -22,6 +28,11 @@ class CalendarPage extends StatefulWidget {
   State<CalendarPage> createState() => _CalendarPageState();
 }
 
+///*********************************
+/// Name: _CalendarPageState
+///
+/// Description: State for the CalendarPage
+///*********************************
 class _CalendarPageState extends State<CalendarPage> {
   List<DateTime>? dateTimeRange;
   String? title;
@@ -54,6 +65,12 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
+  ///*********************************
+  /// Name: getColor
+  ///
+  /// Description: gets and sets the color of the
+  /// all day checkbox based off the interaction state
+  ///*********************************
   Color getColor(Set<WidgetState> states) {
     const Set<WidgetState> interactiveStates = <WidgetState>{
       WidgetState.pressed,
@@ -74,6 +91,11 @@ class _CalendarPageState extends State<CalendarPage> {
     super.dispose();
   }
 
+  ///*********************************
+  /// Name: buildEvent
+  ///
+  /// Description: Creates the event to be added to device calendar
+  ///*********************************
   Event buildEvent({Recurrence? recurrence}) {
     Recurrence? recurrence;
 
@@ -93,7 +115,9 @@ class _CalendarPageState extends State<CalendarPage> {
           break;
       }
     }
-
+    //If valid parameters are selected, they will be included in the event.
+    //Otherwise just default to placeholder text and event starts immediately
+    //and ends 30 minutes later.
     return Event(
       title: title ?? 'Test event',
       description: description ?? 'example',
