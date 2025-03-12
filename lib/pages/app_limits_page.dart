@@ -39,9 +39,18 @@ class AppLimitsPage extends StatefulWidget{
 ///*********************************
 class _AppLimitsPageState extends State<AppLimitsPage>{
   final List<TextEditingController> _appLimitControllers = List.generate(appNames.length, (int i) => TextEditingController());
+  Map<String, int> appLimits = {};
   @override
   void initState() {
     super.initState();
+    _readAppLimits().whenComplete((){
+      for(int ii = 0; ii < appNames.length; ii++){
+        if(appLimits.containsKey(appNames[ii]))
+        {
+          _appLimitControllers[ii].text = appLimits[appNames[ii]]!.toString();
+        }
+      }
+    });
   }
 
   @override
@@ -90,6 +99,29 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
         }
       )
     );
+  }
+
+  ///*********************************
+  /// Name: _readAppLimits
+  ///
+  /// Description: Lists app limits
+  /// for page
+  ///*********************************
+  Future<void> _readAppLimits() async{
+    updateUserRef();
+    try{
+      var limitRef = userRef.collection('limits');
+      var limitColl = await limitRef.get();
+      for(DocumentSnapshot limitDoc in limitColl.docs) {
+        setState(() {
+          debugPrint('Limit: ${(limitDoc['limit'] * 60).round()}');
+          appLimits.addAll({limitDoc.id : (limitDoc['limit'] * 60).round()});
+        });
+      }
+    }
+    catch(e){
+      debugPrint("Error Getting Limits: $e");
+    }
   }
 
   ///*********************************
