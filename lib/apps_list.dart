@@ -12,6 +12,13 @@ import 'package:flutter/material.dart';
 
 List<String> appNames = List.empty();
 
+///*********************************
+/// Name: generateAppsList
+/// 
+/// Description: Generates a list of
+/// all apps from current screen time and 
+/// usage history
+///*********************************
 Future<void> generateAppsList() async{
   updateUserRef();
   //Attempt to connect to database
