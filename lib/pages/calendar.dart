@@ -10,7 +10,6 @@ library;
 //Dart Imports
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 //Calendar Imports
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
@@ -24,12 +23,12 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  DateTime? dateTime;
+  //DateTime? dateTime;
   List<DateTime>? dateTimeRange;
   String? title;
   String? description;
   String? location;
-  String? reccurance;
+  String? recurrenceType;
   bool? isAllDay = false;
 
   final TextEditingController _titleController = TextEditingController();
@@ -77,16 +76,35 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Event buildEvent({Recurrence? recurrence}) {
+    Recurrence? recurrence;
+
+    if (recurrenceType != null) {
+      switch (recurrenceType) {
+        case 'daily':
+          recurrence = Recurrence(frequency: Frequency.daily);
+          break;
+        case 'weekly':
+          recurrence = Recurrence(frequency: Frequency.weekly);
+          break;
+        case 'monthly':
+          recurrence = Recurrence(frequency: Frequency.monthly);
+          break;
+        case 'yearly':
+          recurrence = Recurrence(frequency: Frequency.yearly);
+          break;
+      }
+    }
+
     return Event(
       title: title ?? 'Test event',
       description: description ?? 'example',
       location: location ?? 'Flutter app',
       startDate: dateTimeRange != null && dateTimeRange!.isNotEmpty
           ? dateTimeRange![0]
-          : (dateTime ?? DateTime.now()),
+          : (DateTime.now()),
       endDate: dateTimeRange != null && dateTimeRange!.length > 1
           ? dateTimeRange![1]
-          : (dateTime ?? DateTime.now()).add(const Duration(minutes: 30)),
+          : (DateTime.now()).add(const Duration(minutes: 30)),
       allDay: isAllDay ?? false,
       recurrence: recurrence,
     );
@@ -137,7 +155,27 @@ class _CalendarPageState extends State<CalendarPage> {
                     });
                   },
                 )),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Recurrence',
+                border: OutlineInputBorder(),
+              ),
+              value: recurrenceType,
+              items: const [
+                DropdownMenuItem(value: null, child: Text('No Recurrence')),
+                DropdownMenuItem(value: 'daily', child: Text('Daily')),
+                DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
+                DropdownMenuItem(value: 'monthly', child: Text('Monthly')),
+                DropdownMenuItem(value: 'yearly', child: Text('Yearly')),
+              ],
+              onChanged: (String? value) {
+                setState(() {
+                  recurrenceType = value;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
                 final result = await showOmniDateTimeRangePicker(
@@ -145,11 +183,11 @@ class _CalendarPageState extends State<CalendarPage> {
                 setState(() {
                   dateTimeRange = result;
                 });
-                debugPrint('dateTime: $dateTime');
+                debugPrint('dateTime: $dateTimeRange');
               },
               child: const Text('Event Times'),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             ListTile(
               title: const Text('Add event to calendar'),
               trailing: const Icon(Icons.calendar_today),
