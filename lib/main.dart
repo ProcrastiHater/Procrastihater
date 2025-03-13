@@ -31,6 +31,8 @@ import 'profile/profile_picture_selection.dart';
 import 'profile/profile_settings.dart';
 import 'pages/calendar.dart';
 import 'pages/study_mode.dart';
+import 'pages/app_limits_page.dart';
+import 'apps_list.dart';
 
 //Global Variables 
 //Native Kotlin method channel
@@ -66,11 +68,13 @@ void main() async {
     _checkSTPermission().whenComplete((){
       _getScreenTime().whenComplete((){
         fetchWeeklyScreenTime().whenComplete((){
-          initializeAppNameColorMapping().whenComplete((){
-            _writeScreenTimeData();
-            checkNotifsPermission();
-            //Launches login screen first which returns ProcrasiHater app if success
-            runApp(const LoginScreen());
+          generateAppsList().whenComplete(() {
+            initializeAppNameColorMapping().whenComplete(() {
+              _writeScreenTimeData();
+              checkNotifsPermission();
+              //Launches login screen first which returns ProcrasiHater app if success
+              runApp(const LoginScreen());
+            });
           });
         }); 
       });
@@ -141,6 +145,11 @@ class ProcrastiHater extends StatelessWidget {
           case '/calendarPage':
             return MaterialPageRoute(
               builder: (context) => CalendarPage(),
+              settings: settings,
+            );
+          case '/appLimitsPage':
+            return MaterialPageRoute(
+              builder: (context) => AppLimitsPage(),
               settings: settings,
             );
           /*//Default case builds default navigation to the home page
