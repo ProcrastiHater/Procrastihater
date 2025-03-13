@@ -34,7 +34,7 @@ import 'pages/study_mode.dart';
 import 'pages/app_limits_page.dart';
 import 'apps_list.dart';
 
-//Global Variables 
+//Global Variables
 //Native Kotlin method channel
 const platformChannel = MethodChannel('kotlin.methods/procrastihater');
 //Maps for reading/writing data from the database
@@ -53,10 +53,10 @@ DocumentReference userRef = mainCollection.doc(uid);
 
 ///*********************************
 /// Name: main
-/// 
+///
 /// Description: Initializes Firebase,
-/// 
-/// launches the main app and instantiates 
+///
+/// launches the main app and instantiates
 /// all neccesary connections and permissions
 ///*********************************
 void main() async {
@@ -65,9 +65,9 @@ void main() async {
   await Firebase.initializeApp();
   //launch the main app
   _currentToHistorical().whenComplete(() {
-    _checkSTPermission().whenComplete((){
-      _getScreenTime().whenComplete((){
-        fetchWeeklyScreenTime().whenComplete((){
+    _checkSTPermission().whenComplete(() {
+      _getScreenTime().whenComplete(() {
+        fetchWeeklyScreenTime().whenComplete(() {
           generateAppsList().whenComplete(() {
             initializeAppNameColorMapping().whenComplete(() {
               _writeScreenTimeData();
@@ -76,17 +76,16 @@ void main() async {
               runApp(const LoginScreen());
             });
           });
-        }); 
+        });
       });
     });
   });
 }
 
-
 ///*********************************
 /// Name: MyApp
-/// 
-/// Description: Root stateless widget of 
+///
+/// Description: Root stateless widget of
 /// the app, builds naviagation tree for app
 ///*********************************
 class ProcrastiHater extends StatelessWidget {
@@ -108,19 +107,19 @@ class ProcrastiHater extends StatelessWidget {
               settings: settings,
             );
           //Home page case builds default navigation
-          case '/homePage': 
+          case '/homePage':
             return MaterialPageRoute(
               builder: (context) => HomePage(),
               settings: settings,
             );
           //Leaderboard page case builds animated right swiping navigation
-          case '/leaderBoardPage': 
+          case '/leaderBoardPage':
             return createSwipingRoute(LeaderBoardPage(), Offset(1.0, 0.0));
           //Leaderboard page back case builds animated left swiping navigation
           case '/leaderBoardPageBack':
-            return createSwipingRoute(HomePage(), Offset(-1.0, 0.0)); 
+            return createSwipingRoute(HomePage(), Offset(-1.0, 0.0));
           //Friends page case builds animated left swiping navigation
-          case '/friendsPage': 
+          case '/friendsPage':
             return createSwipingRoute(FriendsPage(), Offset(-1.0, 0.0));
           //Friends page back case builds animated right swiping navigation
           case '/friendsPageBack':
@@ -161,40 +160,41 @@ class ProcrastiHater extends StatelessWidget {
         }
       },
     );
-  } 
+  }
+
   ///*********************************
   /// Name: createSwipingRoute
-  /// 
-  /// Description: Function to build the 
+  ///
+  /// Description: Function to build the
   /// navigation and swiping animation for
   /// main pages of the app
   ///*********************************
   static Route createSwipingRoute(Widget page, Offset beginOffset) {
     return PageRouteBuilder(
-      //Navigation for the page param
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      //Duration of the animation
-      transitionDuration: Duration(milliseconds: 400),
-      //Animation builder
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        //Animation style for swipe
-        final curvedAnimation = CurvedAnimation(
-          parent: animation,
-          curve: Curves.fastEaseInToSlowEaseOut,
-        );
-        //Tween variable for animation
-        final tween = Tween(begin: beginOffset, end: Offset.zero).chain(CurveTween(curve: Curves.fastEaseInToSlowEaseOut));
-        //Actual slide transition variable
-        return SlideTransition(
-          position: curvedAnimation.drive(tween), 
-          //Fade transition for smoothness 
-          child: FadeTransition(
-            opacity: curvedAnimation, 
-            child: child,
-          ),
-        );
-      }
-    );
+        //Navigation for the page param
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        //Duration of the animation
+        transitionDuration: Duration(milliseconds: 400),
+        //Animation builder
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          //Animation style for swipe
+          final curvedAnimation = CurvedAnimation(
+            parent: animation,
+            curve: Curves.fastEaseInToSlowEaseOut,
+          );
+          //Tween variable for animation
+          final tween = Tween(begin: beginOffset, end: Offset.zero)
+              .chain(CurveTween(curve: Curves.fastEaseInToSlowEaseOut));
+          //Actual slide transition variable
+          return SlideTransition(
+            position: curvedAnimation.drive(tween),
+            //Fade transition for smoothness
+            child: FadeTransition(
+              opacity: curvedAnimation,
+              child: child,
+            ),
+          );
+        });
   }
 }
 
@@ -209,7 +209,7 @@ void updateUserRef() {
   //Regrab UID in case it's changed
   uid = auth.currentUser?.uid;
   //Update user reference if UID has changed
-  if(curUid != uid){
+  if (curUid != uid) {
     userRef = mainCollection.doc(uid);
   }
 }
@@ -230,32 +230,36 @@ Future<void> _currentToHistorical() async {
   DateTime dateUpdated;
   bool needToMoveData = false;
   //Grab data from current
-  try{
+  try {
     final current = userRef.collection('appUsageCurrent');
     final curSnapshot = await current.get();
     //Loop to access all current screentime data from user
-    for (var doc in curSnapshot.docs){
+    for (var doc in curSnapshot.docs) {
       String docName = doc.id;
       double? hours = doc['dailyHours']?.toDouble();
       Timestamp timestamp = doc['lastUpdated'];
       dateUpdated = timestamp.toDate();
       String category = doc['appType'];
-      if (hours != null){
-        fetchedData[docName] = {'dailyHours': hours, 'lastUpdated': timestamp, 'appType': category};
+      if (hours != null) {
+        fetchedData[docName] = {
+          'dailyHours': hours,
+          'lastUpdated': timestamp,
+          'appType': category
+        };
       }
       //Check if any data needs to be written to history
-      if (dateUpdated.day != currentTime.day
-        || dateUpdated.month != currentTime.month
-        || dateUpdated.year != currentTime.year) {
+      if (dateUpdated.day != currentTime.day ||
+          dateUpdated.month != currentTime.month ||
+          dateUpdated.year != currentTime.year) {
         needToMoveData = true;
       }
     }
-  } catch (e){
+  } catch (e) {
     debugPrint("error fetching screentime data: $e");
   }
 
   //If any data needs to be written to history
-  if(needToMoveData) {
+  if (needToMoveData) {
     //Create batch
     var batch = firestore.batch();
     double totalDaily = 0.0;
@@ -271,18 +275,22 @@ Future<void> _currentToHistorical() async {
         DateTime dateUpdated = timestamp.toDate();
         DateTime currentTime = DateTime.now();
         //Check if date has changed since database was updated
-        if(dateUpdated.day != currentTime.day
-        || dateUpdated.month != currentTime.month
-        || dateUpdated.year != currentTime.year) {
+        if (dateUpdated.day != currentTime.day ||
+            dateUpdated.month != currentTime.month ||
+            dateUpdated.year != currentTime.year) {
           //Gets the number of the day of the week for the last update day
           int dayOfWeekNum = dateUpdated.weekday;
           //Gets the name of the day of the week for last update day
           String dayOfWeekStr = DateFormat('EEEE').format(dateUpdated);
           //Gets the start of that week
-          String startOfWeek = DateFormat('MM-dd-yyyy').format(dateUpdated.subtract(Duration(days: dayOfWeekNum-1)));
-          var historical = userRef.collection('appUsageHistory').doc(startOfWeek);
+          String startOfWeek = DateFormat('MM-dd-yyyy')
+              .format(dateUpdated.subtract(Duration(days: dayOfWeekNum - 1)));
+          var historical =
+              userRef.collection('appUsageHistory').doc(startOfWeek);
           histSnapshot ??= await historical.get();
-          if(totalWeekly == 0.0 && histSnapshot.data() != null && histSnapshot.data()!.containsKey('totalWeeklyHours')) {
+          if (totalWeekly == 0.0 &&
+              histSnapshot.data() != null &&
+              histSnapshot.data()!.containsKey('totalWeeklyHours')) {
             totalWeekly = histSnapshot['totalWeeklyHours'].toDouble();
           }
           totalDaily += screenTimeHours;
@@ -305,40 +313,40 @@ Future<void> _currentToHistorical() async {
           );
         }
       }
-    
+
       //Commit the batch
       await batch.commit();
-        
+
       debugPrint('Successfully wrote screen time data to History');
     } catch (e) {
       debugPrint('Error writing screen time data to Firestore: $e');
       rethrow;
     }
-  }
-  else{
+  } else {
     debugPrint('No data needed to be written to history');
   }
 }
 
 ///*********************************
 /// Name: _checkSTPermission
-///   
-/// Description: Invokes method from platform channel 
+///
+/// Description: Invokes method from platform channel
 /// to check for screetime usage permissions
 ///*********************************
 Future<void> _checkSTPermission() async {
   try {
-    final bool _hasPermission = await platformChannel.invokeMethod('checkScreenTimePermission');
+    final bool _hasPermission =
+        await platformChannel.invokeMethod('checkScreenTimePermission');
     hasPermission = _hasPermission;
   } on PlatformException catch (e) {
-      debugPrint("Failed to check permission: ${e.message}");
+    debugPrint("Failed to check permission: ${e.message}");
   }
-}  
+}
 
 ///*********************************
 /// Name: _requestSTPermission
-///   
-/// Description: Invokes method from platform channel to 
+///
+/// Description: Invokes method from platform channel to
 /// send a request for screentime usage permissions
 ///*********************************
 Future<void> _requestSTPermission() async {
@@ -352,23 +360,24 @@ Future<void> _requestSTPermission() async {
 
 ///*********************************
 /// Name: checkNotifsPermission
-///   
-/// Description: Invokes method from platform channel 
+///
+/// Description: Invokes method from platform channel
 /// to check for notification permissions
 ///*********************************
 Future<void> checkNotifsPermission() async {
   try {
-    final bool _hasNotifsPermission = await platformChannel.invokeMethod('checkNotificationsPermission');
+    final bool _hasNotifsPermission =
+        await platformChannel.invokeMethod('checkNotificationsPermission');
     hasNotifsPermission = _hasNotifsPermission;
   } on PlatformException catch (e) {
-      debugPrint("Failed to check permission: ${e.message}");
+    debugPrint("Failed to check permission: ${e.message}");
   }
 }
 
 ///*********************************
 /// Name: requestNotifsPermission
-///   
-/// Description: Invokes method from platform channel to 
+///
+/// Description: Invokes method from platform channel to
 /// send a request for notification permissions
 ///*********************************
 Future<void> requestNotifsPermission() async {
@@ -382,12 +391,12 @@ Future<void> requestNotifsPermission() async {
 
 ///*********************************
 /// Name: _startTestNotifications
-///   
-/// Description: Invokes method from platform channel to 
+///
+/// Description: Invokes method from platform channel to
 /// start sending the test notification
 ///*********************************
 Future<void> _startTestNotifications() async {
-  if(!hasNotifsPermission) {
+  if (!hasNotifsPermission) {
     return;
   }
   try {
@@ -397,10 +406,9 @@ Future<void> _startTestNotifications() async {
   }
 }
 
-
 ///*********************************
 /// Name: _getScreenTime
-///   
+///
 /// Description: Accesses screentime data
 /// by storing into a Map.
 ///*********************************
@@ -412,11 +420,13 @@ Future<void> _getScreenTime() async {
   }
 
   try {
-    //Raw data from screentime method of platform channel 
-    final Map<dynamic, dynamic> result = await platformChannel.invokeMethod('getScreenTime');
+    //Raw data from screentime method of platform channel
+    final Map<dynamic, dynamic> result =
+        await platformChannel.invokeMethod('getScreenTime');
     //Convert data obtained by kotlin method to dart equivalent
     screenTimeData = Map<String, Map<String, String>>.from(
-      result.map((key, value) => MapEntry(key as String, Map<String, String>.from(value))),
+      result.map((key, value) =>
+          MapEntry(key as String, Map<String, String>.from(value))),
     );
     debugPrint('Got screen time!');
   } on PlatformException catch (e) {
@@ -427,15 +437,15 @@ Future<void> _getScreenTime() async {
 ///**************************************************
 /// Name: _writeScreenTimeData
 ///
-/// Description: Takes the data 
+/// Description: Takes the data
 /// that was accessed in _getScreenTime
-/// and writes it to the Firestore database 
+/// and writes it to the Firestore database
 /// using batches for multiple writes
 ///***************************************************
 Future<void> _writeScreenTimeData() async {
   //Update ref to user's doc if UID has changed
   updateUserRef();
-  if(screenTimeData.isNotEmpty){
+  if (screenTimeData.isNotEmpty) {
     double totalDaily = 0.0;
     final current = userRef.collection('appUsageCurrent');
     // Create a batch to handle multiple writes
@@ -452,10 +462,10 @@ Future<void> _writeScreenTimeData() async {
         final screenTimeHours = double.parse(entry.value['hours']!);
         final category = entry.value['category'];
         totalDaily += screenTimeHours;
-        
+
         // Reference to the document with app name
         final docRef = current.doc(appName);
-          
+
         // Set the data with merge option to update existing documents
         // or create new ones if they don't exist
         batch.set(
@@ -475,7 +485,7 @@ Future<void> _writeScreenTimeData() async {
           'totalDailyHours': (totalDaily * 100).round().toDouble() / 100,
           'lastUpdated': FieldValue.serverTimestamp()
         },
-        SetOptions(merge:true),
+        SetOptions(merge: true),
       );
       // Commit the batch
       await batch.commit();
