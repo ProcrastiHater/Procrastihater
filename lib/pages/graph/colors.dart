@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 //Page Imports
 import '/main.dart';
+import '/apps_list.dart';
 
 //Global variables
 Map<String, Color> appNameToColor = {}; 
@@ -50,53 +51,10 @@ List<Color> generateDistinctColors(int count) {
 /// generateDistinctColor()
 ///*******************************
 Future<void> initializeAppNameColorMapping() async {
-  updateUserRef();
-  //Attempt to connect to database
-  try {
-    final currentHistory = userRef.collection('appUsageHistory');
-    //Take a snapshot of all docs in appUsageHistory
-    QuerySnapshot historySnapshot = await currentHistory.get();
-    //Set for holding app Names
-
-    Set<String> allAppNames = {};
-    
-    //Loop through each doc in appUsageHistory
-    for (var doc in historySnapshot.docs) {
-      //Extract weekly data from each doc
-      Map<String, dynamic> weeklyData = doc.data() as Map<String, dynamic>;
-      //Loop through weekly data
-      weeklyData.forEach((dayKey, dailyValue) {
-        //Skip totalWeeklyHours memeber
-        if (dayKey != 'totalWeeklyHours') {
-          //Extract daily data from each weekly data
-          Map<String, dynamic> dailyData = dailyValue as Map<String, dynamic>;
-          //Loop through dail data
-          dailyData.forEach((appName, appData) {
-            //Skip totalDailyHours memeber
-            if (appName != 'totalDailyHours') {
-              //Add app names to set
-              allAppNames.add(appName);
-            }
-          }
-          );
-        }
-      }
-      );
-    }
-
-    //Loop through each doc in appUsageHistory
-    screenTimeData.forEach((key, value) {
-      allAppNames.add(key);
-    });
-    //Sorts unordered set before assigning colors to names, ensuring consistency across whole app
-    List<String> sortedAppNames = allAppNames.toList()..sort();
     //Get distinct colors
-    List<Color> distinctColors = generateDistinctColors(sortedAppNames.length);
+    List<Color> distinctColors = generateDistinctColors(appNames.length);
     //Map colors to app name
-    for (int i = 0; i < sortedAppNames.length; i++) {
-      appNameToColor[sortedAppNames[i]] = distinctColors[i];
+    for (int i = 0; i < appNames.length; i++) {
+      appNameToColor[appNames[i]] = distinctColors[i];
     }
-  } catch (e) {
-    debugPrint("Error in initalizeAppNamesColorMapping: $e");
-  }
 }
