@@ -23,6 +23,12 @@ import java.util.Calendar
 import java.util.TimeZone
 import java.util.Locale
 import java.util.Date
+import java.time.LocalDate
+import java.text.SimpleDateFormat
+import java.time.temporal.TemporalAdjusters
+import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+import java.time.DayOfWeek
 //Allows access to category titles
 import android.content.pm.ApplicationInfo
 //Notification imports
@@ -35,10 +41,22 @@ import android.app.NotificationChannel
 import androidx.work.*
 import com.example.app_screen_time.TestNotifWorker
 import com.example.app_screen_time.TotalSTWorker
+import com.example.app_screen_time.BGWritesWorker
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
+//Firebase imports
+import com.google.firebase.*
+import com.google.firebase.firestore.*
+import com.google.firebase.auth.*
+import com.google.android.gms.tasks.Task
 
 public var screenTimeMap = mutableMapOf<String, MutableMap<String, String>>();
+
+lateinit var firestore: FirebaseFirestore
+lateinit var auth: FirebaseAuth
+lateinit var mainCollection: CollectionReference
+lateinit var uid: String
+lateinit var userRef: DocumentReference
 
 ///*********************************************
 /// Name: MainActivity
@@ -57,14 +75,21 @@ class MainActivity: FlutterActivity() {
     ///**********************************************
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        firestore = Firebase.firestore
+        auth = Firebase.auth
+        mainCollection = firestore.collection("UID")
+        uid = auth.currentUser!!.getUid()
+        userRef = mainCollection.document(uid)
+
         //Purge old instances of notifications
         WorkManager.getInstance().cancelAllWork()
         //WorkManager.getInstance().cancelUniqueWork("totalSTNotification")
         createNotificationChannel()
         if(!checkNotificationsPermission())
         {
-            openNotificationSettings();
+            openNotificationSettings()
         }
+        startBGWrites()
     }
 
     ///**********************************************
@@ -86,6 +111,7 @@ class MainActivity: FlutterActivity() {
                     "getScreenTime" -> {
                         if (checkUsageStatsPermission()) {
                             val screenTimeData = getScreenTimeStats()
+                            updateUserRef()
                             Log.d("MainActivity", "Screen time data: $screenTimeData")
                             result.success(screenTimeData)
                         } else {
@@ -268,6 +294,35 @@ class MainActivity: FlutterActivity() {
     }
 
     ///**********************************************
+    /// Name: startBGWrites
+    /// 
+    /// Description: Starts background task for
+    /// writing to DB
+    ///**********************************************
+    fun startBGWrites() {
+        // Give bg work requirements for working
+        // In this case, make it require internet connection
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        //Create bg work request
+        val bgWritesRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<BGWritesWorker>(
+            60, TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .setInitialDelay(5, TimeUnit.MINUTES)
+            .build()
+
+        //Put work into queue
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "BackgroundWrites",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            bgWritesRequest,
+        )
+    }
+
+    ///**********************************************
     /// Name: getMidnight
     /// 
     /// Description: Returns a long of midnight for the
@@ -296,6 +351,7 @@ class MainActivity: FlutterActivity() {
     
         //Sets the time range for data to be from midnight this morning to midnight tonight
         val calendar = Calendar.getInstance()
+        //calendar.setTimeZone(TimeZone.getTimeZone("PST"))
         val startTime = getMidnight(calendar)
         calendar.add(Calendar.DAY_OF_YEAR, 1)
         val endTime = getMidnight(calendar)
@@ -332,5 +388,21 @@ class MainActivity: FlutterActivity() {
         }
     
         return screenTimeMap
+    }
+}
+
+///**************************************************
+/// Name: updateUserRef
+///
+/// Description: Updates userRef to doc if the UID has changed
+///***************************************************
+fun updateUserRef(){
+    var curUid = uid
+    uid = auth.currentUser!!.getUid()
+    if(curUid != uid){
+        userRef = mainCollection.document(uid);
+        Log.d("Kotlin", "UID updated");
+    }else{
+        Log.d("Kotlin", "UID did not change");
     }
 }

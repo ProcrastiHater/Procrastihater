@@ -216,7 +216,8 @@ class ProfileSettingsState extends State<ProfileSettings> {
                       );
                     }
                   }, 
-                  child: Text("Turn Off"))
+                  child: Text("Turn Off")
+                )
               ],
             ),
             SizedBox(height: 10),
