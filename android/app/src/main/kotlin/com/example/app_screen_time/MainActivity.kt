@@ -42,6 +42,7 @@ import androidx.work.*
 import com.example.app_screen_time.TestNotifWorker
 import com.example.app_screen_time.TotalSTWorker
 import com.example.app_screen_time.BGWritesWorker
+import com.example.app_screen_time.AppLimitWorker
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 //Firebase imports
@@ -51,12 +52,13 @@ import com.google.firebase.auth.*
 import com.google.android.gms.tasks.Task
 
 public var screenTimeMap = mutableMapOf<String, MutableMap<String, String>>();
+public var prevScreenTime = mutableMapOf<String, MutableMap<String, String>>();
 
 lateinit var firestore: FirebaseFirestore
 lateinit var auth: FirebaseAuth
 lateinit var mainCollection: CollectionReference
-lateinit var uid: String
-lateinit var userRef: DocumentReference
+var uid: String? = null
+var userRef: DocumentReference? = null
 
 ///*********************************************
 /// Name: MainActivity
@@ -65,6 +67,7 @@ lateinit var userRef: DocumentReference
 /// and doing other kotlin code
 ///**********************************************
 class MainActivity: FlutterActivity() {
+    public val wm = WorkManager.getInstance(this)
     private val CHANNEL = "kotlin.methods/procrastihater"
     private lateinit var channel: MethodChannel
 
@@ -78,11 +81,17 @@ class MainActivity: FlutterActivity() {
         firestore = Firebase.firestore
         auth = Firebase.auth
         mainCollection = firestore.collection("UID")
-        uid = auth.currentUser!!.getUid()
-        userRef = mainCollection.document(uid)
+        if(auth.currentUser != null)
+        {
+            uid = auth.currentUser!!.getUid()
+        }
+        if(uid != null)
+        {
+            userRef = mainCollection.document(uid!!)
+        }
 
         //Purge old instances of notifications
-        WorkManager.getInstance().cancelAllWork()
+        wm.cancelAllWork()
         //WorkManager.getInstance().cancelUniqueWork("totalSTNotification")
         createNotificationChannel()
         if(!checkNotificationsPermission())
@@ -90,6 +99,7 @@ class MainActivity: FlutterActivity() {
             openNotificationSettings()
         }
         startBGWrites()
+        startAppLimitNotifs()
     }
 
     ///**********************************************
@@ -147,7 +157,7 @@ class MainActivity: FlutterActivity() {
                         result.success(true)
                     }
                     "cancelTotalSTNotifications" -> {
-                        WorkManager.getInstance(this).cancelUniqueWork("totalSTNotification")
+                        wm.cancelUniqueWork("totalSTNotification")
                         Log.d("MainActivity", "Canceled Screen Time Notifications")
                         result.success(true)
                     }
@@ -204,9 +214,14 @@ class MainActivity: FlutterActivity() {
     /// permission for receiving notifications
     ///**********************************************
     private fun checkNotificationsPermission(): Boolean {
-        return checkSelfPermission(
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
+        if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            return checkSelfPermission(
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+        else {
+            return NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
     }
 
     ///**********************************************
@@ -266,7 +281,7 @@ class MainActivity: FlutterActivity() {
         )
             .build()
         //Put work into queue
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        wm.enqueueUniquePeriodicWork(
             "testNotification",
             ExistingPeriodicWorkPolicy.REPLACE,
             notifRequest,
@@ -286,8 +301,35 @@ class MainActivity: FlutterActivity() {
         )
             .build()
         //Put work into queue
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        wm.enqueueUniquePeriodicWork(
             "totalSTNotification",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            notifRequest,
+        )
+    }
+
+    ///**********************************************
+    /// Name: startAppLimitNotifs
+    /// 
+    /// Description: Starts background task for
+    /// sending app limit notifications
+    ///**********************************************
+    fun startAppLimitNotifs() {
+        // Give bg work requirements for working
+        // In this case, make it require internet connection
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        //Create bg work request
+        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<AppLimitWorker>(
+            15, TimeUnit.MINUTES
+        )
+            .setInitialDelay(5, TimeUnit.MINUTES)
+            .setConstraints(constraints)
+            .build()
+        //Put work into queue
+        wm.enqueueUniquePeriodicWork(
+            "appLimitNotification",
             ExistingPeriodicWorkPolicy.REPLACE,
             notifRequest,
         )
@@ -315,7 +357,7 @@ class MainActivity: FlutterActivity() {
             .build()
 
         //Put work into queue
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        wm.enqueueUniquePeriodicWork(
             "BackgroundWrites",
             ExistingPeriodicWorkPolicy.REPLACE,
             bgWritesRequest,
@@ -387,6 +429,7 @@ class MainActivity: FlutterActivity() {
             }
         }
     
+        prevScreenTime.putAll(screenTimeMap)
         return screenTimeMap
     }
 }
@@ -400,7 +443,7 @@ fun updateUserRef(){
     var curUid = uid
     uid = auth.currentUser!!.getUid()
     if(curUid != uid){
-        userRef = mainCollection.document(uid);
+        userRef = mainCollection.document(uid!!);
         Log.d("Kotlin", "UID updated");
     }else{
         Log.d("Kotlin", "UID did not change");

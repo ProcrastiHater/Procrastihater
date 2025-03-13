@@ -159,6 +159,14 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () {
                 Navigator.pushNamed(context, '/studyModePage');
               },
+            ),
+            const Divider(),
+            ListTile(
+              trailing: Icon(Icons.alarm),
+              title: Text("App Limits"),
+              onTap: () {
+                Navigator.pushNamed(context, '/appLimitsPage');
+              },
             )
           ],
         ),
