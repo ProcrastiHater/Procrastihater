@@ -88,10 +88,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //State management for loading list view
   String selectedBar = "null";
+  Map<String, Map<String, String>> dayData = screenTimeData;
+  Map<String, Map<String, Map<String, dynamic>>> weekData = weeklyData;
   int graphIndex = 0;
   void updateSelectedBar(String bar) {
     setState(() {
       selectedBar = bar;
+    });
+  }
+  void updateFilteredDayData(Map<String, Map<String, String>> data) {
+    setState(() {
+      dayData = data;
+    });
+  }
+  void updateFilteredWeekData(Map<String, Map<String, Map<String, dynamic>>> data) {
+    setState(() {
+      weekData = data;
     });
   }
 
@@ -101,7 +113,6 @@ class _MyHomePageState extends State<MyHomePage> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        //title: Text("ProcrastiStats"),
         actions: [
           // Creating little user icon you can press to view account info
           IconButton(
@@ -170,21 +181,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                   padding: const EdgeInsets.all(4.0),
                   color: Colors.indigo.shade50,
-                  child: DailyGraphView(onBarSelected: updateSelectedBar),
+                  child: DailyGraphView(onFilteredData: updateFilteredDayData, onBarSelected: updateSelectedBar),
                 ),
                 //Weekly Graph
                  Container(
                   padding: const EdgeInsets.all(4.0),
                   color: Colors.indigo.shade50,
-                  child: WeeklyGraphView(onBarSelected: updateSelectedBar),
+                  child: WeeklyGraphView(onFilteredData: updateFilteredWeekData, onBarSelected: updateSelectedBar),
                 ),
                 //Monthly Graph
-                 Container(
+                 /*Container(
                   padding: const EdgeInsets.all(4.0),
                   color: Colors.indigo.shade50,
                   child: Center(child: Text("Monthly Graph Display"),)
                   //MonthlyGraphView(onBarSelected: updateSelectedBar),
-                ),
+                ),*/
               ][graphIndex],
               bottomNavigationBar: SizedBox(
                 height: 50,
@@ -195,7 +206,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     setState(() {
                       selectedBar == "null";
                       graphIndex = index;
-                    });
+                    }); 
                   },
                   destinations: const <Widget>[
                     NavigationDestination(
@@ -206,10 +217,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       icon: Icon(Icons.calendar_view_week_rounded), 
                       label: 'Weekly'
                     ),
-                    NavigationDestination(
+                    /*NavigationDestination(
                       icon: Icon(Icons.calendar_month_rounded), 
                       label: 'Monthly'
-                    ),
+                    ),*/
                   ],  
                 ), 
               )         
@@ -221,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               padding: const EdgeInsets.all(4.0),
               color: Colors.indigo.shade100,
-              child: ExpandedListView(selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
+              child: ExpandedListView(dayFilteredData: dayData, weekFilteredData: weekData, selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
             ),
           ),
         ],

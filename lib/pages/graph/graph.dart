@@ -9,11 +9,13 @@ library;
 
 //Dart imports
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-//fl_chart imports
+//Plugin imports
 import 'package:fl_chart/fl_chart.dart';
+import 'package:animated_custom_dropdown/custom_dropdown.dart';
 
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
@@ -25,6 +27,7 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import '/main.dart';
 import '/profile/profile_settings.dart';
 import '/pages/graph/fetch_data.dart';
+import '/pages/graph/list_view.dart';
 import '/pages/graph/widget.dart';
 import '/pages/graph/colors.dart';
 
@@ -36,7 +39,8 @@ import '/pages/graph/colors.dart';
 ///*********************************
 class WeeklyGraphView extends StatefulWidget {
   final Function(String) onBarSelected;
-  const WeeklyGraphView({super.key, required this.onBarSelected});
+  final Function(Map<String, Map<String, Map<String, dynamic>>>) onFilteredData;
+  const WeeklyGraphView({super.key, required this.onBarSelected, required this.onFilteredData});
 
   @override
   State<WeeklyGraphView> createState() => _WeeklyGraphViewState();
@@ -50,37 +54,100 @@ class WeeklyGraphView extends StatefulWidget {
 /// weekly graph
 ///*********************************
 class _WeeklyGraphViewState extends State<WeeklyGraphView> {
+  List<String> selectedCategories = [];
+  List<String> selectedApps = [];
+  String? selectedFilter = "";
+  Map<String, Map<String, Map<String, dynamic>>> weekData = {};
   String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
   bool isLoading = false;
-  //Fetch data from the database and intialize to global variable
-  Future<void> _initializeData() async {
-    final weeksToView = await getAvailableWeeks();
-    availableWeekKeys = weeksToView;
-    formattedCurrent = availableWeekKeys.last;
-    currentWeek = formattedCurrent;
-    currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-    final result = await fetchWeeklyScreenTime();
-    setState(() {
-      weeklyData = result;
-      availableDays = weeklyData.keys.toList();
-    });
-  }
-
+  
   //Wrapper for loading bar touch, 
   BarTouchData loadTouch(Map<String, Map<String, Map<String, dynamic>>> data) {
     return getBarWeekTouch(data, widget.onBarSelected);
   }
 
+  Future<void> initWeeklyData() async {
+    await fetchWeeklyScreenTime();
+    setState(() {
+      weekData = weeklyData;
+      availableDays = weekData.keys.toList();
+      widget.onFilteredData(weekData);
+    });
+  }
+
+
   @override
   void initState() {
     super.initState();
-    _initializeData();
+    formattedCurrent = availableWeekKeys.last;
+    currentWeek = formattedCurrent;
+    currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
+    initWeeklyData();
+  }
+
+  Map<String, Map<String, Map<String, dynamic>>> filterData() {
+    Map<String, Map<String, Map<String, dynamic>>> filteredData = {};
+    weeklyData.forEach((dayKey, dayData) {
+      Map<String, Map<String, dynamic>> appsMap = {};
+      dayData.forEach((appKey, appData) {
+        appsMap[appKey] = Map<String, dynamic>.from(appData);
+      });
+      filteredData[dayKey] = appsMap;
+    });
+
+    if (selectedApps.isNotEmpty) {
+      filteredData.forEach((dayKey, dayData) {
+        dayData.removeWhere((appKey, appData) {
+          String? appName = appKey as String?;
+          return appName == null || !selectedApps.contains(appName);
+        });
+      });
+    }
+
+    if (selectedCategories.isNotEmpty){
+      filteredData.forEach((dayKey, dayData) {
+        dayData.removeWhere((appKey, appData) {
+          String? category = appData['appType'] as String?;
+          return category == null || !selectedCategories.contains(category);
+        });
+      }); 
+    }
+
+
+    filteredData.forEach((dayKey, appsKey) {
+      final entries = appsKey.entries.toList();
+      switch (selectedFilter) {
+        case 'Alphabet(asc)':
+          entries.sort((a, b) =>
+            a.key.compareTo(b.key)
+          );
+          break;
+        case 'Alphabet(desc)':
+          entries.sort((a, b) =>
+            b.key.compareTo(a.key)
+          );
+          break;
+        case 'Hours(asc)':
+          entries.sort((a, b) =>
+            (a.value['hours'])!.compareTo(b.value['hours']!)
+          );
+          break;
+        case 'Hours(desc)':
+          entries.sort((a, b) =>
+            (b.value['hours'])!.compareTo(a.value['hours']!)
+          );
+          break;
+        default:
+          break;
+        }
+      filteredData[dayKey] = Map<String, Map<String, dynamic>>.fromEntries(entries);
+    });    
+    return filteredData;
   }
 
   @override
   Widget build(BuildContext context) {
-    //Display loading screen if data is not present
-    if (weeklyData.isEmpty) {
+    if (weekData.isEmpty) {
       return Center(child: CircularProgressIndicator());
     }
     return Padding(
@@ -88,6 +155,82 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       child: Column(
         children: [
           const SizedBox(height: 60),
+          CustomDropdown.multiSelectSearch(
+            closedHeaderPadding: EdgeInsets.all(8.0),
+            expandedHeaderPadding: EdgeInsets.all(8.0),
+            items: appNameToColor.keys.toList(), 
+            hintBuilder: (context, hint, enabled) {
+              return Text(
+                "All Apps", 
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16.0,
+                  ),
+                );
+              },   
+            onListChanged: (value) {  
+              setState(() {
+                selectedApps = value;
+                weekData = filterData();
+                availableDays = weekData.keys.toList();
+                widget.onFilteredData(weekData);
+              });
+            },
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: CustomDropdown.multiSelect(
+                  items: categories, 
+                  overlayHeight: 525,
+                  closedHeaderPadding: EdgeInsets.all(8.0),
+                  expandedHeaderPadding: EdgeInsets.all(8.0),
+                  hintBuilder: (context, hint, enabled) {
+                    return Text(
+                      "All Categories", 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                        ),
+                    );
+                  },                
+                  onListChanged: (value) {
+                    setState(() {
+                      selectedCategories = value;
+                      weekData = filterData();
+                      availableDays = weekData.keys.toList();
+                      widget.onFilteredData(weekData);
+                    });
+                  }
+                ),
+              ),
+              Expanded(
+                child: CustomDropdown(
+                  closedHeaderPadding: EdgeInsets.all(8.0),
+                  expandedHeaderPadding: EdgeInsets.all(8.0),
+                  items: filters, 
+                  hintBuilder: (context, hint, enabled) {
+                    return Text(
+                      "Filters", 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                        ),
+                    );
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      selectedFilter = value;
+                      weekData = filterData();
+                      availableDays = weekData.keys.toList();
+                      widget.onFilteredData(weekData);
+                    });
+                  }
+                ),
+              ),
+            ],
+          ),
           //Graph Title
           Text("Weekly Graph", style: TextStyle(fontSize: 18),),
           Expanded(
@@ -131,8 +274,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   show: true,
                 ),
                 //Functionality Widgets
-                barTouchData: loadTouch(weeklyData),
-                barGroups: generateWeeklyChart(weeklyData),
+                barTouchData: loadTouch(weekData),
+                barGroups: generateWeeklyChart(weekData),
               )
             )
           ),
@@ -150,8 +293,10 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   int currentIndex = availableWeekKeys.indexOf(currentWeek);
                   currentWeek = availableWeekKeys[currentIndex - 1];
                   currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                  weeklyData = await fetchWeeklyScreenTime();
-                  availableDays = weeklyData.keys.toList();
+                  await fetchWeeklyScreenTime();
+                  weekData = filterData();
+                  availableDays = weekData.keys.toList();
+                  widget.onFilteredData(weekData);
                   setState(() {
                     isLoading = false;
                   });
@@ -169,8 +314,10 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   int currentIndex = availableWeekKeys.indexOf(currentWeek);
                   currentWeek = availableWeekKeys[currentIndex + 1];
                   currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                  weeklyData = await fetchWeeklyScreenTime();
-                  availableDays = weeklyData.keys.toList();
+                  await fetchWeeklyScreenTime();
+                  weekData = filterData();
+                  availableDays = weekData.keys.toList();
+                  widget.onFilteredData(weekData);
                   setState(() {
                     isLoading = false;
                   });
@@ -193,7 +340,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
 ///*********************************
 class DailyGraphView extends StatefulWidget {
   final Function(String) onBarSelected;
-  const DailyGraphView({super.key, required this.onBarSelected});
+  final Function(Map<String, Map<String, String>>) onFilteredData;
+  const DailyGraphView({super.key, required this.onBarSelected, required this.onFilteredData});
 
   @override
   State<DailyGraphView> createState() => _DailyGraphViewState();
@@ -207,11 +355,15 @@ class DailyGraphView extends StatefulWidget {
 /// daily graph
 ///*********************************
 class _DailyGraphViewState extends State<DailyGraphView> {
+  List<String> selectedCategories = [];
+  Map<String, Map<String, String>> dailyData = {};
+  String? selectedFilter = "";
 
   @override
   //Initialize colors making sure all apps are mapped to a color before displaying
   void initState() {
     super.initState();
+    dailyData = screenTimeData;
     _initializeData();
   }
 
@@ -221,29 +373,126 @@ class _DailyGraphViewState extends State<DailyGraphView> {
     });
   }
 
-  //Wrapper for loading bar touch, 
+  Map<String, Map<String, String>> filterData() {
+    Map<String, Map<String, String>> filteredData  = Map<String, Map<String, String>>.from(screenTimeData);
+    if (selectedCategories.isNotEmpty){
+      filteredData.removeWhere((key, value){
+      String? category = value['category'];
+      return category == null || !selectedCategories.contains(category);
+    }); 
+    }
+    final entries = filteredData.entries.toList();
+    switch (selectedFilter) {
+      case 'Alphabet(asc)':
+        entries.sort((a, b) =>
+          a.key.compareTo(b.key)
+        );
+        break;
+      case 'Alphabet(desc)':
+        entries.sort((a, b) =>
+          b.key.compareTo(a.key)
+        );
+        break;
+      case 'Hours(asc)':
+        entries.sort((a, b) =>
+          (a.value['hours'])!.compareTo(b.value['hours']!)
+        );
+        break;
+      case 'Hours(desc)':
+        entries.sort((a, b) =>
+          (b.value['hours'])!.compareTo(a.value['hours']!)
+        );
+        break;
+      default:
+        break;
+    }
+    return Map<String, Map<String, String>>.fromEntries(entries);  
+  }
+
+  //Wrapper for loading bar touch
   BarTouchData loadTouch(Map<String, Map<String, String>> data) {
     return getBarDayTouch(data, widget.onBarSelected);
   }
-
   @override
   Widget build(BuildContext context) {
     //Display loading screen if data is not present
-    if (screenTimeData.isEmpty) {
-      return Center(child: CircularProgressIndicator());
-    }
+    /*if (screenTimeData.isEmpty) {
+      return Center(child: Text("No data recorded"));
+    }*/
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
         children: [
           const SizedBox(height: 60),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: CustomDropdown.multiSelect(
+                  items: categories, 
+                  overlayHeight: 525,
+                  closedHeaderPadding: EdgeInsets.all(8.0),
+                  expandedHeaderPadding: EdgeInsets.all(8.0),
+                  hintBuilder: (context, hint, enabled) {
+                    return Text(
+                      "All Categories", 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                        ),
+                    );
+                  },                
+                  onListChanged: (value) {
+                    if (value.isEmpty) {
+                      setState(() {
+                        selectedCategories = [];
+                        dailyData = screenTimeData;
+                        availableApps = dailyData.keys.toList();
+                        widget.onFilteredData(dailyData);
+                      });
+                    }
+                    else { 
+                      setState(() {
+                        selectedCategories = value;
+                        dailyData = filterData();
+                        availableApps = dailyData.keys.toList();
+                        widget.onFilteredData(dailyData);
+                      });
+                    }
+                  },
+                ),
+              ),
+              Expanded(
+                child: CustomDropdown(
+                  closedHeaderPadding: EdgeInsets.all(8.0),
+                  expandedHeaderPadding: EdgeInsets.all(8.0),
+                  items: filters, 
+                  hintBuilder: (context, hint, enabled) {
+                    return Text(
+                      "Filters", 
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                        ),
+                    );
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      selectedFilter = value;
+                      dailyData = filterData();
+                      availableApps = dailyData.keys.toList();
+                      widget.onFilteredData(dailyData);
+                    });
+                  }
+                ),
+              )
+            ],
+          ),
           //Title for graph
           Text("Daily Graph", style: TextStyle(fontSize: 18),),
           Expanded(
             //Widget to allow scrolling of graph if it overflows the screen
             child: SingleChildScrollView(
-              //Allow tooltips to display above graph
-              //clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 //Sets a minimum size for graph
@@ -292,8 +541,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                         show: true,
                       ),
                       //Functionality Widgets
-                      barTouchData: loadTouch(screenTimeData),
-                      barGroups: generateDailyChart(screenTimeData),
+                      barTouchData: loadTouch(dailyData),
+                      barGroups: generateDailyChart(dailyData),
                     )
                   )
                 ),
