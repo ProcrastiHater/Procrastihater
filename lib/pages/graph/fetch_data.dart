@@ -7,6 +7,7 @@
 library;
 
 //Dart Imports
+import 'package:app_screen_time/pages/graph/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -105,4 +106,8 @@ Future<void> fetchWeeklyScreenTime() async {
     debugPrint("error fetching screentime data: $e");
   }
   weeklyData = fetchedData;
+  weeklyData = Map.fromEntries(
+    weeklyData.entries.toList()
+      ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key))),
+  );
 }
