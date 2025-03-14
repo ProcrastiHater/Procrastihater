@@ -85,47 +85,51 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
 
   Map<String, Map<String, Map<String, dynamic>>> filterData() {
     Map<String, Map<String, Map<String, dynamic>>> filteredData = {};
-    weeklyData.forEach((dayKey, appsKey) {
+    weeklyData.forEach((dayKey, dayData) {
       Map<String, Map<String, dynamic>> appsMap = {};
-      appsKey.forEach((appName, appData) {
-        appsMap[appName] = Map<String, dynamic>.from(appData);
+      dayData.forEach((appKey, appData) {
+        appsMap[appKey] = Map<String, dynamic>.from(appData);
       });
       filteredData[dayKey] = appsMap;
     });
     if (selectedCategories.isNotEmpty){
-      filteredData.forEach((key, dailyData) {
-        dailyData.removeWhere((key, value) {
-          String? category = value['appType'] as String?;
+      filteredData.forEach((daysKey, dayData) {
+        dayData.removeWhere((appKey, appData) {
+          String? category = appData['appType'] as String?;
           return category == null || !selectedCategories.contains(category);
         });
       }); 
     }
-    /*final entries = filteredData.entries.toList();
-    switch (selectedFilter) {
-      case 'Alphabet(asc)':
-        entries.sort((a, b) =>
-          a.key.compareTo(b.key)
-        );
-        break;
-      case 'Alphabet(desc)':
-        entries.sort((a, b) =>
-          b.key.compareTo(a.key)
-        );
-        break;
-      case 'Hours(asc)':
-        entries.sort((a, b) =>
-          (a.value['hours'])!.compareTo(b.value['hours']!)
-        );
-        break;
-      case 'Hours(desc)':
-        entries.sort((a, b) =>
-          (b.value['hours'])!.compareTo(a.value['hours']!)
-        );
-        break;
-      default:
-        break;
-    }*/
-    return filteredData;//Map<String, Map<S tring, String>>.fromEntries(entries);  
+
+    filteredData.forEach((dayKey, appsKey) {
+      final entries = appsKey.entries.toList();
+      switch (selectedFilter) {
+        case 'Alphabet(asc)':
+          entries.sort((a, b) =>
+            a.key.compareTo(b.key)
+          );
+          break;
+        case 'Alphabet(desc)':
+          entries.sort((a, b) =>
+            b.key.compareTo(a.key)
+          );
+          break;
+        case 'Hours(asc)':
+          entries.sort((a, b) =>
+            (a.value['hours'])!.compareTo(b.value['hours']!)
+          );
+          break;
+        case 'Hours(desc)':
+          entries.sort((a, b) =>
+            (b.value['hours'])!.compareTo(a.value['hours']!)
+          );
+          break;
+        default:
+          break;
+        }
+      filteredData[dayKey] = Map<String, Map<String, dynamic>>.fromEntries(entries);
+    });    
+    return filteredData;//<String, Map<String, Map<String, dynamic>>>.fromEntries(entries);
   }
 
   @override
@@ -177,7 +181,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                       setState(() {
                         selectedCategories = [];
                         weekData = weeklyData;
-                        availableApps = weekData.keys.toList();
+                        availableDays = weekData.keys.toList();
                         widget.onFilteredData(weekData);
                       });
                     }
@@ -185,7 +189,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                       setState(() {
                         selectedCategories = value;
                         weekData = filterData();
-                        availableApps = weekData.keys.toList();
+                        availableDays = weekData.keys.toList();
                         widget.onFilteredData(weekData);
                       });
                     }
@@ -207,7 +211,12 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                     );
                   },
                   onChanged: (value) {
-                    
+                    setState(() {
+                      selectedFilter = value;
+                      weekData = filterData();
+                      availableDays = weekData.keys.toList();
+                      widget.onFilteredData(weekData);
+                    });
                   }
                 ),
               ),

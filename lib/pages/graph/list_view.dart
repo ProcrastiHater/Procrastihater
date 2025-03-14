@@ -129,7 +129,8 @@ class _ExpandedListViewState extends State<ExpandedListView> {
           );
         }
         //Data to be displayed 
-        final dayData = weeklyData[widget.selectedBar]!;
+        final weekData = widget.weekFilteredData;
+        final dayData = weekData[widget.selectedBar]!;
         final reversedEntries = dayData.entries.toList().reversed.toList();
         //Builder to display list
         return ListView.builder(
