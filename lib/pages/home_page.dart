@@ -206,7 +206,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     setState(() {
                       selectedBar == "null";
                       graphIndex = index;
-                    });
+                    }); 
                   },
                   destinations: const <Widget>[
                     NavigationDestination(

@@ -65,36 +65,40 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     return getBarWeekTouch(data, widget.onBarSelected);
   }
 
-  
-
-  @override
-  void initState() {
-    super.initState();
+  Future<void> initWeeklyData() async {
+    await fetchWeeklyScreenTime();
     setState(() {
       weekData = weeklyData;
-      formattedCurrent = availableWeekKeys.last;
-      currentWeek = formattedCurrent;
-      currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
       availableDays = weekData.keys.toList();
     });
   }
 
+
+  @override
+  void initState() {
+    super.initState();
+    formattedCurrent = availableWeekKeys.last;
+    currentWeek = formattedCurrent;
+    currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
+    initWeeklyData();
+  }
+
   Map<String, Map<String, Map<String, dynamic>>> filterData() {
     Map<String, Map<String, Map<String, dynamic>>> filteredData = {};
-    weeklyData.forEach((outerKey, innerMap) {
-      Map<String, Map<String, dynamic>> newInnerMap = {};
-      innerMap.forEach((key, value) {
-        newInnerMap[key] = Map<String, dynamic>.from(value);
+    weeklyData.forEach((dayKey, appsKey) {
+      Map<String, Map<String, dynamic>> appsMap = {};
+      appsKey.forEach((appName, appData) {
+        appsMap[appName] = Map<String, dynamic>.from(appData);
       });
-      filteredData[outerKey] = newInnerMap;
+      filteredData[dayKey] = appsMap;
     });
     if (selectedCategories.isNotEmpty){
       filteredData.forEach((key, dailyData) {
-        dailyData.removeWhere((key, value){
-        String? category = value['appType'] as String?;
-        return category == null || !selectedCategories.contains(category);
-      });
-    }); 
+        dailyData.removeWhere((key, value) {
+          String? category = value['appType'] as String?;
+          return category == null || !selectedCategories.contains(category);
+        });
+      }); 
     }
     /*final entries = filteredData.entries.toList();
     switch (selectedFilter) {
@@ -124,17 +128,10 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     return filteredData;//Map<String, Map<S tring, String>>.fromEntries(entries);  
   }
 
-  void resetFilters() {
-    setState(() {
-      selectedCategories = [];
-      selectedFilter = "";
-    });
-  }
   @override
   Widget build(BuildContext context) {
-    //Display loading screen if data is not present
-    if (weeklyData.isEmpty) {
-      return Center(child: Text("No data available"));
+    if (weekData.isEmpty) {
+      return Center(child: CircularProgressIndicator());
     }
     return Padding(
       padding: const EdgeInsets.all(10.0),
@@ -279,10 +276,9 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   currentWeek = availableWeekKeys[currentIndex - 1];
                   currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
                   await fetchWeeklyScreenTime();
-                  weekData = weeklyData;
+                  weekData = filterData();
                   availableDays = weekData.keys.toList();
                   setState(() {
-                    resetFilters();
                     isLoading = false;
                   });
                 } : null,
@@ -300,10 +296,9 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   currentWeek = availableWeekKeys[currentIndex + 1];
                   currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
                   await fetchWeeklyScreenTime();
-                  weekData = weeklyData;
+                  weekData = filterData();
                   availableDays = weekData.keys.toList();
                   setState(() {
-                    resetFilters();
                     isLoading = false;
                   });
                 } : null,
