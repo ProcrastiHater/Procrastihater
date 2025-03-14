@@ -55,8 +55,9 @@ class WeeklyGraphView extends StatefulWidget {
 ///*********************************
 class _WeeklyGraphViewState extends State<WeeklyGraphView> {
   List<String> selectedCategories = [];
-  Map<String, Map<String, Map<String, dynamic>>> weekData = {};
+  List<String> selectedApps = [];
   String? selectedFilter = "";
+  Map<String, Map<String, Map<String, dynamic>>> weekData = {};
   String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
   bool isLoading = false;
   
@@ -70,6 +71,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     setState(() {
       weekData = weeklyData;
       availableDays = weekData.keys.toList();
+      widget.onFilteredData(weekData);
     });
   }
 
@@ -92,14 +94,25 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       });
       filteredData[dayKey] = appsMap;
     });
+
+    if (selectedApps.isNotEmpty) {
+      filteredData.forEach((dayKey, dayData) {
+        dayData.removeWhere((appKey, appData) {
+          String? appName = appKey as String?;
+          return appName == null || !selectedApps.contains(appName);
+        });
+      });
+    }
+
     if (selectedCategories.isNotEmpty){
-      filteredData.forEach((daysKey, dayData) {
+      filteredData.forEach((dayKey, dayData) {
         dayData.removeWhere((appKey, appData) {
           String? category = appData['appType'] as String?;
           return category == null || !selectedCategories.contains(category);
         });
       }); 
     }
+
 
     filteredData.forEach((dayKey, appsKey) {
       final entries = appsKey.entries.toList();
@@ -129,7 +142,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
         }
       filteredData[dayKey] = Map<String, Map<String, dynamic>>.fromEntries(entries);
     });    
-    return filteredData;//<String, Map<String, Map<String, dynamic>>>.fromEntries(entries);
+    return filteredData;
   }
 
   @override
@@ -142,21 +155,27 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       child: Column(
         children: [
           const SizedBox(height: 60),
-          CustomDropdown.search(
+          CustomDropdown.multiSelectSearch(
             closedHeaderPadding: EdgeInsets.all(8.0),
             expandedHeaderPadding: EdgeInsets.all(8.0),
             items: appNameToColor.keys.toList(), 
             hintBuilder: (context, hint, enabled) {
               return Text(
-                "App Search", 
+                "All Apps", 
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 16.0,
                   ),
                 );
               },   
-            onChanged: (value) {            
-            }
+            onListChanged: (value) {  
+              setState(() {
+                selectedApps = value;
+                weekData = filterData();
+                availableDays = weekData.keys.toList();
+                widget.onFilteredData(weekData);
+              });
+            },
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -177,23 +196,13 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                     );
                   },                
                   onListChanged: (value) {
-                    if (value.isEmpty) {
-                      setState(() {
-                        selectedCategories = [];
-                        weekData = weeklyData;
-                        availableDays = weekData.keys.toList();
-                        widget.onFilteredData(weekData);
-                      });
-                    }
-                    else { 
-                      setState(() {
-                        selectedCategories = value;
-                        weekData = filterData();
-                        availableDays = weekData.keys.toList();
-                        widget.onFilteredData(weekData);
-                      });
-                    }
-                  },
+                    setState(() {
+                      selectedCategories = value;
+                      weekData = filterData();
+                      availableDays = weekData.keys.toList();
+                      widget.onFilteredData(weekData);
+                    });
+                  }
                 ),
               ),
               Expanded(
@@ -287,6 +296,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   await fetchWeeklyScreenTime();
                   weekData = filterData();
                   availableDays = weekData.keys.toList();
+                  widget.onFilteredData(weekData);
                   setState(() {
                     isLoading = false;
                   });
@@ -307,6 +317,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   await fetchWeeklyScreenTime();
                   weekData = filterData();
                   availableDays = weekData.keys.toList();
+                  widget.onFilteredData(weekData);
                   setState(() {
                     isLoading = false;
                   });

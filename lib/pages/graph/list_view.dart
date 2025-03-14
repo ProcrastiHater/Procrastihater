@@ -137,6 +137,7 @@ class _ExpandedListViewState extends State<ExpandedListView> {
           //Builds from the top of parent widget
           padding: EdgeInsets.zero,
           //Data tiles plus 1 for title
+          
           itemCount: dayData.length + 1,
           //Data tile builder  
           itemBuilder: (context, index) {

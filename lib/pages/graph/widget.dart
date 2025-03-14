@@ -285,7 +285,3 @@ Widget sideTitles(double value, TitleMeta meta) {
     ),
   );
 }
-
-//List<DropdownMenuItem<Object>> getCategoryFilters() {
-  
-//}
