@@ -1,0 +1,2 @@
+C:/Users/Ajewe/source/repos/Procrastihater/android/app/.cxx/Debug/415f3r2j/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/Ajewe/source/repos/Procrastihater/android/app/.cxx/Debug/415f3r2j/arm64-v8a/CMakeFiles/rebuild_cache.dir
