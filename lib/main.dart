@@ -63,20 +63,26 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase initialization
   await Firebase.initializeApp();
-  //launch the main app
+  await initializeMain();
+}
+
+Future<void> initializeMain() async {
+    //launch the main app
   _currentToHistorical().whenComplete(() {
-    _checkSTPermission().whenComplete(() {
-      _getScreenTime().whenComplete(() {
-        fetchWeeklyScreenTime().whenComplete(() {
-          generateAppsList().whenComplete(() {
-            initializeAppNameColorMapping().whenComplete(() {
-              _writeScreenTimeData();
-              checkNotifsPermission();
-              //Launches login screen first which returns ProcrasiHater app if success
-              runApp(const LoginScreen());
+    _checkSTPermission().whenComplete((){
+      _getScreenTime().whenComplete((){
+        getAvailableWeeks().whenComplete((){
+          fetchWeeklyScreenTime().whenComplete((){
+            generateAppsList().whenComplete(() {
+              initializeAppNameColorMapping().whenComplete((){
+                _writeScreenTimeData();
+                checkNotifsPermission();
+                //Launches login screen first which returns ProcrasiHater app if success
+                runApp(const LoginScreen());
+              });
             });
           });
-        });
+        }); 
       });
     });
   });

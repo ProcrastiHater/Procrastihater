@@ -7,6 +7,7 @@
 library;
 
 //Dart Imports
+import 'package:app_screen_time/pages/graph/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -22,8 +23,7 @@ Map<String, Map<String, Map<String, dynamic>>> weeklyData = {};
 
 //Variables for multi-week view
 List<String> availableWeekKeys = [];
-DateTime currentDataset = DateTime.now()
-    .subtract(Duration(days: DateTime.now().weekday - DateTime.monday));
+DateTime currentDataset = DateFormat('MM-dd-yyyy').parse(availableWeekKeys.last);
 String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 
 ///*********************************
@@ -33,8 +33,8 @@ String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 /// querysnapshot of collection appUsageHistory
 /// into a list
 ///*********************************
-Future<List<String>> getAvailableWeeks() async {
-  //Update the reference to the user doc before accessing
+Future<void> getAvailableWeeks() async{
+   //Update the reference to the user doc before accessing
   updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
@@ -47,9 +47,8 @@ Future<List<String>> getAvailableWeeks() async {
 
   // Sort the week keys by date
   final DateFormat formatter = DateFormat('MM-dd-yyyy');
-  availableWeeks
-      .sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
-  return availableWeeks;
+  availableWeeks.sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
+  availableWeekKeys = availableWeeks;
 }
 
 ///*********************************
@@ -61,8 +60,7 @@ Future<List<String>> getAvailableWeeks() async {
 /// database. Data is fetched using a map
 /// of map of maps and is returned.
 ///*********************************
-Future<Map<String, Map<String, Map<String, dynamic>>>>
-    fetchWeeklyScreenTime() async {
+Future<void> fetchWeeklyScreenTime() async {
   //Update the reference to the user doc before accessing
   updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
@@ -107,5 +105,9 @@ Future<Map<String, Map<String, Map<String, dynamic>>>>
   catch (e) {
     debugPrint("error fetching screentime data: $e");
   }
-  return fetchedData;
+  weeklyData = fetchedData;
+  weeklyData = Map.fromEntries(
+    weeklyData.entries.toList()
+      ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key))),
+  );
 }

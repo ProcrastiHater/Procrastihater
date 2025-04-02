@@ -7,6 +7,7 @@
 library;
 
 //Dart Imports
+import 'package:app_screen_time/pages/graph/graph.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -19,9 +20,12 @@ import '/pages/graph/colors.dart';
 import '/pages/friend_page.dart';
 import '/main.dart';
 
+//Global Variables
 List<String> availableApps = screenTimeData.keys.toList();
 List<String> availableDays = weeklyData.keys.toList();
-
+List<String> categories = [ "Accessibility", "Games", "Maps & Navigation", "Movies & Video", "Music & Audio", "News & Magazines", "Other", "Photos & Images", "Productivity", "Social & Communication"];
+List<String> filters = [ "Alphabet(asc)", "Alphabet(desc)", "Hours(asc)", "Hours(desc)"];
+List<String> dayOrder = [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 ///********************************
 /// Name: generateWeeklyChart
