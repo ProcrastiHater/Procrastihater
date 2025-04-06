@@ -161,6 +161,11 @@ String formatTime(Duration duration) {
                     ),
                     child: const Text("End Study Session"),
                   ),
+                  const SizedBox(height: 40),
+                  Text(
+                    "Points Earned: ${_stopwatch.elapsed.inMinutes}", 
+                    style: const TextStyle(fontSize: 20, color: FG),
+                  ),
                 ],
               )
             : Column(
