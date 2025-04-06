@@ -16,6 +16,22 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
+//OG blue: 18,51,86
+//Good blues: 60,65,86 (gr1)
+//            32,58,86 (gr2)
+//            10,27,46 (darker OG)
+//            28,31,41 (darker gr1)
+//            20,36,54 (darker gr2)
+Color bg = Color.fromARGB(255, 20, 36, 54);
+//OG beige-ish: 252,231,193
+Color fg = Color.fromARGB(255, 252, 231, 193);
+
+String font = "sans-serif";
+
+TextStyle style = TextStyle(
+  color: fg,
+  fontFamily: font
+);
 
 ///*********************************
 /// Name: AppLimitsPage
@@ -58,18 +74,27 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
     return Scaffold(
       appBar: AppBar(
         title: Text("App Screen Time Limits"),
+        titleTextStyle: TextStyle(
+          fontFamily: font,
+          fontSize: 20,
+          color: fg
+        ),
+        backgroundColor: bg,
+        foregroundColor: fg,
       ),
       body: ListView.builder(
         padding: EdgeInsets.zero,
         itemCount: appNames.length,
         itemBuilder: (context, index) {
           return ListTile(
+            titleAlignment: ListTileTitleAlignment.center,
             contentPadding: EdgeInsets.only(bottom: 5, left: 10, right: 10),
-            tileColor: Colors.indigo.shade100,
+            tileColor: bg,
             title: Text(
               appNames[index],
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontFamily: font,
                 color: appNameToColor[appNames[index]],
               ),
             ),
@@ -77,18 +102,22 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
               width: 200,
               child: TextField(
                 controller: _appLimitControllers[index],
+                style: style,
                 decoration: InputDecoration(
+                  border: InputBorder.none,
                   labelText: 'Time limit',
+                  labelStyle: style,
                   prefixIcon: IconButton(
                     icon: Icon(
-                      Icons.save
+                      Icons.save_rounded,
+                      color: fg,
                     ),
                     onPressed: () => _updateAppLimit(appNames[index], _appLimitControllers[index].text),
                   ),
                   suffixIcon: IconButton(
                     onPressed: () => _deleteAppLimit(appNames[index]), 
                     icon: Icon(
-                      Icons.close,
+                      Icons.close_rounded,
                       color: Colors.red,
                     )
                   )
