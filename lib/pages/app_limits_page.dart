@@ -22,14 +22,15 @@ import 'dart:async';
 //            10,27,46 (darker OG)
 //            28,31,41 (darker gr1)
 //            20,36,54 (darker gr2)
-Color bg = Color.fromARGB(255, 20, 36, 54);
+//            7,19,33 (even darker OG)
+const Color BG = Color.fromARGB(255, 7, 19, 33);
 //OG beige-ish: 252,231,193
-Color fg = Color.fromARGB(255, 252, 231, 193);
+const Color FG = Color.fromARGB(255, 252, 231, 193);
 
 String font = "sans-serif";
 
 TextStyle style = TextStyle(
-  color: fg,
+  color: FG,
   fontFamily: font
 );
 
@@ -77,19 +78,19 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
         titleTextStyle: TextStyle(
           fontFamily: font,
           fontSize: 20,
-          color: fg
+          color: FG
         ),
-        backgroundColor: bg,
-        foregroundColor: fg,
+        backgroundColor: BG,
+        foregroundColor: FG,
       ),
+      backgroundColor: BG,
       body: ListView.builder(
-        padding: EdgeInsets.zero,
+        padding: EdgeInsets.all(4.0),
         itemCount: appNames.length,
         itemBuilder: (context, index) {
           return ListTile(
             titleAlignment: ListTileTitleAlignment.center,
-            contentPadding: EdgeInsets.only(bottom: 5, left: 10, right: 10),
-            tileColor: bg,
+            contentPadding: EdgeInsets.only(bottom: 5, left: 10),
             title: Text(
               appNames[index],
               style: TextStyle(
@@ -110,7 +111,7 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
                   prefixIcon: IconButton(
                     icon: Icon(
                       Icons.save_rounded,
-                      color: fg,
+                      color: FG,
                     ),
                     onPressed: () => _updateAppLimit(appNames[index], _appLimitControllers[index].text),
                   ),

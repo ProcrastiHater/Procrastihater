@@ -1,8 +1,10 @@
+import 'package:app_screen_time/pages/app_limits_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
-
+HSLColor inter = HSLColor.fromColor(BG);
+Color BUTTON_BG = inter.withLightness(inter.lightness + 0.05).toColor();
 class StudyModePage extends StatefulWidget {
   const StudyModePage({super.key});
 
@@ -130,7 +132,17 @@ String formatTime(Duration duration) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Study Mode")),
+      appBar: AppBar(
+        title: const Text("Study Mode"),
+        titleTextStyle: TextStyle(
+          fontFamily: font,
+          color: FG,
+          fontSize: 20
+        ),
+        foregroundColor: FG,
+        backgroundColor: BG,
+      ),
+      backgroundColor: BG,
       body: Center(
         child: _isStudying
             ? Column(
@@ -138,17 +150,25 @@ String formatTime(Duration duration) {
                 children: [
                   Text(
                     formatTime(_stopwatch.elapsed),
-                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: FG),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _endSession,
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(BUTTON_BG),
+                      foregroundColor: WidgetStatePropertyAll(FG)
+                    ),
                     child: const Text("End Study Session"),
                   ),
                 ],
               )
             : ElevatedButton(
                 onPressed: _startStudySession,
+                style: ButtonStyle(
+                  backgroundColor: WidgetStatePropertyAll(BUTTON_BG),
+                  foregroundColor: WidgetStatePropertyAll(FG)
+                ),
                 child: const Text("Begin Study Session"),
               ),
       ),
