@@ -1,4 +1,5 @@
 import 'package:app_screen_time/pages/app_limits_page.dart';
+import 'package:app_screen_time/profile/profile_picture_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,17 +14,19 @@ class StudyModePage extends StatefulWidget {
 }
 
 class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserver {
- bool _isStudying = false;
- final Stopwatch _stopwatch = Stopwatch();
+  bool _isStudying = false;
+  final Stopwatch _stopwatch = Stopwatch();
+  int _totalPoints = 0;
  
 
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
- @override
+  @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); 
+    WidgetsBinding.instance.addObserver(this);
+    _updateTotalPoints();
   }
 
   @override
@@ -54,6 +57,24 @@ class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserve
       } 
     }
   }
+
+///*********************************************************
+/// Name: _updateTotalPoints
+/// 
+/// Description: Gets the total points from the user'svfirestore
+/// object
+///*********************************************************
+Future<void> _updateTotalPoints() async {
+  final user = auth.currentUser;
+  final userDoc = await userRef.get();
+  int totalPoints = 0;
+  if(user != null){
+    totalPoints = await userDoc.get("points");
+  }
+  setState(() {
+    _totalPoints = totalPoints;
+  });
+}
 
 ///*********************************************************
 /// Name: _startStudySession
@@ -99,6 +120,7 @@ void _startStudySession() {
         'points': FieldValue.increment(earnedPoints),
       });
     }
+    await _updateTotalPoints();
   }
 
   ///*********************************************************
@@ -114,6 +136,7 @@ void _startStudySession() {
         'points': FieldValue.increment(-50),
       });
     }
+    await _updateTotalPoints();
   }
 
 ///*********************************************************
@@ -166,6 +189,10 @@ String formatTime(Duration duration) {
                     "Points Earned: ${_stopwatch.elapsed.inMinutes}", 
                     style: const TextStyle(fontSize: 20, color: FG),
                   ),
+                  Text(
+                    "Your Total Points: $_totalPoints",
+                    style: const TextStyle(fontSize: 20, color: FG),
+                  )
                 ],
               )
             : Column(
@@ -193,6 +220,11 @@ String formatTime(Duration duration) {
                   ),
                   child: const Text("Begin Study Session"),
                 ),
+                const SizedBox(height: 40),
+                Text(
+                  "Your Total Points: $_totalPoints",
+                  style: const TextStyle(fontSize: 20, color: FG),
+                )
               ] 
             )
       ),
