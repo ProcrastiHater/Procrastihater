@@ -112,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        title: Text("ProcrastiStats"),
         actions: [
           // Creating little user icon you can press to view account info
           IconButton(
@@ -136,29 +137,38 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             SizedBox(
-              height: 100,
+              height: 80,
               child:  DrawerHeader(
               decoration: BoxDecoration(
               ),
-              child: Center(child: Text("Other Pages:")),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: Image.asset("assets/logo.jpg"),
+                  ),
+                  Text("ProcrastiTools",),
+              ],
+              )
               ),
             ),
-            ListTile(
+              ListTile(
               trailing: Icon(Icons.calendar_today),
               title: Text("Calendar"),
               onTap:() {
                 Navigator.pushNamed(context, '/calendarPage');
               },
             ),
-            const Divider(),
-            ListTile(
+           // const Divider(),
+             ListTile(
               trailing: Icon(Icons.school),
               title: Text("Study Mode"),
               onTap: () {
                 Navigator.pushNamed(context, '/studyModePage');
               },
             ),
-            const Divider(),
+            //const Divider(),
             ListTile(
               trailing: Icon(Icons.alarm),
               title: Text("App Limits"),

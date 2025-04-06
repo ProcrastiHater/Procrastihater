@@ -122,19 +122,30 @@ class ProcrastiHater extends StatelessWidget {
           titleLarge: TextStyle(color: Color(0xFFC9D1D9), fontWeight: FontWeight.bold),
         ),
         appBarTheme: AppBarTheme(
+          centerTitle: true,
           toolbarHeight: screenHeight * .05,
-          backgroundColor: Color(0xFF0D1117),
+          backgroundColor: Color(0xFF161B22),
           foregroundColor: Color(0xFFC9D1D9),
-          elevation: 1,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF161B22),
-            foregroundColor: Colors.white,
+            foregroundColor: Color(0xFFC9D1D9),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           )
         ),
-        
+        dividerTheme: DividerThemeData(
+          color: Color(0xFFC9D1D9),
+          indent: 5,
+          endIndent: 5,
+          thickness: 1,
+        ),
+        cardTheme: CardThemeData(
+          color: Color(0xFF0D1117),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: EdgeInsets.all(10.0),
+        ),
       ),
       //Main route of the app
       initialRoute: '/homePage',
