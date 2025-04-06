@@ -112,7 +112,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         actions: [
           // Creating little user icon you can press to view account info
           IconButton(
@@ -140,9 +139,8 @@ class _MyHomePageState extends State<MyHomePage> {
               height: 100,
               child:  DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blueGrey,
               ),
-              child: Center(child: Text("Other Pages:", style: TextStyle(color: Colors.white))),
+              child: Center(child: Text("Other Pages:")),
               ),
             ),
             ListTile(
@@ -174,19 +172,18 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [ 
           Expanded(
+            flex: 6,
             //Container holding graph in top portion of screen
             child: Scaffold(
               body: [
                 //Daily Graph
                 Container(
                   padding: const EdgeInsets.all(4.0),
-                  color: Colors.indigo.shade50,
                   child: DailyGraphView(onFilteredData: updateFilteredDayData, onBarSelected: updateSelectedBar),
                 ),
                 //Weekly Graph
                  Container(
                   padding: const EdgeInsets.all(4.0),
-                  color: Colors.indigo.shade50,
                   child: WeeklyGraphView(onFilteredData: updateFilteredWeekData, onBarSelected: updateSelectedBar),
                 ),
                 //Monthly Graph
@@ -201,7 +198,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 50,
                 child: NavigationBar(
                   selectedIndex: graphIndex,
-                  backgroundColor: Colors.indigo.shade50,
                   onDestinationSelected: (int index) {
                     setState(() {
                       selectedBar == "null";
@@ -228,10 +224,10 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           const SizedBox(height: 4.0),
           Expanded(
+            flex: 4,
             //Container holding list view in bottom portion of screen
             child: Container(
               padding: const EdgeInsets.all(4.0),
-              color: Colors.indigo.shade100,
               child: ExpandedListView(dayFilteredData: dayData, weekFilteredData: weekData, selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
             ),
           ),

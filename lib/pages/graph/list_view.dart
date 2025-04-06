@@ -103,7 +103,6 @@ class _ExpandedListViewState extends State<ExpandedListView> {
               "Select a bar to expand",
               style: const TextStyle(
                 decoration: TextDecoration.none,
-                color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               )
@@ -121,7 +120,6 @@ class _ExpandedListViewState extends State<ExpandedListView> {
               "No data available for ${widget.selectedBar}",
               style: const TextStyle(
                 decoration: TextDecoration.none,
-                color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               )

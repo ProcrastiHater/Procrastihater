@@ -130,7 +130,6 @@ BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function
     touchTooltipData: BarTouchTooltipData(
       fitInsideVertically: true,
       fitInsideHorizontally: true,
-      getTooltipColor: (_) => Colors.blueGrey,
       tooltipPadding: const EdgeInsets.all(8.0),
       tooltipMargin: 8.0,
       getTooltipItem: (group, groupIndex, rod, rodIndex) {
@@ -141,7 +140,6 @@ BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function
           "$appName\n",
           const TextStyle(
             decoration: TextDecoration.none,
-            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
@@ -150,14 +148,12 @@ BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function
             text: 'Hours: $totalHours\n',
             style: const TextStyle(
               decoration: TextDecoration.none,
-              color: Colors.white
               ),
             ),
             TextSpan(
             text: 'Category: $category',
             style: const TextStyle(
               decoration: TextDecoration.none,
-              color: Colors.white
               ),
             ),
           ],
@@ -188,7 +184,6 @@ BarTouchData getBarWeekTouch(Map<String, Map<String, Map<String, dynamic>>> data
     },
     //Loads tooltip containing total hours for the day
     touchTooltipData: BarTouchTooltipData(
-      getTooltipColor: (_) => Colors.blueGrey,
       tooltipPadding: const EdgeInsets.all(8.0),
       tooltipMargin: 8.0,
       getTooltipItem: (group, groupIndex, rod, rodIndex) {
@@ -197,7 +192,6 @@ BarTouchData getBarWeekTouch(Map<String, Map<String, Map<String, dynamic>>> data
           'Total Hours\n',
           const TextStyle(
             decoration: TextDecoration.none,
-            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
@@ -206,7 +200,6 @@ BarTouchData getBarWeekTouch(Map<String, Map<String, Map<String, dynamic>>> data
             text: '${totalHours.toStringAsFixed(1)} hrs',
             style: const TextStyle(
               decoration: TextDecoration.none,
-              color: Colors.white
               ),
             ),
           ],
@@ -226,7 +219,6 @@ Widget bottomAppTitles(double value, TitleMeta meta) {
   const style = TextStyle(
     decoration: TextDecoration.none,
     fontSize: 10.0, 
-    color: Colors.black,
   );
   String text = availableApps[value.toInt()];
   return SideTitleWidget(
@@ -258,7 +250,6 @@ Widget bottomDayTitles(double value, TitleMeta meta) {
   const style = TextStyle(
     decoration: TextDecoration.none,
     fontSize: 10.0, 
-    color: Colors.black,
   );
   String text = availableDays[value.toInt()].substring(0,3);
   return SideTitleWidget(
@@ -282,7 +273,6 @@ Widget sideTitles(double value, TitleMeta meta) {
     style: const TextStyle(
       decoration: TextDecoration.none,
       fontSize: 10,
-      color: Colors.black,
     ),
   );
 }

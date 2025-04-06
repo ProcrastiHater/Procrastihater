@@ -100,7 +100,42 @@ class ProcrastiHater extends StatelessWidget {
   @override
   //Main material app for app
   Widget build(BuildContext context) {
+    double? screenWidth = MediaQuery.of(context).size.width;
+    double? screenHeight = MediaQuery.of(context).size.height;
     return MaterialApp(
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor:const Color(0xFF0D1117),
+        primaryColor: const Color(0xFF1F6FEB),
+        colorScheme: const ColorScheme.dark(
+          surface: Color(0xFF161B22),
+          primary: Color(0xFF1F6FEB),
+          primaryContainer: Color(0xFF388BFD),
+          secondary: Color(0xFF2E8BFF),
+          onPrimary: Color(0xFFC9D1D9),
+          onSecondary: Color(0xFFC9D1D9),
+          onSurface: Color(0xFF8B949E),
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFFC9D1D9)),
+          bodyMedium: TextStyle(color: Color(0xFF8B949E)),
+          titleLarge: TextStyle(color: Color(0xFFC9D1D9), fontWeight: FontWeight.bold),
+        ),
+        appBarTheme: AppBarTheme(
+          toolbarHeight: screenHeight * .05,
+          backgroundColor: Color(0xFF0D1117),
+          foregroundColor: Color(0xFFC9D1D9),
+          elevation: 1,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF161B22),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          )
+        ),
+        
+      ),
       //Main route of the app
       initialRoute: '/homePage',
       //Route generation based on what the route needs to do
