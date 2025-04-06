@@ -12,6 +12,7 @@ import 'dart:ffi';
 import 'package:app_screen_time/apps_list.dart';
 import 'package:app_screen_time/main.dart';
 import 'package:app_screen_time/pages/graph/colors.dart';
+import 'package:app_screen_time/pages/study_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -88,43 +89,46 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
         padding: EdgeInsets.all(4.0),
         itemCount: appNames.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            contentPadding: EdgeInsets.only(bottom: 5, left: 10),
-            title: Text(
-              appNames[index],
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontFamily: font,
-                color: appNameToColor[appNames[index]],
+          return Card(
+            color: BUTTON_BG,
+            child: ListTile(
+              titleAlignment: ListTileTitleAlignment.center,
+              contentPadding: EdgeInsets.only(bottom: 5, left: 10),
+              title: Text(
+                appNames[index],
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: font,
+                  color: appNameToColor[appNames[index]],
+                ),
               ),
-            ),
-            trailing: SizedBox(
-              width: 200,
-              child: TextField(
-                controller: _appLimitControllers[index],
-                style: style,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  labelText: 'Time limit',
-                  labelStyle: style,
-                  prefixIcon: IconButton(
-                    icon: Icon(
-                      Icons.save_rounded,
-                      color: FG,
+              trailing: SizedBox(
+                width: 200,
+                child: TextField(
+                  controller: _appLimitControllers[index],
+                  style: style,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    labelText: 'Time limit',
+                    labelStyle: style,
+                    prefixIcon: IconButton(
+                      icon: Icon(
+                        Icons.save_rounded,
+                        color: FG,
+                      ),
+                      onPressed: () => _updateAppLimit(appNames[index], _appLimitControllers[index].text),
                     ),
-                    onPressed: () => _updateAppLimit(appNames[index], _appLimitControllers[index].text),
-                  ),
-                  suffixIcon: IconButton(
-                    onPressed: () => _deleteAppLimit(appNames[index]), 
-                    icon: Icon(
-                      Icons.close_rounded,
-                      color: Colors.red,
+                    suffixIcon: IconButton(
+                      onPressed: () => _deleteAppLimit(appNames[index]), 
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: Colors.red,
+                      )
                     )
                   )
                 )
               )
-            )
+            ),
           );
         }
       )

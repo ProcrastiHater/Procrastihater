@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 HSLColor inter = HSLColor.fromColor(BG);
-Color BUTTON_BG = inter.withLightness(inter.lightness + 0.05).toColor();
+Color BUTTON_BG = inter.withLightness(inter.lightness + 0.025).toColor();
 class StudyModePage extends StatefulWidget {
   const StudyModePage({super.key});
 
@@ -163,14 +163,33 @@ String formatTime(Duration duration) {
                   ),
                 ],
               )
-            : ElevatedButton(
-                onPressed: _startStudySession,
-                style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll(BUTTON_BG),
-                  foregroundColor: WidgetStatePropertyAll(FG)
+            : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "While in study mode, a timer will show and you will gain points for every minute you studied for"
+                    " once you exit study mode. However, if you leave the app without"
+                    " exiting study mode, a large amount of points will be deducted instead.",
+                    style: const TextStyle(
+                      color: FG,
+                      fontSize: 20
+                    ),
+                    textAlign: TextAlign.center
+                  ),
                 ),
-                child: const Text("Begin Study Session"),
-              ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _startStudySession,
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(BUTTON_BG),
+                    foregroundColor: WidgetStatePropertyAll(FG)
+                  ),
+                  child: const Text("Begin Study Session"),
+                ),
+              ] 
+            )
       ),
     );
   }
