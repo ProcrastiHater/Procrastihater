@@ -32,6 +32,8 @@ dependencies:
     sdk: flutter
   firebase_core: ^2.18.0
   firebase_auth: ^4.20.0
+  google_fonts: ^6.1.0
+  flutter_animate: ^4.1.0
   cloud_firestore: 4.17.5
 
 
