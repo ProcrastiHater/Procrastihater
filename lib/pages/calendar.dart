@@ -137,7 +137,7 @@ class _CalendarPageState extends State<CalendarPage> {
         ),
         backgroundColor: _colorScheme.primary,
       ),
-      backgroundColor: _colorScheme.background,
+      backgroundColor: _colorScheme.primary,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
