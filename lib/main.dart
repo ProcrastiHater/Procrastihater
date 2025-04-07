@@ -246,7 +246,8 @@ class ProcrastiHater extends StatelessWidget {
               child: child,
             ),
           );
-        });
+        }
+      );
   }
 }
 

@@ -104,13 +104,16 @@ BarChartGroupData generatedDayData(int index, String appName,Map<String, dynamic
   //Return individual bars with data
   return BarChartGroupData(
     x: index,
+    showingTooltipIndicators: [0],
     barRods: [
       BarChartRodData(
         fromY: 0,
         toY: double.parse(appData['hours'] ?? 0.0),
-        width: 15, 
+        width: 35, 
         color: appNameToColor[appName],
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8.0), 
+          topRight: Radius.circular(8.0)),
       ),
     ],
   );
@@ -128,35 +131,20 @@ BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function
     enabled: true,
     //Loads app data on touch of specific bar
     touchTooltipData: BarTouchTooltipData(
-      fitInsideVertically: true,
       fitInsideHorizontally: true,
-      tooltipPadding: const EdgeInsets.all(8.0),
-      tooltipMargin: 8.0,
+      fitInsideVertically: true,
+      getTooltipColor: (group) => Colors.transparent,
+      tooltipPadding: EdgeInsets.zero,
+      tooltipMargin: 0,
       getTooltipItem: (group, groupIndex, rod, rodIndex) {
         double totalHours = rod.toY;
-        String appName = availableApps[groupIndex];
-        String? category = data[appName]?['category'];
         return BarTooltipItem(
-          "$appName\n",
+          "$totalHours\n",
           const TextStyle(
             decoration: TextDecoration.none,
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
-          children: [
-            TextSpan(
-            text: 'Hours: $totalHours\n',
-            style: const TextStyle(
-              decoration: TextDecoration.none,
-              ),
-            ),
-            TextSpan(
-            text: 'Category: $category',
-            style: const TextStyle(
-              decoration: TextDecoration.none,
-              ),
-            ),
-          ],
         );
       },
     )
@@ -269,10 +257,6 @@ Widget bottomDayTitles(double value, TitleMeta meta) {
 ///*********************************
 Widget sideTitles(double value, TitleMeta meta) {
   return Text(
-    value.toStringAsFixed(1),
-    style: const TextStyle(
-      decoration: TextDecoration.none,
-      fontSize: 10,
-    ),
+    value.toStringAsFixed(0),
   );
 }

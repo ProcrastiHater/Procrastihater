@@ -426,10 +426,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   }
   @override
   Widget build(BuildContext context) {
-    //Display loading screen if data is not present
-    /*if (screenTimeData.isEmpty) {
-      return Center(child: Text("No data recorded"));
-    }*/
+    double? screenWidth = MediaQuery.of(context).size.width;
+    double? screenHeight = MediaQuery.of(context).size.height;
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
@@ -508,21 +506,22 @@ class _DailyGraphViewState extends State<DailyGraphView> {
             ],
           ),
           //Title for graph
-          Text("Daily Graph", style: TextStyle(fontSize: 18),),
+          Text("Daily Graph", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
           Expanded(
             //Widget to allow scrolling of graph if it overflows the screen
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 //Sets a minimum size for graph
-                constraints: BoxConstraints(minWidth: 390),
+                constraints: BoxConstraints(minWidth: screenWidth - (screenWidth * 0.075)),
                 child: SizedBox(
                   //Dynamically size graph based on amount of apps
                   width: 100 + availableApps.length * 70,
                   child: BarChart(
                     BarChartData(
                       groupsSpace: 60,
-                      alignment: BarChartAlignment.center,
+                      alignment: BarChartAlignment.spaceAround,
+                      backgroundColor: Color(0xFF161B22),
                       //Title Widgets
                       titlesData: FlTitlesData(
                         leftTitles: AxisTitles(
@@ -553,8 +552,15 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                         ),
                       ),
                       //Style Widgets
-                      borderData: FlBorderData(show: true),
+                      borderData: FlBorderData(
+                        border: Border.all(
+                          color: Color(0xFF1F6FEB),
+                          width: 2,
+                        ),
+                        show: true
+                        ),
                       gridData: FlGridData(
+                        drawHorizontalLine: false,
                         drawVerticalLine: false,
                         show: true,
                       ),
