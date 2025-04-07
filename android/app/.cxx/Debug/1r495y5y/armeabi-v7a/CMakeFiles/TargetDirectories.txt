@@ -1,0 +1,2 @@
+C:/Users/ansht/OneDrive/Documents/School/JP/Main/android/app/.cxx/Debug/1r495y5y/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/ansht/OneDrive/Documents/School/JP/Main/android/app/.cxx/Debug/1r495y5y/armeabi-v7a/CMakeFiles/rebuild_cache.dir
