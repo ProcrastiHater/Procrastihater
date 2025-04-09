@@ -72,23 +72,10 @@ class FriendsList extends StatefulWidget {
   State<FriendsList> createState() => _FriendsListState();
 }
 
-class _FriendsListState extends State<FriendsList> {
+class _FriendsListState extends State<FriendsList> with TickerProviderStateMixin {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  int _selectedIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  ///*********************************************************
-  /// Name: _deleteFriend
-  ///
-  /// Description: When the small X near a friend's card in the
-  /// friends list is pressed it removes that friend from the
-  /// user's friends list
-  ///*********************************************************
   void _deleteFriend(String friendUID) async {
     DocumentReference userDocRef =
         _firestore.collection('UID').doc(_auth.currentUser?.uid);
@@ -101,12 +88,6 @@ class _FriendsListState extends State<FriendsList> {
         .showSnackBar(const SnackBar(content: Text('Friend removed!')));
   }
 
-  ///*********************************************************
-  /// Name: _pokeFriend
-  ///
-  /// Description: Sends a poke to a friend by adding an entry
-  /// to there firebase document under the pokes collection.
-  ///*********************************************************
   void _pokeFriend(String friendUID) async {
     DocumentReference friendDocRef =
         _firestore.collection('UID').doc(friendUID);
@@ -122,159 +103,149 @@ class _FriendsListState extends State<FriendsList> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: darkBlue,
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8),
-            ),
-            Expanded(
-              child: StreamBuilder<DocumentSnapshot>(
-                stream: _firestore
-                    .collection('UID')
-                    .doc(_auth.currentUser?.uid)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const CircularProgressIndicator();
+    return DefaultTabController(
+      length: 3,
+      child: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
+            Navigator.pushReplacementNamed(context, '/friendsPageBack');
+          }
+        },
+        child: Scaffold(
+          backgroundColor: darkBlue,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(50),
+              child: TabBar(
+                tabs: const [
+                  Tab(icon: Icon(Icons.person_add_alt_1_sharp), text: 'Add Friends'),
+                  Tab(icon: Icon(Icons.waving_hand), text: 'Pokes'),
+                  Tab(icon: Icon(Icons.person_pin_rounded), text: 'Friend Requests'),
+                ],
+                onTap: (index) {
+                  if (index == 1) {
+                    showModalBottomSheet(
+                      context: context,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      builder: (context) => const PokeNotificationsPage(),
+                    );
+                  } else if (index == 0) {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      builder: (context) => Padding(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
+                        child: ShowAddFriendsSheet(),
+                      ),
+                    );
+                  } else if (index == 2) {
+                    showModalBottomSheet(
+                      context: context,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      builder: (context) => FriendRequestsSheet(),
+                    );
                   }
-                  List<dynamic> friends = (snapshot.data?.data()
-                          as Map<String, dynamic>)['friends'] ??
-                      [];
-
-                  return ListView.builder(
-                    itemCount: friends.length,
-                    itemBuilder: (context, index) {
-                      String friendUID = friends[index];
-
-                      return FutureBuilder<DocumentSnapshot>(
-                        future:
-                            _firestore.collection('UID').doc(friendUID).get(),
-                        builder: (context, friendSnapshot) {
-                          if (!friendSnapshot.hasData) {
-                            return const SizedBox.shrink();
-                          }
-
-                          var friendData = friendSnapshot.data!.data()
-                              as Map<String, dynamic>;
-                          String displayName =
-                              friendData['displayName'] ?? 'Unknown';
-                          String photoUrl = friendData['pfp'] ??
-                              'https://picsum.photos/200/200';
-                          double totalDailyHours =
-                              friendData['totalDailyHours'] ?? 0.0;
-
-                          return Card(
-                            color: lighterDarkBlue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            elevation: 5, // Add shadow for elevation
-                            margin: const EdgeInsets.symmetric(
-                                vertical: 8.0,
-                                horizontal: 16.0), // Space around card
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundImage: NetworkImage(photoUrl),
-                              ),
-                              title: Text(
-                                displayName,
-                                style: TextStyle(color: beige),
-                              ),
-                              subtitle: Text(
-                                'Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
-                                style: TextStyle(color: lighterBeige),
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.waving_hand,
-                                        color: Colors.blue),
-                                    onPressed: () => _pokeFriend(friendUID),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close,
-                                        color: Colors.red),
-                                    onPressed: () => _deleteFriend(friendUID),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
                 },
               ),
-            ),
-            BottomNavigationBar(
-              currentIndex: _selectedIndex,
-              selectedItemColor: beige,
-              unselectedItemColor: beige,
-              backgroundColor: darkBlue,
-              onTap: (index) {
-                if (index == 1) {
-                  // Assuming the 'Pokes' button is at index 1
-                  showModalBottomSheet(
-                    context: context,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(20)),
-                    ),
-                    builder: (context) => const PokeNotificationsPage(),
-                  );
-                } else if (index == 0) {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(20)),
-                    ),
-                    builder: (context) => Padding(
-                      padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context)
-                            .viewInsets
-                            .bottom, // Adjusts for keyboard
-                      ),
-                      child: ShowAddFriendsSheet(),
-                    ),
-                  );
-                } else if (index == 2) {
-                  showModalBottomSheet(
-                    context: context,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(20)),
-                    ),
-                    builder: (context) => FriendRequestsSheet(),
-                  );
-                } else {
-                  setState(() {
-                    _selectedIndex = index;
-                  });
-                }
-              },
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person_add_alt_1_sharp),
-                  label: 'Add Friends',
+          ),
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+              ),
+              Expanded(
+                child: StreamBuilder<DocumentSnapshot>(
+                  stream: _firestore
+                      .collection('UID')
+                      .doc(_auth.currentUser?.uid)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const CircularProgressIndicator();
+                    }
+                    List<dynamic> friends = (snapshot.data?.data()
+                            as Map<String, dynamic>)['friends'] ??
+                        [];
+
+                    return ListView.builder(
+                      itemCount: friends.length,
+                      itemBuilder: (context, index) {
+                        String friendUID = friends[index];
+
+                        return FutureBuilder<DocumentSnapshot>(
+                          future:
+                              _firestore.collection('UID').doc(friendUID).get(),
+                          builder: (context, friendSnapshot) {
+                            if (!friendSnapshot.hasData) {
+                              return const SizedBox.shrink();
+                            }
+
+                            var friendData = friendSnapshot.data!.data()
+                                as Map<String, dynamic>;
+                            String displayName =
+                                friendData['displayName'] ?? 'Unknown';
+                            String photoUrl = friendData['pfp'] ??
+                                'https://picsum.photos/200/200';
+                            double totalDailyHours =
+                                friendData['totalDailyHours'] ?? 0.0;
+
+                            return Card(
+                              color: lighterDarkBlue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              elevation: 5,
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 16.0),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage: NetworkImage(photoUrl),
+                                ),
+                                title: Text(
+                                  displayName,
+                                  style: TextStyle(color: beige),
+                                ),
+                                subtitle: Text(
+                                  'Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
+                                  style: TextStyle(color: lighterBeige),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.waving_hand,
+                                          color: Colors.blue),
+                                      onPressed: () => _pokeFriend(friendUID),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.close,
+                                          color: Colors.red),
+                                      onPressed: () => _deleteFriend(friendUID),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
                 ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.waving_hand),
-                  label: 'Pokes',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person_pin_rounded),
-                  label: 'Friend Requests',
-                ),
-              ],
-            )
-          ],
-        ));
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
