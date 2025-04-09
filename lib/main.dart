@@ -70,6 +70,9 @@ void main() async {
 
 Future<void> initializeMain() async {
    
+ checkNotifsPermission();
+
+   if (auth.currentUser != null) {
   _currentToHistorical().whenComplete(() {
     _checkSTPermission().whenComplete((){
       _getScreenTime().whenComplete((){
@@ -78,7 +81,6 @@ Future<void> initializeMain() async {
             generateAppsList().whenComplete(() {
               initializeAppNameColorMapping().whenComplete((){
                 _writeScreenTimeData();
-                checkNotifsPermission();
                 //Launches login screen first which returns ProcrasiHater app if success
               });
             });
@@ -87,6 +89,7 @@ Future<void> initializeMain() async {
       });
     });
   });
+ }
 }
 
 ///*********************************
