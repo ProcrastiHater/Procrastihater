@@ -123,7 +123,7 @@ class ProcrastiHater extends StatelessWidget {
         ),
         appBarTheme: AppBarTheme(
           centerTitle: true,
-          toolbarHeight: screenHeight * .05,
+          toolbarHeight: screenHeight * .06,
           backgroundColor: Color(0xFF161B22),
           foregroundColor: Color(0xFFC9D1D9),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

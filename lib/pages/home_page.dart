@@ -57,7 +57,7 @@ class HomePage extends StatelessWidget {
           Navigator.pushReplacementNamed(context, '/friendsPage');
         }
       },
-      child: Container(padding: const EdgeInsets.all(0.0), child: MyHomePage())
+      child: Container(padding: const EdgeInsets.all(4.0), child: MyHomePage())
     );
   }
 }
@@ -109,8 +109,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //Screensize
+    double? screenWidth = MediaQuery.of(context).size.width;
+    double? screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text("ProcrastiStats"),
         actions: [
@@ -134,41 +136,39 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       drawer: Drawer(
         child: ListView(
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.all(4.0),
           children: <Widget>[
             SizedBox(
-              height: 80,
-              child:  DrawerHeader(
-              decoration: BoxDecoration(
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: Image.asset("assets/logo.jpg"),
-                  ),
-                  Text("ProcrastiTools",),
-              ],
-              )
+              height: screenHeight * .15,
+              child: DrawerHeader(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("ProcrastiTools",),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: Image.asset("assets/logo.jpg"),
+                    ),
+                  ],
+                )
               ),
             ),
-              ListTile(
+            ListTile(
               trailing: Icon(Icons.calendar_today),
               title: Text("Calendar"),
               onTap:() {
                 Navigator.pushNamed(context, '/calendarPage');
               },
             ),
-           // const Divider(),
-             ListTile(
+            const Divider(),
+            ListTile(
               trailing: Icon(Icons.school),
               title: Text("Study Mode"),
               onTap: () {
                 Navigator.pushNamed(context, '/studyModePage');
               },
             ),
-            //const Divider(),
+            const Divider(),
             ListTile(
               trailing: Icon(Icons.alarm),
               title: Text("App Limits"),
@@ -192,45 +192,62 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: DailyGraphView(onFilteredData: updateFilteredDayData, onBarSelected: updateSelectedBar),
                 ),
                 //Weekly Graph
-                 Container(
+                Container(
                   padding: const EdgeInsets.all(4.0),
                   child: WeeklyGraphView(onFilteredData: updateFilteredWeekData, onBarSelected: updateSelectedBar),
                 ),
-                //Monthly Graph
-                 /*Container(
-                  padding: const EdgeInsets.all(4.0),
-                  color: Colors.indigo.shade50,
-                  child: Center(child: Text("Monthly Graph Display"),)
-                  //MonthlyGraphView(onBarSelected: updateSelectedBar),
-                ),*/
               ][graphIndex],
-              bottomNavigationBar: SizedBox(
-                height: 50,
-                child: NavigationBar(
-                  selectedIndex: graphIndex,
-                  onDestinationSelected: (int index) {
-                    setState(() {
-                      selectedBar == "null";
-                      graphIndex = index;
-                    }); 
-                  },
-                  destinations: const <Widget>[
-                    NavigationDestination(
-                      icon: Icon(Icons.calendar_today_rounded), 
-                      label: 'Daily'
+              bottomNavigationBar: Container(
+                height: 72,
+                child: Column(
+                  children: [
+                    Container(color: Color(0xFF1F6FEB), height: 2,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Card(
+                          color: graphIndex == 0? Color(0xFF388BFD) : null,
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: Icon(
+                              Icons.calendar_today_rounded,
+                              color: graphIndex == 0? Color(0xFF0D1117) : null,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                selectedBar = "null";
+                                graphIndex = 0;
+                              }); 
+                            },
+                          ), 
+                        ),
+                        Card(
+                          color: graphIndex == 1? Color(0xFF388BFD) : null,
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: Icon(
+                              Icons.calendar_view_week_rounded,
+                              color: graphIndex == 1? Color(0xFF0D1117) : null,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                               selectedBar = "null";
+                                graphIndex = 1;
+                              }); 
+                            },
+                          ), 
+                        ),
+                      ],
                     ),
-                    NavigationDestination(
-                      icon: Icon(Icons.calendar_view_week_rounded), 
-                      label: 'Weekly'
-                    ),
-                    /*NavigationDestination(
-                      icon: Icon(Icons.calendar_month_rounded), 
-                      label: 'Monthly'
-                    ),*/
-                  ],  
-                ), 
-              )         
-            )
+                    Container(color: Color(0xFF1F6FEB), height: 2,),
+                  ],
+                ),
+              ),
+            )         
           ),
           const SizedBox(height: 4.0),
           Expanded(

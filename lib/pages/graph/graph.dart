@@ -432,7 +432,6 @@ class _DailyGraphViewState extends State<DailyGraphView> {
       padding: const EdgeInsets.all(10.0),
       child: Column(
         children: [
-          const SizedBox(height: 60),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -519,6 +518,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                   width: 100 + availableApps.length * 70,
                   child: BarChart(
                     BarChartData(
+                      maxY: tallestBar(dailyData) + 1,
                       groupsSpace: 60,
                       alignment: BarChartAlignment.spaceAround,
                       backgroundColor: Color(0xFF161B22),

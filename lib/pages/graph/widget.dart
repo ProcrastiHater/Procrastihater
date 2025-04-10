@@ -94,6 +94,18 @@ List<BarChartGroupData> generateDailyChart(Map<String, Map<String, dynamic>> dat
   ]; 
 }
 
+double tallestBar(Map<String, Map<String, dynamic>> data) {
+  double tallestHeight = 0;
+  for (int i = 0; i < data.length; i++) {
+    Map<String, dynamic> appData = data[data.keys.toList()[i]]!;
+    if (double.parse(appData['hours'] ?? 0.0) > tallestHeight)
+    {
+      tallestHeight = double.parse(appData['hours'] ?? 0.0);
+    }
+  }
+  return tallestHeight;
+}
+
 ///*********************************
 /// Name: generatedDayData
 /// 
@@ -135,13 +147,12 @@ BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function
       fitInsideVertically: true,
       getTooltipColor: (group) => Colors.transparent,
       tooltipPadding: EdgeInsets.zero,
-      tooltipMargin: 0,
+      tooltipMargin: -10,
       getTooltipItem: (group, groupIndex, rod, rodIndex) {
         double totalHours = rod.toY;
         return BarTooltipItem(
           "$totalHours\n",
           const TextStyle(
-            decoration: TextDecoration.none,
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
@@ -257,6 +268,6 @@ Widget bottomDayTitles(double value, TitleMeta meta) {
 ///*********************************
 Widget sideTitles(double value, TitleMeta meta) {
   return Text(
-    value.toStringAsFixed(0),
+    ' ${value.toStringAsFixed(0)}',
   );
 }
