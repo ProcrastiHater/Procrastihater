@@ -443,6 +443,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                   decoration: CustomDropdownDecoration(
                     closedFillColor: lightBlue,
                     expandedFillColor: lightBlue,
+
                   ),
                   items: categories, 
                   overlayHeight: 525,
@@ -524,7 +525,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                       maxY: tallestBar(dailyData) + 1,
                       groupsSpace: 60,
                       alignment: BarChartAlignment.spaceAround,
-                      //backgroundColor: Color(0xFF161B22),
+                      backgroundColor: lightBlue,
                       //Title Widgets
                       titlesData: FlTitlesData(
                         leftTitles: AxisTitles(
@@ -557,7 +558,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                       //Style Widgets
                       borderData: FlBorderData(
                         border: Border.all(
-                          //color: Color(0xFF1F6FEB),
+                          color: beige,
                           width: 2,
                         ),
                         show: true
