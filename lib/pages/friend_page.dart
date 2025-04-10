@@ -160,7 +160,7 @@ void _pokeFriend(String friendUID) async {
                               icon: const Icon(Icons.waving_hand, color: Colors.blue),
                               onPressed: () => _pokeFriend(friendUID),
                             ),
-                            IconButton(
+                            IconButton( //This button now pops up the confirmation dialog
                               icon: const Icon(Icons.close, color: Colors.red),
                               onPressed: () => showDialog<String>(
                                 context: context,
@@ -168,19 +168,17 @@ void _pokeFriend(String friendUID) async {
                                     title: Text("Delete Friend"),
                                     content: Text("Are you sure you want to delete $displayName from your friends list?"),
                                     actions: [
-                                      ElevatedButton(
+                                      TextButton(
                                         onPressed: (){
-                                          _deleteFriend(friendUID);
+                                          _deleteFriend(friendUID); //Actually deletes friend
                                           Navigator.pop(alertContext, "Yes");
                                         }, 
                                         child: Text("Yes")
                                       ),
-                                      ElevatedButton(
+                                      TextButton(
                                         onPressed: () => Navigator.pop(alertContext, "Cancel"), 
                                         child: Text("Cancel",
-                                          style: TextStyle(
-                                            color: Colors.red
-                                          ),
+                                          style: TextStyle(color: Colors.red),
                                         )
                                       )
                                     ],

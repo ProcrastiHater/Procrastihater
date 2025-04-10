@@ -159,7 +159,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
             SizedBox(height: 20),
             // Profile picture change button
             ElevatedButton(
-              onPressed :_updateProfilePicture,
+              onPressed : _updateProfilePicture,
               child: Text('Change Profile Picture')
             ),
             SizedBox(height: 10),
@@ -180,9 +180,28 @@ class ProfileSettingsState extends State<ProfileSettings> {
               },
               child: const Text('Copy UID Clipboard'),
             ),
-            // Button to sign out
+            // Button to show dialog for signing out
             ElevatedButton(
-              onPressed: _signOut,
+              onPressed: () => showDialog(
+                context: context, 
+                builder: (BuildContext alertContext) => AlertDialog(
+                  title: Text("Sign Out"),
+                  content: Text("Are you sure you want to sign out?"),
+                  actions: [
+                    ElevatedButton( //Button to actually sign out
+                      onPressed: _signOut, 
+                      child: Text("Yes")
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(alertContext, "Cancel"), 
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.red),
+                      )
+                    )
+                  ],
+                )
+              ),
               child: Text('Sign Out'),
             ),
             //Buttons for Total ST Notifications
