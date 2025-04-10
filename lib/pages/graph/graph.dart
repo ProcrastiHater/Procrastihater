@@ -154,11 +154,14 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       padding: const EdgeInsets.all(10.0),
       child: Column(
         children: [
-          const SizedBox(height: 60),
           CustomDropdown.multiSelectSearch(
             decoration: CustomDropdownDecoration(
-                    closedFillColor: Color(0xFF161B22),
-                    expandedFillColor: Color(0xFF161B22),
+                    closedFillColor: lightBlue,
+                    expandedFillColor: lightBlue,
+                    searchFieldDecoration: SearchFieldDecoration(
+                      textStyle: TextStyle(color: lightBeige),
+                      fillColor: darkBlue,
+                    ),
                   ),
             closedHeaderPadding: EdgeInsets.all(8.0),
             expandedHeaderPadding: EdgeInsets.all(8.0),
@@ -187,8 +190,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
               Expanded(
                 child: CustomDropdown.multiSelect(
                   decoration: CustomDropdownDecoration(
-                    closedFillColor: Color(0xFF161B22),
-                    expandedFillColor: Color(0xFF161B22),
+                    closedFillColor: lightBlue,
+                    expandedFillColor: lightBlue,
                   ),
                   items: categories, 
                   overlayHeight: 525,
@@ -216,8 +219,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
               Expanded(
                 child: CustomDropdown(
                   decoration: CustomDropdownDecoration(
-                    closedFillColor: Color(0xFF161B22),
-                    expandedFillColor: Color(0xFF161B22),
+                    closedFillColor: lightBlue,
+                    expandedFillColor: lightBlue,
                   ),
                   closedHeaderPadding: EdgeInsets.all(8.0),
                   expandedHeaderPadding: EdgeInsets.all(8.0),
@@ -438,8 +441,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
               Expanded(
                 child: CustomDropdown.multiSelect(
                   decoration: CustomDropdownDecoration(
-                    closedFillColor: Color(0xFF161B22),
-                    expandedFillColor: Color(0xFF161B22),
+                    closedFillColor: lightBlue,
+                    expandedFillColor: lightBlue,
                   ),
                   items: categories, 
                   overlayHeight: 525,
@@ -477,8 +480,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
               Expanded(
                 child: CustomDropdown(
                    decoration: CustomDropdownDecoration(
-                    closedFillColor: Color(0xFF161B22),
-                    expandedFillColor: Color(0xFF161B22),
+                    closedFillColor: lightBlue,
+                    expandedFillColor: lightBlue,
                   ),
                   closedHeaderPadding: EdgeInsets.all(8.0),
                   expandedHeaderPadding: EdgeInsets.all(8.0),
@@ -521,7 +524,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                       maxY: tallestBar(dailyData) + 1,
                       groupsSpace: 60,
                       alignment: BarChartAlignment.spaceAround,
-                      backgroundColor: Color(0xFF161B22),
+                      //backgroundColor: Color(0xFF161B22),
                       //Title Widgets
                       titlesData: FlTitlesData(
                         leftTitles: AxisTitles(
@@ -554,7 +557,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                       //Style Widgets
                       borderData: FlBorderData(
                         border: Border.all(
-                          color: Color(0xFF1F6FEB),
+                          //color: Color(0xFF1F6FEB),
                           width: 2,
                         ),
                         show: true

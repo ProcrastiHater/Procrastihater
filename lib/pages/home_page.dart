@@ -201,19 +201,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 72,
                 child: Column(
                   children: [
-                    Container(color: Color(0xFF1F6FEB), height: 2,),
+                    Container(color: beige, height: 2,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Card(
-                          color: graphIndex == 0? Color(0xFF388BFD) : null,
+                          color: graphIndex == 0? beige : null,
                           elevation: 3,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
                           child: IconButton(
                             padding: EdgeInsets.zero,
                             icon: Icon(
                               Icons.calendar_today_rounded,
-                              color: graphIndex == 0? Color(0xFF0D1117) : null,
+                              color: graphIndex == 0? lightBlue : null,
                             ),
                             onPressed: () {
                               setState(() {
@@ -224,14 +224,14 @@ class _MyHomePageState extends State<MyHomePage> {
                           ), 
                         ),
                         Card(
-                          color: graphIndex == 1? Color(0xFF388BFD) : null,
+                          color: graphIndex == 1? beige : null,
                           elevation: 3,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
                           child: IconButton(
                             padding: EdgeInsets.zero,
                             icon: Icon(
                               Icons.calendar_view_week_rounded,
-                              color: graphIndex == 1? Color(0xFF0D1117) : null,
+                              color: graphIndex == 1? lightBlue : null,
                             ),
                             onPressed: () {
                               setState(() {
@@ -243,7 +243,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ],
                     ),
-                    Container(color: Color(0xFF1F6FEB), height: 2,),
+                    Container(color: beige, height: 2,),
                   ],
                 ),
               ),

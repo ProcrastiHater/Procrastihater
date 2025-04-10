@@ -168,7 +168,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                       title: Text(user['displayName']),
                       subtitle: Text(
                         'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
-                        style: const TextStyle(color: Colors.grey),
+                        //style: const TextStyle(color: Colors.grey),
                       ),
                       trailing: Text("${index+1}"),
                     );

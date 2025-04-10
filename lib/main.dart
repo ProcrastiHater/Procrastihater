@@ -33,6 +33,7 @@ import 'pages/calendar.dart';
 import 'pages/study_mode.dart';
 import 'pages/app_limits_page.dart';
 import 'apps_list.dart';
+import 'pages/graph/colors.dart';
 
 //Global Variables
 //Native Kotlin method channel
@@ -50,6 +51,11 @@ final CollectionReference mainCollection = firestore.collection('UID');
 String? uid = auth.currentUser?.uid;
 //Reference to user's document in Firestore
 DocumentReference userRef = mainCollection.doc(uid);
+
+const Color darkBlue = Color.fromRGBO(10, 29, 55, 1);
+const Color lightBlue = Color.fromRGBO(12, 36, 68, 1);
+const Color beige = Color.fromARGB(255, 229, 214, 160);
+const Color lightBeige = Color.fromARGB(255, 208, 196, 153);
 
 ///*********************************
 /// Name: main
@@ -104,35 +110,46 @@ class ProcrastiHater extends StatelessWidget {
     double? screenHeight = MediaQuery.of(context).size.height;
     return MaterialApp(
       theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor:const Color(0xFF0D1117),
-        primaryColor: const Color(0xFF1F6FEB),
+        //brightness: Brightness.dark,
+        scaffoldBackgroundColor: darkBlue,
+        //canvasColor: beige,
         colorScheme: const ColorScheme.dark(
-          surface: Color(0xFF161B22),
-          primary: Color(0xFF1F6FEB),
-          primaryContainer: Color(0xFF388BFD),
-          secondary: Color(0xFF2E8BFF),
-          onPrimary: Color(0xFFC9D1D9),
-          onSecondary: Color(0xFFC9D1D9),
-          onSurface: Color(0xFF8B949E),
+          brightness: Brightness.dark,
+          primary: beige,
+          onPrimary: lightBlue,
+          primaryContainer: beige,
+          surface: lightBlue,
+          onSurface: beige,
+          outline: lightBeige,
         ),
         textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Color(0xFFC9D1D9)),
-          bodyMedium: TextStyle(color: Color(0xFF8B949E)),
-          titleLarge: TextStyle(color: Color(0xFFC9D1D9), fontWeight: FontWeight.bold),
+          displayLarge: TextStyle(color: beige),
+          displayMedium: TextStyle(color: beige),
+          displaySmall: TextStyle(color: beige),
+          headlineLarge: TextStyle(color: beige),
+          headlineMedium: TextStyle(color: beige),
+          headlineSmall: TextStyle(color: beige),
+          titleLarge: TextStyle(color: beige),
+          titleMedium: TextStyle(color: beige),
+          titleSmall: TextStyle(color: lightBeige),
+          bodyLarge: TextStyle(color: lightBeige),
+          bodyMedium: TextStyle(color: lightBeige),
+          bodySmall: TextStyle(color: lightBeige),
+          labelLarge: TextStyle(color: lightBeige),
+          labelMedium: TextStyle(color: lightBeige),
+          labelSmall: TextStyle(color: lightBeige),
         ),
         appBarTheme: AppBarTheme(
           centerTitle: true,
           toolbarHeight: screenHeight * .06,
-          backgroundColor: Color(0xFF161B22),
-          foregroundColor: Color(0xFFC9D1D9),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          backgroundColor: lightBlue,
+          foregroundColor: beige,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF161B22),
-            foregroundColor: Color(0xFFC9D1D9),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            backgroundColor: lightBlue,
+            foregroundColor: beige,
           )
         ),
         dividerTheme: DividerThemeData(
@@ -142,9 +159,9 @@ class ProcrastiHater extends StatelessWidget {
           thickness: 1,
         ),
         cardTheme: CardThemeData(
-          color: Color(0xFF0D1117),
+          color: lightBlue,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: EdgeInsets.all(10.0),
+          //margin: EdgeInsets.all(10.0),
         ),
       ),
       //Main route of the app

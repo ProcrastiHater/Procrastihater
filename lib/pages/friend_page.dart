@@ -218,7 +218,7 @@ void _pokeFriend(String friendUID) async {
                           title: Text(displayName),
                           subtitle: Text(
                             'Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
-                            style: TextStyle(color: Colors.grey), 
+                            //style: TextStyle(color: Colors.grey), 
                           ),
                           trailing: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -243,8 +243,8 @@ void _pokeFriend(String friendUID) async {
           ),
           BottomNavigationBar(
           currentIndex: _selectedIndex,
-          selectedItemColor: Colors.grey[700],  
-          unselectedItemColor: Colors.grey[700],
+          selectedItemColor: beige,  
+          unselectedItemColor: beige,
             onTap: (index) {
               if (index == 1) { // Assuming the 'Pokes' button is at index 1
                 showModalBottomSheet(
