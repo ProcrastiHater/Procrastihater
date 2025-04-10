@@ -162,7 +162,30 @@ void _pokeFriend(String friendUID) async {
                             ),
                             IconButton(
                               icon: const Icon(Icons.close, color: Colors.red),
-                              onPressed: () => _deleteFriend(friendUID),
+                              onPressed: () => showDialog<String>(
+                                context: context,
+                                builder: (BuildContext alertContext) => AlertDialog(
+                                    title: Text("Delete Friend"),
+                                    content: Text("Are you sure you want to delete $displayName from your friends list?"),
+                                    actions: [
+                                      ElevatedButton(
+                                        onPressed: (){
+                                          _deleteFriend(friendUID);
+                                          Navigator.pop(alertContext, "Yes");
+                                        }, 
+                                        child: Text("Yes")
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () => Navigator.pop(alertContext, "Cancel"), 
+                                        child: Text("Cancel",
+                                          style: TextStyle(
+                                            color: Colors.red
+                                          ),
+                                        )
+                                      )
+                                    ],
+                                ),
+                              )
                             ),
                           ],
                         ),
