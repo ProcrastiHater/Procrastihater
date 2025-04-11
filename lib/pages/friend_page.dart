@@ -175,7 +175,7 @@ void _pokeFriend(String friendUID) async {
                                         }, 
                                         child: Text("Yes")
                                       ),
-                                      TextButton(
+                                      ElevatedButton(
                                         onPressed: () => Navigator.pop(alertContext, "Cancel"), 
                                         child: Text("Cancel",
                                           style: TextStyle(color: Colors.red),

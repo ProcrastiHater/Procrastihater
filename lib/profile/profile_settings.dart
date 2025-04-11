@@ -242,7 +242,14 @@ class ProfileSettingsState extends State<ProfileSettings> {
             SizedBox(height: 10),
             // Button to delete account
             ElevatedButton(
-              onPressed: _deleteAccount,
+              onPressed: () => showDialog(
+                context: context, 
+                builder: (BuildContext alertContext) => AlertDialog(
+                  title: Text("Delete Account"),
+                  content:
+                )
+              )
+              _deleteAccount,
               child: Text(
                 'Delete Account',
                 style: TextStyle(color: Colors.red),
