@@ -122,7 +122,6 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
             ),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              color: Colors.indigo.shade50,
               child: Center(
                 child: SmoothPageIndicator(
                   controller: PageController(
