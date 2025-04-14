@@ -41,6 +41,22 @@ List<BarChartGroupData> generateWeeklyChart(Map<String, Map<String, Map<String, 
       generatedWeeklyGroupData(i, data[availableDays[i]]!)
   ]; 
 }
+ 
+
+double tallestDayBar(Map<String, Map<String, Map<String, dynamic>>> data) {
+  double tallestHeight = 0;
+  for (int i = 0; i < data.length; i++) {
+    Map<String, Map<String, dynamic>> dayData = data[availableDays[i]]!;
+    double dayHeight = 0;
+    for (var appName in dayData.keys) {
+      dayHeight += dayData[appName]?['hours'] ?? 0.0;
+    }
+    if (tallestHeight < dayHeight) {
+      tallestHeight = dayHeight;
+    }
+  }
+  return tallestHeight;
+}
 
 ///*********************************
 /// Name: generatedWeeklyGroupData
@@ -68,13 +84,16 @@ BarChartGroupData generatedWeeklyGroupData(int index, Map<String, Map<String, dy
   //Returns the entire stacked bar
   return BarChartGroupData(
     x: index,
+    showingTooltipIndicators: [0],
     barRods: [
       BarChartRodData(
         fromY: 0,
         toY: cumulativeHeight, 
         rodStackItems: rodStackItems, 
-        width: 15, 
-        borderRadius: BorderRadius.circular(5),
+        width: 35, 
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8.0), 
+          topRight: Radius.circular(8.0)),
       ),
     ],
   );
@@ -94,7 +113,7 @@ List<BarChartGroupData> generateDailyChart(Map<String, Map<String, dynamic>> dat
   ]; 
 }
 
-double tallestBar(Map<String, Map<String, dynamic>> data) {
+double tallestAppBar(Map<String, Map<String, dynamic>> data) {
   double tallestHeight = 0;
   for (int i = 0; i < data.length; i++) {
     Map<String, dynamic> appData = data[data.keys.toList()[i]]!;
@@ -149,7 +168,7 @@ BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function
       tooltipPadding: EdgeInsets.zero,
       tooltipMargin: -10,
       getTooltipItem: (group, groupIndex, rod, rodIndex) {
-        double totalHours = rod.toY;
+        String totalHours = rod.toY.toStringAsFixed(2);        
         return BarTooltipItem(
           "$totalHours\n",
           const TextStyle(
@@ -171,37 +190,23 @@ BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function
 /// loads listview of daily data
 ///*********************************
 BarTouchData getBarWeekTouch(Map<String, Map<String, Map<String, dynamic>>> data, void Function(String) onDaySelected) {
-  return BarTouchData(
+return BarTouchData(
     enabled: true,
-    //Reads touch and updates the selectedDay to load list view
-    touchCallback: (event, response){
-      if (response != null && response.spot != null) {
-        int dayIndex = response.spot!.touchedBarGroupIndex;
-        String day = availableDays[dayIndex];
-        onDaySelected(day);
-      }
-    },
-    //Loads tooltip containing total hours for the day
+    //Loads app data on touch of specific bar
     touchTooltipData: BarTouchTooltipData(
-      tooltipPadding: const EdgeInsets.all(8.0),
-      tooltipMargin: 8.0,
+      fitInsideHorizontally: true,
+      fitInsideVertically: true,
+      getTooltipColor: (group) => Colors.transparent,
+      tooltipPadding: EdgeInsets.zero,
+      tooltipMargin: -10,
       getTooltipItem: (group, groupIndex, rod, rodIndex) {
-        double totalHours = rod.toY;
+        String totalHours = rod.toY.toStringAsFixed(2);
         return BarTooltipItem(
-          'Total Hours\n',
+          "$totalHours\n",
           const TextStyle(
-            decoration: TextDecoration.none,
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
-          children: [
-            TextSpan(
-            text: '${totalHours.toStringAsFixed(1)} hrs',
-            style: const TextStyle(
-              decoration: TextDecoration.none,
-              ),
-            ),
-          ],
         );
       },
     )

@@ -182,18 +182,16 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [ 
           Expanded(
-            flex: 6,
+            flex: 13,
             //Container holding graph in top portion of screen
             child: Scaffold(
               body: [
                 //Daily Graph
                 Container(
-                  padding: const EdgeInsets.all(4.0),
                   child: DailyGraphView(onFilteredData: updateFilteredDayData, onBarSelected: updateSelectedBar),
                 ),
                 //Weekly Graph
                 Container(
-                  padding: const EdgeInsets.all(4.0),
                   child: WeeklyGraphView(onFilteredData: updateFilteredWeekData, onBarSelected: updateSelectedBar),
                 ),
               ][graphIndex],
@@ -251,7 +249,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           const SizedBox(height: 4.0),
           Expanded(
-            flex: 4,
+            flex: 7,
             //Container holding list view in bottom portion of screen
             child: Container(
               padding: const EdgeInsets.all(4.0),

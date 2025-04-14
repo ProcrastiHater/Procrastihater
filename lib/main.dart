@@ -161,7 +161,9 @@ class ProcrastiHater extends StatelessWidget {
         cardTheme: CardThemeData(
           color: lightBlue,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          //margin: EdgeInsets.all(10.0),
+        ),
+        drawerTheme: DrawerThemeData(
+
         ),
       ),
       //Main route of the app

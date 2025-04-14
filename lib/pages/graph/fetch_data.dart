@@ -111,3 +111,20 @@ Future<void> fetchWeeklyScreenTime() async {
       ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key))),
   );
 }
+
+Future<double> fetchTotalDayScreentime() async {
+   //Update the reference to the user doc before accessing
+  updateUserRef();
+  //Variable for scoping into the users appUsageHistory collection
+  final current = await userRef.get();
+  double totalDaily = current['totalDailyHours'];  
+  return totalDaily;
+}
+Future<int> fetchPoints() async {
+   //Update the reference to the user doc before accessing
+  updateUserRef();
+  //Variable for scoping into the users appUsageHistory collection
+  final current = await userRef.get();
+  int points = current['points'];  
+  return points;
+}

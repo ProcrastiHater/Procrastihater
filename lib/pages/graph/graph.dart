@@ -151,7 +151,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       return Center(child: CircularProgressIndicator());
     }
     return Padding(
-      padding: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(4.0),
       child: Column(
         children: [
           CustomDropdown.multiSelectSearch(
@@ -161,6 +161,10 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                     searchFieldDecoration: SearchFieldDecoration(
                       textStyle: TextStyle(color: lightBeige),
                       fillColor: darkBlue,
+                    ),
+                    listItemDecoration: ListItemDecoration(
+                      highlightColor: darkBlue,
+                      selectedColor: darkBlue,
                     ),
                   ),
             closedHeaderPadding: EdgeInsets.all(8.0),
@@ -192,6 +196,10 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   decoration: CustomDropdownDecoration(
                     closedFillColor: lightBlue,
                     expandedFillColor: lightBlue,
+                      listItemDecoration: ListItemDecoration(
+                      highlightColor: darkBlue,
+                      selectedColor: darkBlue,
+                    )
                   ),
                   items: categories, 
                   overlayHeight: 525,
@@ -221,6 +229,10 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   decoration: CustomDropdownDecoration(
                     closedFillColor: lightBlue,
                     expandedFillColor: lightBlue,
+                    listItemDecoration: ListItemDecoration(
+                      highlightColor: darkBlue,
+                      selectedColor: darkBlue,
+                    ),
                   ),
                   closedHeaderPadding: EdgeInsets.all(8.0),
                   expandedHeaderPadding: EdgeInsets.all(8.0),
@@ -247,11 +259,14 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
             ],
           ),
           //Graph Title
-          Text("Weekly Graph", style: TextStyle(fontSize: 18),),
+          Text("Historical Phone Usage", style: TextStyle(fontSize: 18),),
           Expanded(
             child: BarChart(
               BarChartData(
-                alignment: BarChartAlignment.center,
+                maxY: tallestDayBar(weekData) + 1,
+                groupsSpace: 60,
+                alignment: BarChartAlignment.spaceAround,
+                backgroundColor: lightBlue,
                 //Title Widgets
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
@@ -259,7 +274,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                       maxIncluded: false,
                       showTitles: true,
                       interval: 1,
-                      reservedSize: 25,
+                      reservedSize: 20,
                       getTitlesWidget: sideTitles,
                     )
                   ),
@@ -282,10 +297,15 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   ),
                 ),
                 //Style Widgets
-                borderData: FlBorderData(show: true),
+                borderData: FlBorderData(
+                  border: Border.all(
+                    color: beige,
+                    width: 2,
+                  ),
+                  show: true
+                ),
                 gridData: FlGridData(
-                  drawVerticalLine: false,
-                  show: true,
+                  show: false,
                 ),
                 //Functionality Widgets
                 barTouchData: loadTouch(weekData),
@@ -295,7 +315,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
           ),
           Row(
             //Equal spacing between children
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               //Previous arrow button
               IconButton(
@@ -372,6 +392,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   List<String> selectedCategories = [];
   Map<String, Map<String, String>> dailyData = {};
   String? selectedFilter = "";
+  double totalDaily = 0;
+  int points = 0;
 
   @override
   //Initialize colors making sure all apps are mapped to a color before displaying
@@ -382,6 +404,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   }
 
   Future<void> _initializeData() async {
+    totalDaily = await fetchTotalDayScreentime();
+    points = await fetchPoints();
     setState(() {
       availableApps = screenTimeData.keys.toList();
     });
@@ -434,16 +458,19 @@ class _DailyGraphViewState extends State<DailyGraphView> {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: CustomDropdown.multiSelect(
                   decoration: CustomDropdownDecoration(
                     closedFillColor: lightBlue,
                     expandedFillColor: lightBlue,
-
+                    listItemDecoration: ListItemDecoration(
+                      highlightColor: darkBlue,
+                      selectedColor: darkBlue,
+                    ),
                   ),
                   items: categories, 
                   overlayHeight: 525,
@@ -483,6 +510,10 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                    decoration: CustomDropdownDecoration(
                     closedFillColor: lightBlue,
                     expandedFillColor: lightBlue,
+                    listItemDecoration: ListItemDecoration(
+                      highlightColor: darkBlue,
+                      selectedColor: darkBlue,
+                    ),
                   ),
                   closedHeaderPadding: EdgeInsets.all(8.0),
                   expandedHeaderPadding: EdgeInsets.all(8.0),
@@ -509,7 +540,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
             ],
           ),
           //Title for graph
-          Text("Daily Graph", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+          Text("Current Phone Usage", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
           Expanded(
             //Widget to allow scrolling of graph if it overflows the screen
             child: SingleChildScrollView(
@@ -522,7 +553,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                   width: 100 + availableApps.length * 70,
                   child: BarChart(
                     BarChartData(
-                      maxY: tallestBar(dailyData) + 1,
+                      maxY: tallestAppBar(dailyData) + 1,
                       groupsSpace: 60,
                       alignment: BarChartAlignment.spaceAround,
                       backgroundColor: lightBlue,
@@ -551,7 +582,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                           sideTitles: SideTitles(
                             showTitles: true,
                             getTitlesWidget: bottomAppTitles,
-                            reservedSize: 60,
+                            reservedSize: 25,
                           )
                         ),
                       ),
@@ -564,9 +595,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                         show: true
                         ),
                       gridData: FlGridData(
-                        drawHorizontalLine: false,
-                        drawVerticalLine: false,
-                        show: true,
+                        show: false,
                       ),
                       //Functionality Widgets
                       barTouchData: loadTouch(dailyData),
@@ -577,6 +606,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
               )
             ),
           ),
+          Text("Today's Procrastination Total:",),
+          Text("Hours: $totalDaily | Points: $points"),
         ],
       )
     );
