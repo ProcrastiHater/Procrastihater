@@ -1,7 +1,7 @@
 ///*********************************
 /// Name: social_media_page.dart
 ///
-/// Description: Social Media page file for 
+/// Description: Social Media page file for
 /// application
 ///*******************************
 library;
@@ -18,12 +18,12 @@ final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 ///*********************************
 /// Name: Leaderboard_Page
-/// 
-/// Description: Root stateless widget of 
-/// the Leaderboard_Page, builds and displays 
+///
+/// Description: Root stateless widget of
+/// the Leaderboard_Page, builds and displays
 /// the global leaderboard by default
 ///*********************************
-  class LeaderBoardPage extends StatefulWidget {
+class LeaderBoardPage extends StatefulWidget {
   const LeaderBoardPage({super.key});
 
   @override
@@ -44,12 +44,13 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          
-          title: Text(showFriendsLeaderboard ? "Friends Leaderboard" : "Global Leaderboard"),
+          title: Text(showFriendsLeaderboard
+              ? "Friends Leaderboard"
+              : "Global Leaderboard"),
           automaticallyImplyLeading: false,
           actions: [
-          Icon(showFriendsLeaderboard ? Icons.group : Icons.public),  
-          Switch(
+            Icon(showFriendsLeaderboard ? Icons.group : Icons.public),
+            Switch(
               value: showFriendsLeaderboard,
               onChanged: (value) {
                 setState(() {
@@ -71,7 +72,8 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
 
             return StreamBuilder<QuerySnapshot>(
               stream: showFriendsLeaderboard
-                  ? firestore.collection('UID').where(FieldPath.documentId, whereIn: [...friends, currentUserId]).snapshots()
+                  ? firestore.collection('UID').where(FieldPath.documentId,
+                      whereIn: [...friends, currentUserId]).snapshots()
                   : firestore.collection('UID').snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
@@ -79,7 +81,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                 }
 
                 var users = snapshot.data!.docs.map((doc) {
-                var data = doc.data() as Map<String, dynamic>;
+                  var data = doc.data() as Map<String, dynamic>;
                   return {
                     'uid': doc.id,
                     'displayName': data['displayName'] ?? 'Unknown',
@@ -88,7 +90,8 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                   };
                 }).toList();
 
-                users.sort((a, b) => (b['totalDailyHours'] as num).compareTo(a['totalDailyHours'] as num));
+                users.sort((a, b) => (b['totalDailyHours'] as num)
+                    .compareTo(a['totalDailyHours'] as num));
 
                 return ListView.builder(
                   itemCount: users.length,
@@ -103,7 +106,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                         'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
                         style: const TextStyle(color: Colors.grey),
                       ),
-                      trailing: Text("${index+1}"),
+                      trailing: Text("${index + 1}"),
                     );
                   },
                 );

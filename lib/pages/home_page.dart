@@ -15,6 +15,9 @@ import 'package:intl/intl.dart';
 //fl_chart imports
 import 'package:fl_chart/fl_chart.dart';
 
+//smooth_page_indicator imports
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,7 +34,6 @@ import '/pages/graph/fetch_data.dart';
 import '/pages/graph/widget.dart';
 import '/pages/graph/colors.dart';
 
-
 ///*********************************
 /// Name: HomePage
 ///
@@ -44,21 +46,21 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     //Wait for a gesture
     return GestureDetector(
-      //The user swipes horizontally
-      onHorizontalDragEnd: (details) {
-        //The user swipes from right to left
-        if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
-          //Load animation for leaderboard page
-          Navigator.pushReplacementNamed(context, '/leaderBoardPage');
-        }
-        //The user swipes from left to right
-        if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
-          //Load animation for friends page
-          Navigator.pushReplacementNamed(context, '/friendsPage');
-        }
-      },
-      child: Container(padding: const EdgeInsets.all(0.0), child: MyHomePage())
-    );
+        //The user swipes horizontally
+        onHorizontalDragEnd: (details) {
+          //The user swipes from right to left
+          if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
+            //Load animation for leaderboard page
+            Navigator.pushReplacementNamed(context, '/leaderBoardPage');
+          }
+          //The user swipes from left to right
+          if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+            //Load animation for friends page
+            Navigator.pushReplacementNamed(context, '/friendsPage');
+          }
+        },
+        child:
+            Container(padding: const EdgeInsets.all(0.0), child: MyHomePage()));
   }
 }
 
@@ -96,12 +98,15 @@ class _MyHomePageState extends State<MyHomePage> {
       selectedBar = bar;
     });
   }
+
   void updateFilteredDayData(Map<String, Map<String, String>> data) {
     setState(() {
       dayData = data;
     });
   }
-  void updateFilteredWeekData(Map<String, Map<String, Map<String, dynamic>>> data) {
+
+  void updateFilteredWeekData(
+      Map<String, Map<String, Map<String, dynamic>>> data) {
     setState(() {
       weekData = data;
     });
@@ -119,7 +124,8 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: CircleAvatar(
               backgroundImage: NetworkImage(
                 // Use user's pfp as icon image if there is no pfp use this link as a default
-                auth.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
+                auth.currentUser?.photoURL ??
+                    'https://picsum.photos/id/237/200/300',
               ),
             ),
             onPressed: () async {
@@ -138,17 +144,19 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             SizedBox(
               height: 100,
-              child:  DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blueGrey,
-              ),
-              child: Center(child: Text("Other Pages:", style: TextStyle(color: Colors.white))),
+              child: DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey,
+                ),
+                child: Center(
+                    child: Text("Other Pages:",
+                        style: TextStyle(color: Colors.white))),
               ),
             ),
             ListTile(
               trailing: Icon(Icons.calendar_today),
               title: Text("Calendar"),
-              onTap:() {
+              onTap: () {
                 Navigator.pushNamed(context, '/calendarPage');
               },
             ),
@@ -172,67 +180,89 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       body: Column(
-        children: [ 
+        children: [
           Expanded(
-            //Container holding graph in top portion of screen
-            child: Scaffold(
-              body: [
-                //Daily Graph
-                Container(
-                  padding: const EdgeInsets.all(4.0),
-                  color: Colors.indigo.shade50,
-                  child: DailyGraphView(onFilteredData: updateFilteredDayData, onBarSelected: updateSelectedBar),
-                ),
-                //Weekly Graph
-                 Container(
-                  padding: const EdgeInsets.all(4.0),
-                  color: Colors.indigo.shade50,
-                  child: WeeklyGraphView(onFilteredData: updateFilteredWeekData, onBarSelected: updateSelectedBar),
-                ),
-                //Monthly Graph
-                 /*Container(
+              //Container holding graph in top portion of screen
+              child: Scaffold(
+                  body: [
+                    //Daily Graph
+                    Container(
+                      padding: const EdgeInsets.all(4.0),
+                      color: Colors.indigo.shade50,
+                      child: DailyGraphView(
+                          onFilteredData: updateFilteredDayData,
+                          onBarSelected: updateSelectedBar),
+                    ),
+                    //Weekly Graph
+                    Container(
+                      padding: const EdgeInsets.all(4.0),
+                      color: Colors.indigo.shade50,
+                      child: WeeklyGraphView(
+                          onFilteredData: updateFilteredWeekData,
+                          onBarSelected: updateSelectedBar),
+                    ),
+                    //Monthly Graph
+                    /*Container(
                   padding: const EdgeInsets.all(4.0),
                   color: Colors.indigo.shade50,
                   child: Center(child: Text("Monthly Graph Display"),)
                   //MonthlyGraphView(onBarSelected: updateSelectedBar),
                 ),*/
-              ][graphIndex],
-              bottomNavigationBar: SizedBox(
-                height: 50,
-                child: NavigationBar(
-                  selectedIndex: graphIndex,
-                  backgroundColor: Colors.indigo.shade50,
-                  onDestinationSelected: (int index) {
-                    setState(() {
-                      selectedBar == "null";
-                      graphIndex = index;
-                    }); 
-                  },
-                  destinations: const <Widget>[
-                    NavigationDestination(
-                      icon: Icon(Icons.calendar_today_rounded), 
-                      label: 'Daily'
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.calendar_view_week_rounded), 
-                      label: 'Weekly'
-                    ),
-                    /*NavigationDestination(
+                  ][graphIndex],
+                  bottomNavigationBar: SizedBox(
+                    height: 50,
+                    child: NavigationBar(
+                      selectedIndex: graphIndex,
+                      backgroundColor: Colors.indigo.shade50,
+                      onDestinationSelected: (int index) {
+                        setState(() {
+                          selectedBar == "null";
+                          graphIndex = index;
+                        });
+                      },
+                      destinations: const <Widget>[
+                        NavigationDestination(
+                            icon: Icon(Icons.calendar_today_rounded),
+                            label: 'Daily'),
+                        NavigationDestination(
+                            icon: Icon(Icons.calendar_view_week_rounded),
+                            label: 'Weekly'),
+                        /*NavigationDestination(
                       icon: Icon(Icons.calendar_month_rounded), 
                       label: 'Monthly'
                     ),*/
-                  ],  
-                ), 
-              )         
-            )
-          ),
+                      ],
+                    ),
+                  ))),
           const SizedBox(height: 4.0),
           Expanded(
             //Container holding list view in bottom portion of screen
             child: Container(
               padding: const EdgeInsets.all(4.0),
               color: Colors.indigo.shade100,
-              child: ExpandedListView(dayFilteredData: dayData, weekFilteredData: weekData, selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
+              child: ExpandedListView(
+                  dayFilteredData: dayData,
+                  weekFilteredData: weekData,
+                  selectedBar: selectedBar,
+                  appColors: appNameToColor,
+                  graphIndex: graphIndex),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            color: Colors.indigo.shade50,
+            child: Center(
+              child: SmoothPageIndicator(
+                controller: PageController(initialPage: 1), // Dummy controller
+                count: 3,
+                effect: WormEffect(
+                  activeDotColor: Colors.indigo,
+                  dotColor: Colors.indigo.shade200,
+                  dotHeight: 8,
+                  dotWidth: 8,
+                  spacing: 12,
+                ),
+              ),
             ),
           ),
         ],
