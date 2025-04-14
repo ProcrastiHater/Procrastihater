@@ -247,7 +247,6 @@ class _FriendsListState extends State<FriendsList> {
         ),
         Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          color: Colors.indigo.shade50,
           child: Center(
             child: SmoothPageIndicator(
               controller: PageController(initialPage: 0), // Dummy controller
@@ -262,6 +261,7 @@ class _FriendsListState extends State<FriendsList> {
             ),
           ),
         ),
+        const SizedBox(height: 16),
       ],
     ));
   }
