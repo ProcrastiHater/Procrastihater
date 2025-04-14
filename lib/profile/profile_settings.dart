@@ -189,7 +189,10 @@ class ProfileSettingsState extends State<ProfileSettings> {
                   content: Text("Are you sure you want to sign out?"),
                   actions: [
                     ElevatedButton( //Button to actually sign out
-                      onPressed: _signOut, 
+                      onPressed: () {
+                        Navigator.pop(alertContext, "Sign Out");
+                        _signOut;
+                      }, 
                       child: Text("Yes")
                     ),
                     ElevatedButton(
@@ -246,10 +249,28 @@ class ProfileSettingsState extends State<ProfileSettings> {
                 context: context, 
                 builder: (BuildContext alertContext) => AlertDialog(
                   title: Text("Delete Account"),
-                  content:
+                  content: Text("Are you sure you want to delete your account?\n\nThis action cannot be undone and will"
+                    " clear all of your data from our database."),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: (){
+                        Navigator.pop(alertContext, "Delete Account");
+                        _deleteAccount;
+                      },
+                      child: Text("Yes")
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(alertContext, "Cancel"),
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(
+                          color: Colors.red
+                        ),
+                      )
+                    )
+                  ],
                 )
-              )
-              _deleteAccount,
+              ),
               child: Text(
                 'Delete Account',
                 style: TextStyle(color: Colors.red),
