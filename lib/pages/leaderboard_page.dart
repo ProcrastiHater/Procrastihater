@@ -138,6 +138,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
