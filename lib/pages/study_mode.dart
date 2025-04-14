@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 HSLColor inter = HSLColor.fromColor(BG);
-Color BUTTON_BG = inter.withLightness(inter.lightness + 0.025).toColor();
+Color BUTTON_BG = inter.withLightness(inter.lightness + 0.05).toColor();
 class StudyModePage extends StatefulWidget {
   const StudyModePage({super.key});
 

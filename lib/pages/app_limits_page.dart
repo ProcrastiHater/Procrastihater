@@ -24,7 +24,7 @@ import 'dart:async';
 //            28,31,41 (darker gr1)
 //            20,36,54 (darker gr2)
 //            7,19,33 (even darker OG)
-const Color BG = Color.fromARGB(255, 7, 19, 33);
+const Color BG = Color.fromARGB(255, 10, 27, 46);
 //OG beige-ish: 252,231,193
 const Color FG = Color.fromARGB(255, 252, 231, 193);
 
