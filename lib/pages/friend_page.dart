@@ -245,6 +245,23 @@ class _FriendsListState extends State<FriendsList> {
             ),
           ],
         ),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          color: Colors.indigo.shade50,
+          child: Center(
+            child: SmoothPageIndicator(
+              controller: PageController(initialPage: 0), // Dummy controller
+              count: 3,
+              effect: WormEffect(
+                activeDotColor: Colors.indigo,
+                dotColor: Colors.indigo.shade200,
+                dotHeight: 8,
+                dotWidth: 8,
+                spacing: 12,
+              ),
+            ),
+          ),
+        ),
       ],
     ));
   }
