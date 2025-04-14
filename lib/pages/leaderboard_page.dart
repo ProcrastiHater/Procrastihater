@@ -6,6 +6,9 @@
 ///*******************************
 library;
 
+//smooth_page_indicator imports
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 //Dart Imports
 import 'package:flutter/material.dart';
 
@@ -60,59 +63,82 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
             ),
           ],
         ),
-        body: FutureBuilder<DocumentSnapshot>(
-          future: firestore.collection('UID').doc(currentUserId).get(),
-          builder: (context, userSnapshot) {
-            if (!userSnapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            var userData = userSnapshot.data!.data() as Map<String, dynamic>;
-            List<String> friends = List<String>.from(userData['friends'] ?? []);
-
-            return StreamBuilder<QuerySnapshot>(
-              stream: showFriendsLeaderboard
-                  ? firestore.collection('UID').where(FieldPath.documentId,
-                      whereIn: [...friends, currentUserId]).snapshots()
-                  : firestore.collection('UID').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                var users = snapshot.data!.docs.map((doc) {
-                  var data = doc.data() as Map<String, dynamic>;
-                  return {
-                    'uid': doc.id,
-                    'displayName': data['displayName'] ?? 'Unknown',
-                    'pfp': data['pfp'] ?? 'https://picsum.photos/200/200',
-                    'totalDailyHours': (data['totalDailyHours'] ?? 0.0) as num,
-                  };
-                }).toList();
-
-                users.sort((a, b) => (b['totalDailyHours'] as num)
-                    .compareTo(a['totalDailyHours'] as num));
-
-                return ListView.builder(
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    var user = users[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(user['pfp']),
-                      ),
-                      title: Text(user['displayName']),
-                      subtitle: Text(
-                        'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      trailing: Text("${index + 1}"),
-                    );
-                  },
-                );
-              },
-            );
-          },
+        body: Column(
+          children: [
+            Expanded(
+              child: FutureBuilder<DocumentSnapshot>(
+                future: firestore.collection('UID').doc(currentUserId).get(),
+                builder: (context, userSnapshot) {
+                  if (!userSnapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  var userData =
+                      userSnapshot.data!.data() as Map<String, dynamic>;
+                  List<String> friends =
+                      List<String>.from(userData['friends'] ?? []);
+                  return StreamBuilder<QuerySnapshot>(
+                    stream: showFriendsLeaderboard
+                        ? firestore.collection('UID').where(
+                            FieldPath.documentId,
+                            whereIn: [...friends, currentUserId]).snapshots()
+                        : firestore.collection('UID').snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      var users = snapshot.data!.docs.map((doc) {
+                        var data = doc.data() as Map<String, dynamic>;
+                        return {
+                          'uid': doc.id,
+                          'displayName': data['displayName'] ?? 'Unknown',
+                          'pfp': data['pfp'] ?? 'https://picsum.photos/200/200',
+                          'totalDailyHours':
+                              (data['totalDailyHours'] ?? 0.0) as num,
+                        };
+                      }).toList();
+                      users.sort((a, b) => (b['totalDailyHours'] as num)
+                          .compareTo(a['totalDailyHours'] as num));
+                      return ListView.builder(
+                        itemCount: users.length,
+                        itemBuilder: (context, index) {
+                          var user = users[index];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: NetworkImage(user['pfp']),
+                            ),
+                            title: Text(user['displayName']),
+                            subtitle: Text(
+                              'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                            trailing: Text("${index + 1}"),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              color: Colors.indigo.shade50,
+              child: Center(
+                child: SmoothPageIndicator(
+                  controller: PageController(
+                      initialPage: 2), // Dummy controller, will never be used
+                  count: 3,
+                  effect: WormEffect(
+                    activeDotColor: Colors.indigo,
+                    dotColor: Colors.indigo.shade200,
+                    dotHeight: 8,
+                    dotWidth: 8,
+                    spacing: 12,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
