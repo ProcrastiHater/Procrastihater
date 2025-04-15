@@ -261,7 +261,7 @@ class _FriendsListState extends State<FriendsList> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        Container(height: 16),
       ],
     ));
   }

@@ -265,7 +265,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          Container(height: 16, color: Colors.indigo.shade100),
         ],
       ),
     );
