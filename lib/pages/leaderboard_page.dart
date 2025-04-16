@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../main.dart';
+
 final FirebaseAuth auth = FirebaseAuth.instance;
 final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -201,8 +203,8 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                       PageController(initialPage: 2), // Dummy controller
                   count: 3,
                   effect: WormEffect(
-                    activeDotColor: Colors.indigo,
-                    dotColor: Colors.indigo.shade200,
+                    activeDotColor: beige,
+                    dotColor: lightBeige,
                     dotHeight: 8,
                     dotWidth: 8,
                     spacing: 12,

@@ -33,7 +33,6 @@ import 'pages/calendar.dart';
 import 'pages/study_mode.dart';
 import 'pages/app_limits_page.dart';
 import 'apps_list.dart';
-import 'pages/graph/colors.dart';
 
 //Global Variables
 //Native Kotlin method channel
