@@ -181,13 +181,7 @@ class ProcrastiHater extends StatelessWidget {
         // Listen to auth state changes instead of using a FutureBuilder
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          // Show loading indicator while connecting to Firebase
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-
+          
           // If user is null (signed out), show login screen
           if (snapshot.data == null) {
             return const LoginScreen();
