@@ -248,13 +248,12 @@ class ProfileSettingsState extends State<ProfileSettings> {
                 context: context, 
                 builder: (BuildContext alertContext) => AlertDialog(
                   title: Text("Delete Account"),
-                  content: Text("Are you sure you want to delete your account?\n\nThis action cannot be undone and will"
-                    " clear all of your data from our database."),
+                  content: Text("Are you sure you want to delete your account?\n\nThis action cannot be undone."),
                   actions: [
                     ElevatedButton(
                       onPressed: (){
                         Navigator.pop(alertContext, "Delete Account");
-                        _deleteAccount;
+                        _deleteAccount();
                       },
                       child: Text("Yes")
                     ),
