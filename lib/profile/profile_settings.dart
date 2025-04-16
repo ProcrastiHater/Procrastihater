@@ -98,9 +98,8 @@ class ProfileSettingsState extends State<ProfileSettings> {
 /// to login screen
 ///***************************************************
   Future<void> _signOut() async {
-    await _auth.signOut();
-    // Go back to the previous screen
-    Navigator.of(context).pop(); 
+   await _auth.signOut();
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
   }
 
   ///***************************************************
@@ -191,7 +190,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
                     ElevatedButton( //Button to actually sign out
                       onPressed: () {
                         Navigator.pop(alertContext, "Sign Out");
-                        _signOut;
+                        _signOut();
                       }, 
                       child: Text("Yes")
                     ),

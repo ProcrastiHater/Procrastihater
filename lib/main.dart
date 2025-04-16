@@ -70,10 +70,15 @@ void main() async {
   //Firebase initialization
   await Firebase.initializeApp();
   await initializeMain();
+  runApp(const ProcrastiHater());
+
 }
 
 Future<void> initializeMain() async {
-    //launch the main app
+   
+ checkNotifsPermission();
+
+   if (auth.currentUser != null) {
   _currentToHistorical().whenComplete(() {
     _checkSTPermission().whenComplete((){
       _getScreenTime().whenComplete((){
@@ -82,9 +87,7 @@ Future<void> initializeMain() async {
             generateAppsList().whenComplete(() {
               initializeAppNameColorMapping().whenComplete((){
                 _writeScreenTimeData();
-                checkNotifsPermission();
                 //Launches login screen first which returns ProcrasiHater app if success
-                runApp(const LoginScreen());
               });
             });
           });
@@ -92,6 +95,7 @@ Future<void> initializeMain() async {
       });
     });
   });
+ }
 }
 
 ///*********************************
@@ -173,11 +177,11 @@ class ProcrastiHater extends StatelessWidget {
       onGenerateRoute: (RouteSettings settings) {
         switch (settings.name) {
           //Login screen case builds default navigation
-          case '/loginScreen':
-            return MaterialPageRoute(
-              builder: (context) => LoginScreen(),
-              settings: settings,
-            );
+          // case '/loginScreen':
+          //   return MaterialPageRoute(
+          //     builder: (context) => LoginScreen(),
+          //     settings: settings,
+          //   );
           //Home page case builds default navigation
           case '/homePage':
             return MaterialPageRoute(
@@ -223,6 +227,8 @@ class ProcrastiHater extends StatelessWidget {
               builder: (context) => AppLimitsPage(),
               settings: settings,
             );
+          default:
+            return MaterialPageRoute(builder: (_) => const HomePage());
           /*//Default case builds default navigation to the home page
           default:
             return MaterialPageRoute(
@@ -230,8 +236,7 @@ class ProcrastiHater extends StatelessWidget {
               settings: settings,
             );*/
         }
-      },
-    );
+      }
   }
 
   ///*********************************
@@ -241,7 +246,7 @@ class ProcrastiHater extends StatelessWidget {
   /// navigation and swiping animation for
   /// main pages of the app
   ///*********************************
-  static Route createSwipingRoute(Widget page, Offset beginOffset) {
+  Route createSwipingRoute(Widget page, Offset beginOffset) {
     return PageRouteBuilder(
         //Navigation for the page param
         pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -269,7 +274,7 @@ class ProcrastiHater extends StatelessWidget {
         }
       );
   }
-}
+
 
 ///**************************************************
 /// Name: _updateUserRef
