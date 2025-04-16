@@ -75,11 +75,17 @@ void main() async {
 }
 
 Future<void> initializeMain() async {
-   
- checkNotifsPermission();
-
-   if (auth.currentUser != null) {
-  _currentToHistorical().whenComplete(() {
+  await checkNotifsPermission();
+  if (auth.currentUser != null) {
+    await _currentToHistorical();
+    await _checkSTPermission();
+    await _getScreenTime();
+    await getAvailableWeeks();
+    await fetchWeeklyScreenTime();
+    await generateAppsList();
+    await initializeAppNameColorMapping();
+    await _writeScreenTimeData();
+  /*_currentToHistorical().whenComplete(() {
     _checkSTPermission().whenComplete((){
       _getScreenTime().whenComplete((){
         getAvailableWeeks().whenComplete((){
@@ -94,7 +100,7 @@ Future<void> initializeMain() async {
         }); 
       });
     });
-  });
+  });*/
  }
 }
 
@@ -171,72 +177,82 @@ class ProcrastiHater extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
-      //Main route of the app
-      initialRoute: '/homePage',
-      //Route generation based on what the route needs to do
-      onGenerateRoute: (RouteSettings settings) {
-        switch (settings.name) {
-          //Login screen case builds default navigation
-          // case '/loginScreen':
-          //   return MaterialPageRoute(
-          //     builder: (context) => LoginScreen(),
-          //     settings: settings,
-          //   );
-          //Home page case builds default navigation
-          case '/homePage':
-            return MaterialPageRoute(
-              builder: (context) => HomePage(),
-              settings: settings,
+        home: StreamBuilder<User?>(
+        // Listen to auth state changes instead of using a FutureBuilder
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // Show loading indicator while connecting to Firebase
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
             );
-          //Leaderboard page case builds animated right swiping navigation
-          case '/leaderBoardPage':
-            return createSwipingRoute(LeaderBoardPage(), Offset(1.0, 0.0));
-          //Leaderboard page back case builds animated left swiping navigation
-          case '/leaderBoardPageBack':
-            return createSwipingRoute(HomePage(), Offset(-1.0, 0.0));
-          //Friends page case builds animated left swiping navigation
-          case '/friendsPage':
-            return createSwipingRoute(FriendsPage(), Offset(-1.0, 0.0));
-          //Friends page back case builds animated right swiping navigation
-          case '/friendsPageBack':
-            return createSwipingRoute(HomePage(), Offset(1.0, 0.0));
-          //Profile settings case builds default navigation
-          case '/profileSettings':
-            return MaterialPageRoute(
-              builder: (context) => ProfileSettings(),
-              settings: settings,
-            );
-          //Profile picture selection case builds default navigation
-          case '/profilePictureSelection':
-            return MaterialPageRoute(
-              builder: (context) => ProfilePictureSelectionScreen(),
-              settings: settings,
-            );
-          case '/studyModePage':
-            return MaterialPageRoute(
-              builder: (context) => StudyModePage(),
-              settings: settings,
-            );
-          case '/calendarPage':
-            return MaterialPageRoute(
-              builder: (context) => CalendarPage(),
-              settings: settings,
-            );
-          case '/appLimitsPage':
-            return MaterialPageRoute(
-              builder: (context) => AppLimitsPage(),
-              settings: settings,
-            );
-          default:
-            return MaterialPageRoute(builder: (_) => const HomePage());
-          /*//Default case builds default navigation to the home page
-          default:
-            return MaterialPageRoute(
-              builder: (context) => HomePage(),
-              settings: settings,
-            );*/
-        }
+          }
+
+          // If user is null (signed out), show login screen
+          if (snapshot.data == null) {
+            return const LoginScreen();
+          }
+
+          // If user is authenticated, initialize app data and show home page
+          initializeMain();
+          return const HomePage();
+        },
+      ),
+      onGenerateRoute: _generateRoutes,
+    );
+  }
+
+  Route<dynamic>? _generateRoutes(RouteSettings settings) {
+    switch (settings.name) {
+      //Home page case builds default navigation
+      case '/homePage':
+        return MaterialPageRoute(
+          builder: (context) => HomePage(),
+          settings: settings,
+        );
+      //Leaderboard page case builds animated right swiping navigation
+      case '/leaderBoardPage':
+        return createSwipingRoute(LeaderBoardPage(), Offset(1.0, 0.0));
+      //Leaderboard page back case builds animated left swiping navigation
+      case '/leaderBoardPageBack':
+        return createSwipingRoute(HomePage(), Offset(-1.0, 0.0));
+      //Friends page case builds animated left swiping navigation
+      case '/friendsPage':
+        return createSwipingRoute(FriendsPage(), Offset(-1.0, 0.0));
+      //Friends page back case builds animated right swiping navigation
+      case '/friendsPageBack':
+        return createSwipingRoute(HomePage(), Offset(1.0, 0.0));
+      //Profile settings case builds default navigation
+      case '/profileSettings':
+        return MaterialPageRoute(
+          builder: (context) => ProfileSettings(),
+          settings: settings,
+        );
+      //Profile picture selection case builds default navigation
+      case '/profilePictureSelection':
+        return MaterialPageRoute(
+          builder: (context) => ProfilePictureSelectionScreen(),
+          settings: settings,
+        );
+      case '/studyModePage':
+        return MaterialPageRoute(
+          builder: (context) => StudyModePage(),
+          settings: settings,
+        );
+      case '/calendarPage':
+        return MaterialPageRoute(
+          builder: (context) => CalendarPage(),
+          settings: settings,
+        );
+      case '/appLimitsPage':
+        return MaterialPageRoute(
+          builder: (context) => AppLimitsPage(),
+          settings: settings,
+        );
+      default:
+        return MaterialPageRoute(builder: (_) => const HomePage());
       }
+    }
   }
 
   ///*********************************
@@ -289,6 +305,22 @@ void updateUserRef() {
   //Update user reference if UID has changed
   if (curUid != uid) {
     userRef = mainCollection.doc(uid);
+  }
+}
+
+///*********************************
+/// Name: _checkSTPermission
+///
+/// Description: Invokes method from platform channel
+/// to check for screetime usage permissions
+///*********************************
+Future<void> _checkSTPermission() async {
+  try {
+    final bool _hasPermission =
+        await platformChannel.invokeMethod('checkScreenTimePermission');
+    hasPermission = _hasPermission;
+  } on PlatformException catch (e) {
+    debugPrint("Failed to check permission: ${e.message}");
   }
 }
 
@@ -402,22 +434,6 @@ Future<void> _currentToHistorical() async {
     }
   } else {
     debugPrint('No data needed to be written to history');
-  }
-}
-
-///*********************************
-/// Name: _checkSTPermission
-///
-/// Description: Invokes method from platform channel
-/// to check for screetime usage permissions
-///*********************************
-Future<void> _checkSTPermission() async {
-  try {
-    final bool _hasPermission =
-        await platformChannel.invokeMethod('checkScreenTimePermission');
-    hasPermission = _hasPermission;
-  } on PlatformException catch (e) {
-    debugPrint("Failed to check permission: ${e.message}");
   }
 }
 

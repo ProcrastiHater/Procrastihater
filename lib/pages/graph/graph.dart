@@ -404,8 +404,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   //Initialize colors making sure all apps are mapped to a color before displaying
   void initState() {
     super.initState();
-    dailyData = screenTimeData;
     _initializeData();
+    dailyData = screenTimeData;
   }
 
   Future<void> _initializeData() async {
@@ -461,6 +461,9 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   Widget build(BuildContext context) {
     double? screenWidth = MediaQuery.of(context).size.width;
     double? screenHeight = MediaQuery.of(context).size.height;
+    if (dailyData.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    }
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: Column(

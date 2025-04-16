@@ -42,13 +42,19 @@ class ExpandedListView extends StatefulWidget {
 /// for ExpandedListView
 ///*********************************
 class _ExpandedListViewState extends State<ExpandedListView> { 
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     switch(widget.graphIndex) {
       //Daily list view
       case 0:
       //Return loading icon if no data is present
-        if (screenTimeData.isEmpty) {
+        if (widget.dayFilteredData.isEmpty) {
           return Center(child: CircularProgressIndicator());
         } 
         //Data to be displayed 
