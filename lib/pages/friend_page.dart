@@ -252,7 +252,7 @@ class _FriendsListState extends State<FriendsList>
                         PageController(initialPage: 0), // Dummy controller
                     count: 3,
                     effect: WormEffect(
-                      activeDotColor: beige,
+                      activeDotColor: Color.fromARGB(255, 249, 207, 135),
                       dotColor: lightBeige,
                       dotHeight: 8,
                       dotWidth: 8,

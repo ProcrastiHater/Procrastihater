@@ -204,7 +204,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                       PageController(initialPage: 2), // Dummy controller
                   count: 3,
                   effect: WormEffect(
-                    activeDotColor: beige,
+                    activeDotColor: Color.fromARGB(255, 249, 207, 135),
                     dotColor: lightBeige,
                     dotHeight: 8,
                     dotWidth: 8,

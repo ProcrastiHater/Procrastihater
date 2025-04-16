@@ -318,7 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 controller: PageController(initialPage: 1), // Dummy controller
                 count: 3,
                 effect: WormEffect(
-                  activeDotColor: beige,
+                  activeDotColor: Color.fromARGB(255, 249, 207, 135),
                   dotColor: lightBeige,
                   dotHeight: 8,
                   dotWidth: 8,
