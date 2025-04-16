@@ -109,10 +109,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //Screensize
+    double? screenWidth = MediaQuery.of(context).size.width;
+    double? screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        title: Text("ProcrastiStats"),
         actions: [
           // Creating little user icon you can press to view account info
           IconButton(
@@ -134,15 +136,21 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       drawer: Drawer(
         child: ListView(
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.all(4.0),
           children: <Widget>[
             SizedBox(
-              height: 100,
-              child:  DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blueGrey,
-              ),
-              child: Center(child: Text("Other Pages:", style: TextStyle(color: Colors.white))),
+              height: screenHeight * .15,
+              child: DrawerHeader(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("ProcrastiTools",),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: Image.asset("assets/logo.jpg"),
+                    ),
+                  ],
+                )
               ),
             ),
             ListTile(
@@ -152,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pushNamed(context, '/calendarPage');
               },
             ),
-            const Divider(),
+            const Divider(height: 1, color: lightBeige,),
             ListTile(
               trailing: Icon(Icons.school),
               title: Text("Study Mode"),
@@ -160,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pushNamed(context, '/studyModePage');
               },
             ),
-            const Divider(),
+            const Divider(height: 1, color: lightBeige,),
             ListTile(
               trailing: Icon(Icons.alarm),
               title: Text("App Limits"),
@@ -174,66 +182,93 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [ 
           Expanded(
+            flex: 13,
             //Container holding graph in top portion of screen
             child: Scaffold(
               body: [
                 //Daily Graph
                 Container(
-                  padding: const EdgeInsets.all(4.0),
-                  color: Colors.indigo.shade50,
                   child: DailyGraphView(onFilteredData: updateFilteredDayData, onBarSelected: updateSelectedBar),
                 ),
                 //Weekly Graph
-                 Container(
-                  padding: const EdgeInsets.all(4.0),
-                  color: Colors.indigo.shade50,
+                Container(
                   child: WeeklyGraphView(onFilteredData: updateFilteredWeekData, onBarSelected: updateSelectedBar),
                 ),
-                //Monthly Graph
-                 /*Container(
-                  padding: const EdgeInsets.all(4.0),
-                  color: Colors.indigo.shade50,
-                  child: Center(child: Text("Monthly Graph Display"),)
-                  //MonthlyGraphView(onBarSelected: updateSelectedBar),
-                ),*/
               ][graphIndex],
-              bottomNavigationBar: SizedBox(
-                height: 50,
-                child: NavigationBar(
-                  selectedIndex: graphIndex,
-                  backgroundColor: Colors.indigo.shade50,
-                  onDestinationSelected: (int index) {
-                    setState(() {
-                      selectedBar == "null";
-                      graphIndex = index;
-                    }); 
-                  },
-                  destinations: const <Widget>[
-                    NavigationDestination(
-                      icon: Icon(Icons.calendar_today_rounded), 
-                      label: 'Daily'
+              bottomNavigationBar: Container(
+                height: 72,
+                child: Column(
+                  children: [
+                    Container(color: beige, height: 2,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Card(
+                          color: graphIndex == 0? beige : null,
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                          child: InkWell(
+                            child: Padding(
+                              padding: EdgeInsets.all(5.0),
+                              child: Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                color: graphIndex == 0? lightBlue : lightBeige,
+                                size: screenHeight * 0.035,
+                              ),
+                              Text("  Daily  ", style: TextStyle(color: graphIndex == 0? darkBlue : null)),
+                            ],
+                          ),
+                            ), 
+                        
+                          onTap: () {
+                             setState(() {
+                              selectedBar = "null";
+                              graphIndex = 0;
+                            }); 
+                          },
+                          ),
+                        ),
+                        Card(
+                          color: graphIndex == 1? beige : null,
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                          child: InkWell(
+                            child: Padding(
+                              padding: EdgeInsets.all(5.0),
+                              child: Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_view_week_rounded,
+                                color: graphIndex == 1? lightBlue : lightBeige,
+                                size: screenHeight * 0.035,
+                              ),
+                              Text("  Weekly  ", style: TextStyle(color: graphIndex == 1? darkBlue : null)),
+                            ],
+                          ),
+                            ), 
+                        
+                          onTap: () {
+                             setState(() {
+                              selectedBar = "null";
+                              graphIndex = 1;
+                            }); 
+                          },
+                          ),
+                        ),
+                      ],
                     ),
-                    NavigationDestination(
-                      icon: Icon(Icons.calendar_view_week_rounded), 
-                      label: 'Weekly'
-                    ),
-                    /*NavigationDestination(
-                      icon: Icon(Icons.calendar_month_rounded), 
-                      label: 'Monthly'
-                    ),*/
-                  ],  
-                ), 
-              )         
-            )
+                    Container(color: beige, height: 2,),
+                  ],
+                ),
+              ),
+            )         
           ),
-          const SizedBox(height: 4.0),
           Expanded(
+            flex: 7,
             //Container holding list view in bottom portion of screen
-            child: Container(
-              padding: const EdgeInsets.all(4.0),
-              color: Colors.indigo.shade100,
-              child: ExpandedListView(dayFilteredData: dayData, weekFilteredData: weekData, selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
-            ),
+            child: ExpandedListView(dayFilteredData: dayData, weekFilteredData: weekData, selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
           ),
         ],
       ),

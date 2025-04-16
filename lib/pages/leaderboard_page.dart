@@ -44,7 +44,26 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          
+          title: Text("ProcrastiBoards"),
+        actions: [
+          // Creating little user icon you can press to view account info
+          IconButton(
+            icon: CircleAvatar(
+              backgroundImage: NetworkImage(
+                // Use user's pfp as icon image if there is no pfp use this link as a default
+                auth.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
+              ),
+            ),
+            onPressed: () async {
+              await Navigator.pushNamed(context, "/profileSettings");
+              // Reload the user in case anything changed
+              await auth.currentUser?.reload();
+              // Reload UI in case things changed
+              setState(() {});
+            },
+          )
+        ],
+        bottom: AppBar(
           title: Text(showFriendsLeaderboard ? "Friends Leaderboard" : "Global Leaderboard"),
           automaticallyImplyLeading: false,
           actions: [
@@ -58,7 +77,55 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
               },
             ),
           ],
+          ),
         ),
+        drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            SizedBox(
+              height: 80,
+              child:  DrawerHeader(
+              decoration: BoxDecoration(
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: Image.asset("assets/logo.jpg"),
+                  ),
+                  Text("ProcrastiTools",),
+              ],
+              )
+              ),
+            ),
+              ListTile(
+              trailing: Icon(Icons.calendar_today),
+              title: Text("Calendar"),
+              onTap:() {
+                Navigator.pushNamed(context, '/calendarPage');
+              },
+            ),
+           // const Divider(),
+             ListTile(
+              trailing: Icon(Icons.school),
+              title: Text("Study Mode"),
+              onTap: () {
+                Navigator.pushNamed(context, '/studyModePage');
+              },
+            ),
+            //const Divider(),
+            ListTile(
+              trailing: Icon(Icons.alarm),
+              title: Text("App Limits"),
+              onTap: () {
+                Navigator.pushNamed(context, '/appLimitsPage');
+              },
+            )
+          ],
+        ),
+      ),
         body: FutureBuilder<DocumentSnapshot>(
           future: firestore.collection('UID').doc(currentUserId).get(),
           builder: (context, userSnapshot) {
@@ -101,7 +168,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                       title: Text(user['displayName']),
                       subtitle: Text(
                         'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
-                        style: const TextStyle(color: Colors.grey),
+                        //style: const TextStyle(color: Colors.grey),
                       ),
                       trailing: Text("${index+1}"),
                     );
