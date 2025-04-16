@@ -116,7 +116,7 @@ void _pokeFriend(String friendUID) async {
   Widget build(BuildContext context) {
     return Scaffold(
        appBar: AppBar(
-        title: Text("ProcrastiStats"),
+        title: Text("ProcrastiFriends"),
         actions: [
           // Creating little user icon you can press to view account info
           IconButton(

@@ -44,7 +44,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("ProcrastiStats"),
+          title: Text("ProcrastiBoards"),
         actions: [
           // Creating little user icon you can press to view account info
           IconButton(
