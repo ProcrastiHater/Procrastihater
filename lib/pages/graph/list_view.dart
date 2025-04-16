@@ -42,13 +42,19 @@ class ExpandedListView extends StatefulWidget {
 /// for ExpandedListView
 ///*********************************
 class _ExpandedListViewState extends State<ExpandedListView> { 
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     switch(widget.graphIndex) {
       //Daily list view
       case 0:
       //Return loading icon if no data is present
-        if (screenTimeData.isEmpty) {
+        if (widget.dayFilteredData.isEmpty) {
           return Center(child: CircularProgressIndicator());
         } 
         //Data to be displayed 
@@ -64,14 +70,11 @@ class _ExpandedListViewState extends State<ExpandedListView> {
           itemBuilder: (context, index) {
             //Display title if first tile
             if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
+              return Center(
                   child: Text(
-                    "Daily Data", 
+                    "Daily Hours", 
                     style: TextStyle(fontSize: 22),
                   )
-                ),
               );
             }
             //Build data tile
@@ -103,7 +106,6 @@ class _ExpandedListViewState extends State<ExpandedListView> {
               "Select a bar to expand",
               style: const TextStyle(
                 decoration: TextDecoration.none,
-                color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               )
@@ -121,7 +123,6 @@ class _ExpandedListViewState extends State<ExpandedListView> {
               "No data available for ${widget.selectedBar}",
               style: const TextStyle(
                 decoration: TextDecoration.none,
-                color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               )
@@ -137,15 +138,14 @@ class _ExpandedListViewState extends State<ExpandedListView> {
           //Builds from the top of parent widget
           padding: EdgeInsets.zero,
           //Data tiles plus 1 for title
-          
           itemCount: dayData.length + 1,
           //Data tile builder  
           itemBuilder: (context, index) {
             //Display title if first tile
             if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(child: Text("${DateFormat('MM-dd-yyyy').format(currentDataset)}: ${widget.selectedBar}", style: TextStyle(fontSize: 22),)),
+              return Center(
+                child: Text(/*"${DateFormat('MM-dd-yyyy').format(currentDataset)}:*/"${widget.selectedBar} Hours", 
+                style: TextStyle(fontSize: 22),),
               );
             }
             //Build data tile
@@ -169,10 +169,6 @@ class _ExpandedListViewState extends State<ExpandedListView> {
             }
           },
         );
-      //Monthly list view
-      case 2:
-        return Center(child: Text("Monthly Graph Display"),);
-        //Center(child: CircularProgressIndicator());
       default: 
         return Center(child: CircularProgressIndicator());
     }

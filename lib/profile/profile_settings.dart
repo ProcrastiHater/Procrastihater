@@ -98,9 +98,8 @@ class ProfileSettingsState extends State<ProfileSettings> {
 /// to login screen
 ///***************************************************
   Future<void> _signOut() async {
-    await _auth.signOut();
-    // Go back to the previous screen
-    Navigator.of(context).pop(); 
+   await _auth.signOut();
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
   }
 
   ///***************************************************
@@ -159,7 +158,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
             SizedBox(height: 20),
             // Profile picture change button
             ElevatedButton(
-              onPressed :_updateProfilePicture,
+              onPressed : _updateProfilePicture,
               child: Text('Change Profile Picture')
             ),
             SizedBox(height: 10),
@@ -180,9 +179,31 @@ class ProfileSettingsState extends State<ProfileSettings> {
               },
               child: const Text('Copy UID Clipboard'),
             ),
-            // Button to sign out
+            // Button to show dialog for signing out
             ElevatedButton(
-              onPressed: _signOut,
+              onPressed: () => showDialog(
+                context: context, 
+                builder: (BuildContext alertContext) => AlertDialog(
+                  title: Text("Sign Out"),
+                  content: Text("Are you sure you want to sign out?"),
+                  actions: [
+                    ElevatedButton( //Button to actually sign out
+                      onPressed: () {
+                        Navigator.pop(alertContext, "Sign Out");
+                        _signOut();
+                      }, 
+                      child: Text("Yes")
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(alertContext, "Cancel"), 
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.red),
+                      )
+                    )
+                  ],
+                )
+              ),
               child: Text('Sign Out'),
             ),
             //Buttons for Total ST Notifications
@@ -223,7 +244,31 @@ class ProfileSettingsState extends State<ProfileSettings> {
             SizedBox(height: 10),
             // Button to delete account
             ElevatedButton(
-              onPressed: _deleteAccount,
+              onPressed: () => showDialog(
+                context: context, 
+                builder: (BuildContext alertContext) => AlertDialog(
+                  title: Text("Delete Account"),
+                  content: Text("Are you sure you want to delete your account?\n\nThis action cannot be undone."),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: (){
+                        Navigator.pop(alertContext, "Delete Account");
+                        _deleteAccount();
+                      },
+                      child: Text("Yes")
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(alertContext, "Cancel"),
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(
+                          color: Colors.red
+                        ),
+                      )
+                    )
+                  ],
+                )
+              ),
               child: Text(
                 'Delete Account',
                 style: TextStyle(color: Colors.red),

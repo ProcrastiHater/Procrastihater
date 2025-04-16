@@ -111,3 +111,20 @@ Future<void> fetchWeeklyScreenTime() async {
       ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key))),
   );
 }
+
+Future<double> fetchTotalDayScreentime() async {
+  final dailyScreenTime = (await FirebaseFirestore.instance
+    .collection('UID')
+    .doc(userRef.id)
+    .get())
+    .get('totalDailyHours') as double;
+    return dailyScreenTime;
+}
+Future<int> fetchPoints() async {
+  final points = (await FirebaseFirestore.instance
+    .collection('UID')
+    .doc(userRef.id)
+    .get())
+    .get('points') as int;
+    return points;
+}
