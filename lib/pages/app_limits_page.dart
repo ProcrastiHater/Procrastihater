@@ -65,7 +65,7 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
         itemBuilder: (context, index) {
           return ListTile(
             contentPadding: EdgeInsets.only(bottom: 5, left: 10, right: 10),
-            tileColor: Colors.indigo.shade100,
+            //: Colors.indigo.shade100,
             title: Text(
               appNames[index],
               style: TextStyle(

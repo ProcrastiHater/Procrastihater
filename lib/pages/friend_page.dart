@@ -19,6 +19,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+//Page Imports
+import '/main.dart';
+
 ///*********************************
 /// Name: HistoricalDataPage
 ///
@@ -41,10 +44,6 @@ class FriendsPage extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: const Text("ProcrastiFriends"),
-        ),
         body: FriendsList(),
       ),
     );
@@ -116,154 +115,259 @@ class _FriendsListState extends State<FriendsList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8),
+        appBar: AppBar(
+          title: Text("ProcrastiFriends"),
+          actions: [
+            // Creating little user icon you can press to view account info
+            IconButton(
+              icon: CircleAvatar(
+                backgroundImage: NetworkImage(
+                  // Use user's pfp as icon image if there is no pfp use this link as a default
+                  auth.currentUser?.photoURL ??
+                      'https://picsum.photos/id/237/200/300',
+                ),
+              ),
+              onPressed: () async {
+                await Navigator.pushNamed(context, "/profileSettings");
+                // Reload the user in case anything changed
+                await auth.currentUser?.reload();
+                // Reload UI in case things changed
+                setState(() {});
+              },
+            )
+          ],
         ),
-        Expanded(
-          child: StreamBuilder<DocumentSnapshot>(
-            stream: _firestore
-                .collection('UID')
-                .doc(_auth.currentUser?.uid)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const CircularProgressIndicator();
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              SizedBox(
+                height: 80,
+                child: DrawerHeader(
+                    decoration: BoxDecoration(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12.0),
+                          child: Image.asset("assets/logo.jpg"),
+                        ),
+                        Text(
+                          "ProcrastiTools",
+                        ),
+                      ],
+                    )),
+              ),
+              ListTile(
+                trailing: Icon(Icons.calendar_today),
+                title: Text("Calendar"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/calendarPage');
+                },
+              ),
+              // const Divider(),
+              ListTile(
+                trailing: Icon(Icons.school),
+                title: Text("Study Mode"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/studyModePage');
+                },
+              ),
+              //const Divider(),
+              ListTile(
+                trailing: Icon(Icons.alarm),
+                title: Text("App Limits"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/appLimitsPage');
+                },
+              )
+            ],
+          ),
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8),
+            ),
+            Expanded(
+              child: StreamBuilder<DocumentSnapshot>(
+                stream: _firestore
+                    .collection('UID')
+                    .doc(_auth.currentUser?.uid)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return const CircularProgressIndicator();
 
-              List<dynamic> friends =
-                  (snapshot.data?.data() as Map<String, dynamic>)['friends'] ??
+                  List<dynamic> friends = (snapshot.data?.data()
+                          as Map<String, dynamic>)['friends'] ??
                       [];
 
-              return ListView.builder(
-                itemCount: friends.length,
-                itemBuilder: (context, index) {
-                  String friendUID = friends[index];
+                  return ListView.builder(
+                    itemCount: friends.length,
+                    itemBuilder: (context, index) {
+                      String friendUID = friends[index];
 
-                  return FutureBuilder<DocumentSnapshot>(
-                    future: _firestore.collection('UID').doc(friendUID).get(),
-                    builder: (context, friendSnapshot) {
-                      if (!friendSnapshot.hasData)
-                        return const SizedBox
-                            .shrink(); // Show nothing if no data
+                      return FutureBuilder<DocumentSnapshot>(
+                        future:
+                            _firestore.collection('UID').doc(friendUID).get(),
+                        builder: (context, friendSnapshot) {
+                          if (!friendSnapshot.hasData)
+                            return const SizedBox
+                                .shrink(); // Show nothing if no data
 
-                      var friendData =
-                          friendSnapshot.data!.data() as Map<String, dynamic>;
-                      String displayName =
-                          friendData['displayName'] ?? 'Unknown';
-                      String photoUrl =
-                          friendData['pfp'] ?? 'https://picsum.photos/200/200';
-                      double totalDailyHours =
-                          friendData['totalDailyHours'] ?? 0.0;
+                          var friendData = friendSnapshot.data!.data()
+                              as Map<String, dynamic>;
+                          String displayName =
+                              friendData['displayName'] ?? 'Unknown';
+                          String photoUrl = friendData['pfp'] ??
+                              'https://picsum.photos/200/200';
+                          double totalDailyHours =
+                              friendData['totalDailyHours'] ?? 0.0;
 
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(photoUrl),
-                        ),
-                        title: Text(displayName),
-                        subtitle: Text(
-                          'Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.waving_hand,
-                                  color: Colors.blue),
-                              onPressed: () => _pokeFriend(friendUID),
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: NetworkImage(photoUrl),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.close, color: Colors.red),
-                              onPressed: () => _deleteFriend(friendUID),
+                            title: Text(displayName),
+                            subtitle: Text(
+                              'Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
+                              //style: TextStyle(color: Colors.grey),
                             ),
-                          ],
-                        ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.waving_hand,
+                                      color: Colors.blue),
+                                  onPressed: () => _pokeFriend(friendUID),
+                                ),
+                                IconButton(
+                                    //This button now pops up the confirmation dialog
+                                    icon: const Icon(Icons.close,
+                                        color: Colors.red),
+                                    onPressed: () => showDialog<String>(
+                                          context: context,
+                                          builder:
+                                              (BuildContext alertContext) =>
+                                                  AlertDialog(
+                                            title: Text("Delete Friend"),
+                                            content: Text(
+                                                "Are you sure you want to delete $displayName from your friends list?"),
+                                            actions: [
+                                              ElevatedButton(
+                                                  onPressed: () {
+                                                    _deleteFriend(
+                                                        friendUID); //Actually deletes friend
+                                                    Navigator.pop(
+                                                        alertContext, "Yes");
+                                                  },
+                                                  child: Text("Yes")),
+                                              ElevatedButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          alertContext,
+                                                          "Cancel"),
+                                                  child: Text(
+                                                    "Cancel",
+                                                    style: TextStyle(
+                                                        color: Colors.red),
+                                                  ))
+                                            ],
+                                          ),
+                                        )),
+                              ],
+                            ),
+                          );
+                        },
                       );
                     },
                   );
                 },
-              );
-            },
-          ),
-        ),
-        BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.grey[700],
-          unselectedItemColor: Colors.grey[700],
-          onTap: (index) {
-            if (index == 1) {
-              // Assuming the 'Pokes' button is at index 1
-              showModalBottomSheet(
-                context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (context) => const PokeNotificationsPage(),
-              );
-            } else if (index == 0) {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (context) => Padding(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context)
-                        .viewInsets
-                        .bottom, // Adjusts for keyboard
-                  ),
-                  child: ShowAddFriendsSheet(),
-                ),
-              );
-            } else if (index == 2) {
-              showModalBottomSheet(
-                context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (context) => FriendRequestsSheet(),
-              );
-            } else {
-              setState(() {
-                _selectedIndex = index;
-              });
-            }
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_add_alt_1_sharp),
-              label: 'Add Friends',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.waving_hand),
-              label: 'Pokes',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_pin_rounded),
-              label: 'Friend Requests',
-            ),
-          ],
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Center(
-            child: SmoothPageIndicator(
-              controller: PageController(initialPage: 0), // Dummy controller
-              count: 3,
-              effect: WormEffect(
-                activeDotColor: Colors.indigo,
-                dotColor: Colors.indigo.shade200,
-                dotHeight: 8,
-                dotWidth: 8,
-                spacing: 12,
               ),
             ),
-          ),
-        ),
-        Container(height: 16),
-      ],
-    ));
+            BottomNavigationBar(
+              currentIndex: _selectedIndex,
+              selectedItemColor: beige,
+              unselectedItemColor: beige,
+              onTap: (index) {
+                if (index == 1) {
+                  // Assuming the 'Pokes' button is at index 1
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => const PokeNotificationsPage(),
+                  );
+                } else if (index == 0) {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => Padding(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context)
+                            .viewInsets
+                            .bottom, // Adjusts for keyboard
+                      ),
+                      child: ShowAddFriendsSheet(),
+                    ),
+                  );
+                } else if (index == 2) {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => FriendRequestsSheet(),
+                  );
+                } else {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                }
+              },
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_add_alt_1_sharp),
+                  label: 'Add Friends',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.waving_hand),
+                  label: 'Pokes',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_pin_rounded),
+                  label: 'Friend Requests',
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Center(
+                child: SmoothPageIndicator(
+                  controller:
+                      PageController(initialPage: 0), // Dummy controller
+                  count: 3,
+                  effect: WormEffect(
+                    activeDotColor: Colors.indigo,
+                    dotColor: Colors.indigo.shade200,
+                    dotHeight: 8,
+                    dotWidth: 8,
+                    spacing: 12,
+                  ),
+                ),
+              ),
+            ),
+            Container(height: 16),
+          ],
+        ));
   }
 }
 

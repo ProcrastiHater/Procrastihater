@@ -33,6 +33,7 @@ import 'pages/calendar.dart';
 import 'pages/study_mode.dart';
 import 'pages/app_limits_page.dart';
 import 'apps_list.dart';
+import 'pages/graph/colors.dart';
 
 //Global Variables
 //Native Kotlin method channel
@@ -51,6 +52,11 @@ String? uid = auth.currentUser?.uid;
 //Reference to user's document in Firestore
 DocumentReference userRef = mainCollection.doc(uid);
 
+const Color darkBlue = Color.fromRGBO(10, 27, 46, 1);
+const Color lightBlue = Color.fromRGBO(14, 40, 77, 1);
+const Color beige = Color.fromARGB(255, 229, 214, 160);
+const Color lightBeige = Color.fromARGB(255, 208, 196, 153);
+
 ///*********************************
 /// Name: main
 ///
@@ -64,28 +70,22 @@ void main() async {
   //Firebase initialization
   await Firebase.initializeApp();
   await initializeMain();
+  runApp(const ProcrastiHater());
+
 }
 
 Future<void> initializeMain() async {
-    //launch the main app
-  _currentToHistorical().whenComplete(() {
-    _checkSTPermission().whenComplete((){
-      _getScreenTime().whenComplete((){
-        getAvailableWeeks().whenComplete((){
-          fetchWeeklyScreenTime().whenComplete((){
-            generateAppsList().whenComplete(() {
-              initializeAppNameColorMapping().whenComplete((){
-                _writeScreenTimeData();
-                checkNotifsPermission();
-                //Launches login screen first which returns ProcrasiHater app if success
-                runApp(const LoginScreen());
-              });
-            });
-          });
-        }); 
-      });
-    });
-  });
+  await checkNotifsPermission();
+  if (auth.currentUser != null) {
+    await _currentToHistorical();
+    await _checkSTPermission();
+    await _getScreenTime();
+    await getAvailableWeeks();
+    await fetchWeeklyScreenTime();
+    await generateAppsList();
+    await initializeAppNameColorMapping();
+    await _writeScreenTimeData();
+ }
 }
 
 ///*********************************
@@ -100,72 +100,137 @@ class ProcrastiHater extends StatelessWidget {
   @override
   //Main material app for app
   Widget build(BuildContext context) {
+    double? screenWidth = MediaQuery.of(context).size.width;
+    double? screenHeight = MediaQuery.of(context).size.height;
     return MaterialApp(
-      //Main route of the app
-      initialRoute: '/homePage',
-      //Route generation based on what the route needs to do
-      onGenerateRoute: (RouteSettings settings) {
-        switch (settings.name) {
-          //Login screen case builds default navigation
-          case '/loginScreen':
-            return MaterialPageRoute(
-              builder: (context) => LoginScreen(),
-              settings: settings,
-            );
-          //Home page case builds default navigation
-          case '/homePage':
-            return MaterialPageRoute(
-              builder: (context) => HomePage(),
-              settings: settings,
-            );
-          //Leaderboard page case builds animated right swiping navigation
-          case '/leaderBoardPage':
-            return createSwipingRoute(LeaderBoardPage(), Offset(1.0, 0.0));
-          //Leaderboard page back case builds animated left swiping navigation
-          case '/leaderBoardPageBack':
-            return createSwipingRoute(HomePage(), Offset(-1.0, 0.0));
-          //Friends page case builds animated left swiping navigation
-          case '/friendsPage':
-            return createSwipingRoute(FriendsPage(), Offset(-1.0, 0.0));
-          //Friends page back case builds animated right swiping navigation
-          case '/friendsPageBack':
-            return createSwipingRoute(HomePage(), Offset(1.0, 0.0));
-          //Profile settings case builds default navigation
-          case '/profileSettings':
-            return MaterialPageRoute(
-              builder: (context) => ProfileSettings(),
-              settings: settings,
-            );
-          //Profile picture selection case builds default navigation
-          case '/profilePictureSelection':
-            return MaterialPageRoute(
-              builder: (context) => ProfilePictureSelectionScreen(),
-              settings: settings,
-            );
-          case '/studyModePage':
-            return MaterialPageRoute(
-              builder: (context) => StudyModePage(),
-              settings: settings,
-            );
-          case '/calendarPage':
-            return MaterialPageRoute(
-              builder: (context) => CalendarPage(),
-              settings: settings,
-            );
-          case '/appLimitsPage':
-            return MaterialPageRoute(
-              builder: (context) => AppLimitsPage(),
-              settings: settings,
-            );
-          /*//Default case builds default navigation to the home page
-          default:
-            return MaterialPageRoute(
-              builder: (context) => HomePage(),
-              settings: settings,
-            );*/
-        }
-      },
+      theme: ThemeData(
+        //brightness: Brightness.dark,
+        scaffoldBackgroundColor: darkBlue,
+        //canvasColor: beige,
+        colorScheme: const ColorScheme.dark(
+          brightness: Brightness.dark,
+          primary: beige,
+          onPrimary: lightBlue,
+          primaryContainer: beige,
+          surface: lightBlue,
+          onSurface: beige,
+          outline: lightBeige,
+        ),
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(color: beige),
+          displayMedium: TextStyle(color: beige),
+          displaySmall: TextStyle(color: beige),
+          headlineLarge: TextStyle(color: beige),
+          headlineMedium: TextStyle(color: beige),
+          headlineSmall: TextStyle(color: beige),
+          titleLarge: TextStyle(color: beige),
+          titleMedium: TextStyle(color: beige),
+          titleSmall: TextStyle(color: lightBeige),
+          bodyLarge: TextStyle(color: lightBeige),
+          bodyMedium: TextStyle(color: lightBeige),
+          bodySmall: TextStyle(color: lightBeige),
+          labelLarge: TextStyle(color: lightBeige),
+          labelMedium: TextStyle(color: lightBeige),
+          labelSmall: TextStyle(color: lightBeige),
+        ),
+        appBarTheme: AppBarTheme(
+          centerTitle: true,
+          toolbarHeight: screenHeight * .06,
+          backgroundColor: lightBlue,
+          foregroundColor: beige,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: lightBlue,
+            foregroundColor: beige,
+          )
+        ),
+        dividerTheme: DividerThemeData(
+          color: Color(0xFFC9D1D9),
+          indent: 5,
+          endIndent: 5,
+          thickness: 1,
+        ),
+        cardTheme: CardThemeData(
+          color: lightBlue,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: darkBlue,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+        home: StreamBuilder<User?>(
+        // Listen to auth state changes instead of using a FutureBuilder
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          
+          // If user is null (signed out), show login screen
+          if (snapshot.data == null) {
+            return const LoginScreen();
+          }
+
+          // If user is authenticated, initialize app data and show home page
+          initializeMain();
+          return const HomePage();
+        },
+      ),
+      onGenerateRoute: _generateRoutes,
     );
+  }
+
+  Route<dynamic>? _generateRoutes(RouteSettings settings) {
+    switch (settings.name) {
+      //Home page case builds default navigation
+      case '/homePage':
+        return MaterialPageRoute(
+          builder: (context) => HomePage(),
+          settings: settings,
+        );
+      //Leaderboard page case builds animated right swiping navigation
+      case '/leaderBoardPage':
+        return createSwipingRoute(LeaderBoardPage(), Offset(1.0, 0.0));
+      //Leaderboard page back case builds animated left swiping navigation
+      case '/leaderBoardPageBack':
+        return createSwipingRoute(HomePage(), Offset(-1.0, 0.0));
+      //Friends page case builds animated left swiping navigation
+      case '/friendsPage':
+        return createSwipingRoute(FriendsPage(), Offset(-1.0, 0.0));
+      //Friends page back case builds animated right swiping navigation
+      case '/friendsPageBack':
+        return createSwipingRoute(HomePage(), Offset(1.0, 0.0));
+      //Profile settings case builds default navigation
+      case '/profileSettings':
+        return MaterialPageRoute(
+          builder: (context) => ProfileSettings(),
+          settings: settings,
+        );
+      //Profile picture selection case builds default navigation
+      case '/profilePictureSelection':
+        return MaterialPageRoute(
+          builder: (context) => ProfilePictureSelectionScreen(),
+          settings: settings,
+        );
+      case '/studyModePage':
+        return MaterialPageRoute(
+          builder: (context) => StudyModePage(),
+          settings: settings,
+        );
+      case '/calendarPage':
+        return MaterialPageRoute(
+          builder: (context) => CalendarPage(),
+          settings: settings,
+        );
+      case '/appLimitsPage':
+        return MaterialPageRoute(
+          builder: (context) => AppLimitsPage(),
+          settings: settings,
+        );
+      default:
+        return MaterialPageRoute(builder: (_) => const HomePage());
+      }
+    }
   }
 
   ///*********************************
@@ -175,7 +240,7 @@ class ProcrastiHater extends StatelessWidget {
   /// navigation and swiping animation for
   /// main pages of the app
   ///*********************************
-  static Route createSwipingRoute(Widget page, Offset beginOffset) {
+  Route createSwipingRoute(Widget page, Offset beginOffset) {
     return PageRouteBuilder(
         //Navigation for the page param
         pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -200,9 +265,10 @@ class ProcrastiHater extends StatelessWidget {
               child: child,
             ),
           );
-        });
+        }
+      );
   }
-}
+
 
 ///**************************************************
 /// Name: _updateUserRef
@@ -217,6 +283,22 @@ void updateUserRef() {
   //Update user reference if UID has changed
   if (curUid != uid) {
     userRef = mainCollection.doc(uid);
+  }
+}
+
+///*********************************
+/// Name: _checkSTPermission
+///
+/// Description: Invokes method from platform channel
+/// to check for screetime usage permissions
+///*********************************
+Future<void> _checkSTPermission() async {
+  try {
+    final bool _hasPermission =
+        await platformChannel.invokeMethod('checkScreenTimePermission');
+    hasPermission = _hasPermission;
+  } on PlatformException catch (e) {
+    debugPrint("Failed to check permission: ${e.message}");
   }
 }
 
@@ -330,22 +412,6 @@ Future<void> _currentToHistorical() async {
     }
   } else {
     debugPrint('No data needed to be written to history');
-  }
-}
-
-///*********************************
-/// Name: _checkSTPermission
-///
-/// Description: Invokes method from platform channel
-/// to check for screetime usage permissions
-///*********************************
-Future<void> _checkSTPermission() async {
-  try {
-    final bool _hasPermission =
-        await platformChannel.invokeMethod('checkScreenTimePermission');
-    hasPermission = _hasPermission;
-  } on PlatformException catch (e) {
-    debugPrint("Failed to check permission: ${e.message}");
   }
 }
 

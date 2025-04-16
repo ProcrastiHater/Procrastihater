@@ -40,31 +40,99 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
-          Navigator.pushReplacementNamed(context, '/leaderBoardPageBack');
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(showFriendsLeaderboard
-              ? "Friends Leaderboard"
-              : "Global Leaderboard"),
-          automaticallyImplyLeading: false,
-          actions: [
-            Icon(showFriendsLeaderboard ? Icons.group : Icons.public),
-            Switch(
-              value: showFriendsLeaderboard,
-              onChanged: (value) {
-                setState(() {
-                  showFriendsLeaderboard = value;
-                });
-              },
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+            Navigator.pushReplacementNamed(context, '/leaderBoardPageBack');
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("ProcrastiBoards"),
+            actions: [
+              // Creating little user icon you can press to view account info
+              IconButton(
+                icon: CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    // Use user's pfp as icon image if there is no pfp use this link as a default
+                    auth.currentUser?.photoURL ??
+                        'https://picsum.photos/id/237/200/300',
+                  ),
+                ),
+                onPressed: () async {
+                  await Navigator.pushNamed(context, "/profileSettings");
+                  // Reload the user in case anything changed
+                  await auth.currentUser?.reload();
+                  // Reload UI in case things changed
+                  setState(() {});
+                },
+              )
+            ],
+            bottom: AppBar(
+              title: Text(showFriendsLeaderboard
+                  ? "Friends Leaderboard"
+                  : "Global Leaderboard"),
+              automaticallyImplyLeading: false,
+              actions: [
+                Icon(showFriendsLeaderboard ? Icons.group : Icons.public),
+                Switch(
+                  value: showFriendsLeaderboard,
+                  onChanged: (value) {
+                    setState(() {
+                      showFriendsLeaderboard = value;
+                    });
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-        body: Column(
-          children: [
+          ),
+          drawer: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                SizedBox(
+                  height: 80,
+                  child: DrawerHeader(
+                      decoration: BoxDecoration(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12.0),
+                            child: Image.asset("assets/logo.jpg"),
+                          ),
+                          Text(
+                            "ProcrastiTools",
+                          ),
+                        ],
+                      )),
+                ),
+                ListTile(
+                  trailing: Icon(Icons.calendar_today),
+                  title: Text("Calendar"),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/calendarPage');
+                  },
+                ),
+                // const Divider(),
+                ListTile(
+                  trailing: Icon(Icons.school),
+                  title: Text("Study Mode"),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/studyModePage');
+                  },
+                ),
+                //const Divider(),
+                ListTile(
+                  trailing: Icon(Icons.alarm),
+                  title: Text("App Limits"),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/appLimitsPage');
+                  },
+                )
+              ],
+            ),
+          ),
+          body: Column(children: [
             Expanded(
               child: FutureBuilder<DocumentSnapshot>(
                 future: firestore.collection('UID').doc(currentUserId).get(),
@@ -72,10 +140,12 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                   if (!userSnapshot.hasData) {
                     return const Center(child: CircularProgressIndicator());
                   }
+
                   var userData =
                       userSnapshot.data!.data() as Map<String, dynamic>;
                   List<String> friends =
                       List<String>.from(userData['friends'] ?? []);
+
                   return StreamBuilder<QuerySnapshot>(
                     stream: showFriendsLeaderboard
                         ? firestore.collection('UID').where(
@@ -86,6 +156,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                       if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator());
                       }
+
                       var users = snapshot.data!.docs.map((doc) {
                         var data = doc.data() as Map<String, dynamic>;
                         return {
@@ -96,8 +167,10 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                               (data['totalDailyHours'] ?? 0.0) as num,
                         };
                       }).toList();
+
                       users.sort((a, b) => (b['totalDailyHours'] as num)
                           .compareTo(a['totalDailyHours'] as num));
+
                       return ListView.builder(
                         itemCount: users.length,
                         itemBuilder: (context, index) {
@@ -109,7 +182,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                             title: Text(user['displayName']),
                             subtitle: Text(
                               'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
-                              style: const TextStyle(color: Colors.grey),
+                              //style: const TextStyle(color: Colors.grey),
                             ),
                             trailing: Text("${index + 1}"),
                           );
@@ -121,7 +194,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Center(
                 child: SmoothPageIndicator(
                   controller:
@@ -138,9 +211,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
               ),
             ),
             Container(height: 16),
-          ],
-        ),
-      ),
-    );
+          ]),
+        ));
   }
 }
