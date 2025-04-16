@@ -250,7 +250,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            color: Colors.indigo.shade100,
             child: Center(
               child: SmoothPageIndicator(
                 controller: PageController(initialPage: 1), // Dummy controller
@@ -265,7 +264,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-          Container(height: 16, color: Colors.indigo.shade100),
+          Container(height: 16),
         ],
       ),
     );

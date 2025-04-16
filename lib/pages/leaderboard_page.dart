@@ -124,8 +124,8 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Center(
                 child: SmoothPageIndicator(
-                  controller: PageController(
-                      initialPage: 2), // Dummy controller, will never be used
+                  controller:
+                      PageController(initialPage: 2), // Dummy controller
                   count: 3,
                   effect: WormEffect(
                     activeDotColor: Colors.indigo,
