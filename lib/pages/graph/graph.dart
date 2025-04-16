@@ -147,15 +147,28 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
 
   @override
   Widget build(BuildContext context) {
+    double? screenWidth = MediaQuery.of(context).size.width;
+    double? screenHeight = MediaQuery.of(context).size.height;
     if (weekData.isEmpty) {
       return Center(child: CircularProgressIndicator());
     }
     return Padding(
-      padding: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(4.0),
       child: Column(
         children: [
-          const SizedBox(height: 60),
           CustomDropdown.multiSelectSearch(
+            decoration: CustomDropdownDecoration(
+                    closedFillColor: lightBlue,
+                    expandedFillColor: lightBlue,
+                    searchFieldDecoration: SearchFieldDecoration(
+                      textStyle: TextStyle(color: lightBeige),
+                      fillColor: darkBlue,
+                    ),
+                    listItemDecoration: ListItemDecoration(
+                      highlightColor: darkBlue,
+                      selectedColor: darkBlue,
+                    ),
+                  ),
             closedHeaderPadding: EdgeInsets.all(8.0),
             expandedHeaderPadding: EdgeInsets.all(8.0),
             items: appNameToColor.keys.toList(), 
@@ -182,6 +195,14 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
             children: [
               Expanded(
                 child: CustomDropdown.multiSelect(
+                  decoration: CustomDropdownDecoration(
+                    closedFillColor: lightBlue,
+                    expandedFillColor: lightBlue,
+                      listItemDecoration: ListItemDecoration(
+                      highlightColor: darkBlue,
+                      selectedColor: darkBlue,
+                    )
+                  ),
                   items: categories, 
                   overlayHeight: 525,
                   closedHeaderPadding: EdgeInsets.all(8.0),
@@ -207,6 +228,14 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
               ),
               Expanded(
                 child: CustomDropdown(
+                  decoration: CustomDropdownDecoration(
+                    closedFillColor: lightBlue,
+                    expandedFillColor: lightBlue,
+                    listItemDecoration: ListItemDecoration(
+                      highlightColor: darkBlue,
+                      selectedColor: darkBlue,
+                    ),
+                  ),
                   closedHeaderPadding: EdgeInsets.all(8.0),
                   expandedHeaderPadding: EdgeInsets.all(8.0),
                   items: filters, 
@@ -232,28 +261,33 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
             ],
           ),
           //Graph Title
-          Text("Weekly Graph", style: TextStyle(fontSize: 18),),
+          Text("Historical Phone Usage", style: TextStyle(fontSize: 18),),
           Expanded(
-            child: BarChart(
+            child: SizedBox(
+              width: screenWidth - (screenWidth * 0.05),
+              child: BarChart(
               BarChartData(
-                alignment: BarChartAlignment.center,
+                maxY: tallestDayBar(weekData),
+                groupsSpace: 60,
+                alignment: BarChartAlignment.spaceAround,
+                backgroundColor: lightBlue,
                 //Title Widgets
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
-                      maxIncluded: false,
+                      maxIncluded: true,
                       showTitles: true,
                       interval: 1,
-                      reservedSize: 25,
+                      reservedSize: 20,
                       getTitlesWidget: sideTitles,
                     )
                   ),
                   rightTitles: AxisTitles(
                     sideTitles: SideTitles(
-                      maxIncluded: false,
+                      maxIncluded: true,
                       showTitles: true,
                       interval: 1,
-                      reservedSize: 25,
+                      reservedSize: 20,
                       getTitlesWidget: sideTitles,
                     )
                   ),
@@ -267,21 +301,26 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   ),
                 ),
                 //Style Widgets
-                backgroundColor: Colors.white,
-                borderData: FlBorderData(show: true),
+                borderData: FlBorderData(
+                  border: Border.all(
+                    color: beige,
+                    width: 2,
+                  ),
+                  show: true
+                ),
                 gridData: FlGridData(
-                  drawVerticalLine: false,
-                  show: true,
+                  show: false,
                 ),
                 //Functionality Widgets
                 barTouchData: loadTouch(weekData),
                 barGroups: generateWeeklyChart(weekData),
               )
-            )
+            ),
+            ),
           ),
           Row(
             //Equal spacing between children
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               //Previous arrow button
               IconButton(
@@ -358,16 +397,21 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   List<String> selectedCategories = [];
   Map<String, Map<String, String>> dailyData = {};
   String? selectedFilter = "";
+  double totalDaily = 0;
+  int points = 0;
 
   @override
   //Initialize colors making sure all apps are mapped to a color before displaying
   void initState() {
     super.initState();
-    dailyData = screenTimeData;
     _initializeData();
+    dailyData = screenTimeData;
   }
 
   Future<void> _initializeData() async {
+    totalDaily = await fetchTotalDayScreentime();
+    points = await fetchPoints();
+    if (!mounted) return;
     setState(() {
       availableApps = screenTimeData.keys.toList();
     });
@@ -415,20 +459,28 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   }
   @override
   Widget build(BuildContext context) {
-    //Display loading screen if data is not present
-    /*if (screenTimeData.isEmpty) {
-      return Center(child: Text("No data recorded"));
-    }*/
+    double? screenWidth = MediaQuery.of(context).size.width;
+    double? screenHeight = MediaQuery.of(context).size.height;
+    if (dailyData.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    }
     return Padding(
-      padding: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(4.0),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const SizedBox(height: 60),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: CustomDropdown.multiSelect(
+                  decoration: CustomDropdownDecoration(
+                    closedFillColor: lightBlue,
+                    expandedFillColor: lightBlue,
+                    listItemDecoration: ListItemDecoration(
+                      highlightColor: darkBlue,
+                      selectedColor: darkBlue,
+                    ),
+                  ),
                   items: categories, 
                   overlayHeight: 525,
                   closedHeaderPadding: EdgeInsets.all(8.0),
@@ -464,6 +516,14 @@ class _DailyGraphViewState extends State<DailyGraphView> {
               ),
               Expanded(
                 child: CustomDropdown(
+                   decoration: CustomDropdownDecoration(
+                    closedFillColor: lightBlue,
+                    expandedFillColor: lightBlue,
+                    listItemDecoration: ListItemDecoration(
+                      highlightColor: darkBlue,
+                      selectedColor: darkBlue,
+                    ),
+                  ),
                   closedHeaderPadding: EdgeInsets.all(8.0),
                   expandedHeaderPadding: EdgeInsets.all(8.0),
                   items: filters, 
@@ -489,38 +549,40 @@ class _DailyGraphViewState extends State<DailyGraphView> {
             ],
           ),
           //Title for graph
-          Text("Daily Graph", style: TextStyle(fontSize: 18),),
+          Text("Current Phone Usage", style: TextStyle(fontSize: 18),),
           Expanded(
             //Widget to allow scrolling of graph if it overflows the screen
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 //Sets a minimum size for graph
-                constraints: BoxConstraints(minWidth: 390),
+                constraints: BoxConstraints(minWidth: screenWidth - (screenWidth * 0.05)),
                 child: SizedBox(
                   //Dynamically size graph based on amount of apps
                   width: 100 + availableApps.length * 70,
                   child: BarChart(
                     BarChartData(
+                      maxY: tallestAppBar(dailyData),
                       groupsSpace: 60,
-                      alignment: BarChartAlignment.center,
+                      alignment: BarChartAlignment.spaceAround,
+                      backgroundColor: lightBlue,
                       //Title Widgets
                       titlesData: FlTitlesData(
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
-                            maxIncluded: false,
+                            maxIncluded: true,
                             showTitles: true,
                             interval: 1,
-                            reservedSize: 25,
+                            reservedSize: 20,
                             getTitlesWidget: sideTitles,
                           )
                         ),
                         rightTitles: AxisTitles(
                           sideTitles: SideTitles(
-                            maxIncluded: false,
+                            maxIncluded: true,
                             showTitles: true,
                             interval: 1,
-                            reservedSize: 25,
+                            reservedSize: 20,
                             getTitlesWidget: sideTitles,
                           )
                         ),
@@ -529,16 +591,20 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                           sideTitles: SideTitles(
                             showTitles: true,
                             getTitlesWidget: bottomAppTitles,
-                            reservedSize: 60,
+                            reservedSize: 25,
                           )
                         ),
                       ),
                       //Style Widgets
-                      backgroundColor: Colors.white,
-                      borderData: FlBorderData(show: true),
+                      borderData: FlBorderData(
+                        border: Border.all(
+                          color: beige,
+                          width: 2,
+                        ),
+                        show: true
+                        ),
                       gridData: FlGridData(
-                        drawVerticalLine: false,
-                        show: true,
+                        show: false,
                       ),
                       //Functionality Widgets
                       barTouchData: loadTouch(dailyData),
@@ -549,6 +615,8 @@ class _DailyGraphViewState extends State<DailyGraphView> {
               )
             ),
           ),
+          Text("Today's Procrastination Total:",),
+          Text("Hours: $totalDaily | Points: $points"),
         ],
       )
     );
