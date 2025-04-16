@@ -118,13 +118,11 @@ class ProcrastiHater extends StatelessWidget {
           
           // If user is null (signed out), show login screen
           if (snapshot.data == null) {
-            print("User is null, showing LoginScreen");
             return const LoginScreen();
           }
           
           // If user is authenticated, initialize app data and show home page
           initializeMain();
-           print("User authenticated, showing HomePage");
           return const HomePage();
         },
       ),
