@@ -253,7 +253,7 @@ class _FriendsListState extends State<FriendsList>
                     count: 3,
                     effect: WormEffect(
                       activeDotColor: Color.fromARGB(255, 249, 207, 135),
-                      dotColor: lightBeige,
+                      dotColor: beige,
                       dotHeight: 8,
                       dotWidth: 8,
                       spacing: 12,
