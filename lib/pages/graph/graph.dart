@@ -68,6 +68,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
 
   Future<void> initWeeklyData() async {
     await fetchWeeklyScreenTime();
+    if (!mounted) return;
     setState(() {
       weekData = weeklyData;
       availableDays = weekData.keys.toList();
@@ -461,9 +462,9 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   Widget build(BuildContext context) {
     double? screenWidth = MediaQuery.of(context).size.width;
     double? screenHeight = MediaQuery.of(context).size.height;
-    if (dailyData.isEmpty) {
+    /*if (dailyData.isEmpty) {
       return Center(child: CircularProgressIndicator());
-    }
+    }*/
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: Column(
