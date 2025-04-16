@@ -85,22 +85,6 @@ Future<void> initializeMain() async {
     await generateAppsList();
     await initializeAppNameColorMapping();
     await _writeScreenTimeData();
-  /*_currentToHistorical().whenComplete(() {
-    _checkSTPermission().whenComplete((){
-      _getScreenTime().whenComplete((){
-        getAvailableWeeks().whenComplete((){
-          fetchWeeklyScreenTime().whenComplete((){
-            generateAppsList().whenComplete(() {
-              initializeAppNameColorMapping().whenComplete((){
-                _writeScreenTimeData();
-                //Launches login screen first which returns ProcrasiHater app if success
-              });
-            });
-          });
-        }); 
-      });
-    });
-  });*/
  }
 }
 
