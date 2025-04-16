@@ -103,22 +103,29 @@ class ProcrastiHater extends StatelessWidget {
 
   @override
   //Main material app for app
-   Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return MaterialApp(
-      home: FutureBuilder(
-        future: initializeMain(),
+      home: StreamBuilder<User?>(
+        // Listen to auth state changes instead of using a FutureBuilder
+        stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
+          // Show loading indicator while connecting to Firebase
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
           }
-
-          if (FirebaseAuth.instance.currentUser == null) {
-            return const LoginScreen(); // Still unauthenticated
+          
+          // If user is null (signed out), show login screen
+          if (snapshot.data == null) {
+            print("User is null, showing LoginScreen");
+            return const LoginScreen();
           }
-
-          return const HomePage(); // Authenticated
+          
+          // If user is authenticated, initialize app data and show home page
+          initializeMain();
+           print("User authenticated, showing HomePage");
+          return const HomePage();
         },
       ),
       onGenerateRoute: _generateRoutes,

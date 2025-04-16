@@ -98,7 +98,8 @@ class ProfileSettingsState extends State<ProfileSettings> {
 /// to login screen
 ///***************************************************
   Future<void> _signOut() async {
-    await _auth.signOut();
+   // await _auth.signOut();
+    await FirebaseAuth.instance.signOut();
     // Go back to the previous screen
     Navigator.of(context).pop(); 
   }
