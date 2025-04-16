@@ -16,11 +16,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-const Color darkBlue = Color.fromRGBO(10, 29, 55, 1);
-const Color lighterDarkBlue = Color.fromRGBO(12, 36, 68, 1);
-const Color beige = Color.fromARGB(255, 229, 214, 160);
-const Color lighterBeige = Color.fromARGB(255, 208, 196, 153);
-
 ///*********************************
 /// Name: HistoricalDataPage
 ///
@@ -47,10 +42,8 @@ class FriendsPage extends StatelessWidget {
           automaticallyImplyLeading: false,
           title: const Text(
             "ProcrastiFriends",
-            style: TextStyle(color: Color.fromARGB(255, 241, 228, 178)),
           ),
           centerTitle: true,
-          backgroundColor: darkBlue,
         ),
         body: FriendsList(),
       ),
@@ -112,7 +105,6 @@ class _FriendsListState extends State<FriendsList> with TickerProviderStateMixin
           }
         },
         child: Scaffold(
-          backgroundColor: darkBlue,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(50),
               child: TabBar(
@@ -198,7 +190,6 @@ class _FriendsListState extends State<FriendsList> with TickerProviderStateMixin
                                 friendData['totalDailyHours'] ?? 0.0;
 
                             return Card(
-                              color: lighterDarkBlue,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
@@ -211,11 +202,9 @@ class _FriendsListState extends State<FriendsList> with TickerProviderStateMixin
                                 ),
                                 title: Text(
                                   displayName,
-                                  style: TextStyle(color: beige),
                                 ),
                                 subtitle: Text(
                                   'Daily Hours: ${totalDailyHours.toStringAsFixed(2)}',
-                                  style: TextStyle(color: lighterBeige),
                                 ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -265,12 +254,9 @@ class PokeNotificationsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: beige),
         title: const Text(
           'Poke Notifications',
-          style: TextStyle(color: beige),
         ),
-        backgroundColor: darkBlue,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: firestore
@@ -288,12 +274,10 @@ class PokeNotificationsPage extends StatelessWidget {
             return const Center(
                 child: Text(
               'No pokes yet!',
-              style: TextStyle(color: beige),
             ));
           }
 
           return Container(
-            color: darkBlue, 
             child: ListView.builder(
               itemCount: pokes.length,
               itemBuilder: (context, index) {
@@ -314,20 +298,16 @@ class PokeNotificationsPage extends StatelessWidget {
                         userData['pfp'] ?? 'https://picsum.photos/200';
 
                     return ListTile(
-                      tileColor:
-                          darkBlue, 
                       leading: CircleAvatar(
                           backgroundImage: NetworkImage(profilePic)),
                       title: Text(
                         displayName,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: beige,
                         ),
                       ),
                       subtitle: const Text(
                         'poked you!',
-                        style: TextStyle(color: lighterBeige),
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.clear, color: Colors.red),
