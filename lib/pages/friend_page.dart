@@ -235,7 +235,7 @@ void _pokeFriend(String friendUID) async {
                                     title: Text("Delete Friend"),
                                     content: Text("Are you sure you want to delete $displayName from your friends list?"),
                                     actions: [
-                                      TextButton(
+                                      ElevatedButton(
                                         onPressed: (){
                                           _deleteFriend(friendUID); //Actually deletes friend
                                           Navigator.pop(alertContext, "Yes");

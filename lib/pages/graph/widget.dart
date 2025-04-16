@@ -41,7 +41,6 @@ List<BarChartGroupData> generateWeeklyChart(Map<String, Map<String, Map<String, 
       generatedWeeklyGroupData(i, data[availableDays[i]]!)
   ]; 
 }
- 
 
 double tallestDayBar(Map<String, Map<String, Map<String, dynamic>>> data) {
   double tallestHeight = 0;
@@ -55,8 +54,15 @@ double tallestDayBar(Map<String, Map<String, Map<String, dynamic>>> data) {
       tallestHeight = dayHeight;
     }
   }
+  if (tallestHeight - tallestHeight.floor() > .5  || tallestHeight - tallestHeight.floor() == 0){
+    tallestHeight = (tallestHeight + 1).ceilToDouble();
+  }
+  else{
+    tallestHeight = tallestHeight.ceilToDouble();
+  }
   return tallestHeight;
 }
+
 
 ///*********************************
 /// Name: generatedWeeklyGroupData
@@ -121,6 +127,12 @@ double tallestAppBar(Map<String, Map<String, dynamic>> data) {
     {
       tallestHeight = double.parse(appData['hours'] ?? 0.0);
     }
+  }
+    if (tallestHeight - tallestHeight.floor() > .5  || tallestHeight - tallestHeight.floor() == 0){
+    tallestHeight = (tallestHeight + 1).ceilToDouble();
+  }
+  else{
+    tallestHeight = tallestHeight.ceilToDouble();
   }
   return tallestHeight;
 }

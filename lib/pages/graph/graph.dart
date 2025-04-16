@@ -267,7 +267,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
               width: screenWidth - (screenWidth * 0.05),
               child: BarChart(
               BarChartData(
-                maxY: tallestDayBar(weekData).ceilToDouble(),
+                maxY: tallestDayBar(weekData),
                 groupsSpace: 60,
                 alignment: BarChartAlignment.spaceAround,
                 backgroundColor: lightBlue,
@@ -462,7 +462,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
     double? screenWidth = MediaQuery.of(context).size.width;
     double? screenHeight = MediaQuery.of(context).size.height;
     return Padding(
-      padding: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(4.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -559,7 +559,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                   width: 100 + availableApps.length * 70,
                   child: BarChart(
                     BarChartData(
-                      maxY: tallestAppBar(dailyData).ceilToDouble(),
+                      maxY: tallestAppBar(dailyData),
                       groupsSpace: 60,
                       alignment: BarChartAlignment.spaceAround,
                       backgroundColor: lightBlue,

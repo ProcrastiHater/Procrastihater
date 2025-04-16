@@ -162,8 +162,9 @@ class ProcrastiHater extends StatelessWidget {
           color: lightBlue,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        drawerTheme: DrawerThemeData(
-
+        dialogTheme: DialogThemeData(
+          backgroundColor: darkBlue,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
       //Main route of the app

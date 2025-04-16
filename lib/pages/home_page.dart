@@ -160,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pushNamed(context, '/calendarPage');
               },
             ),
-            const Divider(),
+            const Divider(height: 1, color: lightBeige,),
             ListTile(
               trailing: Icon(Icons.school),
               title: Text("Study Mode"),
@@ -168,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pushNamed(context, '/studyModePage');
               },
             ),
-            const Divider(),
+            const Divider(height: 1, color: lightBeige,),
             ListTile(
               trailing: Icon(Icons.alarm),
               title: Text("App Limits"),
