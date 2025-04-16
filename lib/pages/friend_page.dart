@@ -6,6 +6,9 @@
 ///*******************************
 library;
 
+//smooth_page_indicator imports
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 //Dart Imports
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -15,6 +18,9 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+//Page imports
+import '/main.dart';
 
 ///*********************************
 /// Name: HistoricalDataPage
@@ -65,7 +71,8 @@ class FriendsList extends StatefulWidget {
   State<FriendsList> createState() => _FriendsListState();
 }
 
-class _FriendsListState extends State<FriendsList> with TickerProviderStateMixin {
+class _FriendsListState extends State<FriendsList>
+    with TickerProviderStateMixin {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -107,46 +114,53 @@ class _FriendsListState extends State<FriendsList> with TickerProviderStateMixin
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(50),
-              child: TabBar(
-                tabs: const [
-                  Tab(icon: Icon(Icons.person_add_alt_1_sharp), text: 'Add Friends'),
-                  Tab(icon: Icon(Icons.waving_hand), text: 'Pokes'),
-                  Tab(icon: Icon(Icons.person_pin_rounded), text: 'Friend Requests'),
-                ],
-                onTap: (index) {
-                  if (index == 1) {
-                    showModalBottomSheet(
-                      context: context,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            child: TabBar(
+              tabs: const [
+                Tab(
+                    icon: Icon(Icons.person_add_alt_1_sharp),
+                    text: 'Add Friends'),
+                Tab(icon: Icon(Icons.waving_hand), text: 'Pokes'),
+                Tab(
+                    icon: Icon(Icons.person_pin_rounded),
+                    text: 'Friend Requests'),
+              ],
+              onTap: (index) {
+                if (index == 1) {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => const PokeNotificationsPage(),
+                  );
+                } else if (index == 0) {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => Padding(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom,
                       ),
-                      builder: (context) => const PokeNotificationsPage(),
-                    );
-                  } else if (index == 0) {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                      ),
-                      builder: (context) => Padding(
-                        padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom,
-                        ),
-                        child: ShowAddFriendsSheet(),
-                      ),
-                    );
-                  } else if (index == 2) {
-                    showModalBottomSheet(
-                      context: context,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                      ),
-                      builder: (context) => FriendRequestsSheet(),
-                    );
-                  }
-                },
-              ),
+                      child: ShowAddFriendsSheet(),
+                    ),
+                  );
+                } else if (index == 2) {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => FriendRequestsSheet(),
+                  );
+                }
+              },
+            ),
           ),
           body: Column(
             children: [
@@ -230,6 +244,25 @@ class _FriendsListState extends State<FriendsList> with TickerProviderStateMixin
                   },
                 ),
               ),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Center(
+                  child: SmoothPageIndicator(
+                    controller:
+                        PageController(initialPage: 0), // Dummy controller
+                    count: 3,
+                    effect: WormEffect(
+                      paintStyle: PaintingStyle.stroke,
+                      activeDotColor: beige,
+                      dotColor: lightBeige,
+                      dotHeight: 8,
+                      dotWidth: 8,
+                      spacing: 12,
+                    ),
+                  ),
+                ),
+              ),
+              Container(height: 16),
             ],
           ),
         ),
