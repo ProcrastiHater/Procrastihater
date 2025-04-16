@@ -147,6 +147,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
 
   @override
   Widget build(BuildContext context) {
+    double? screenWidth = MediaQuery.of(context).size.width;
+    double? screenHeight = MediaQuery.of(context).size.height;
     if (weekData.isEmpty) {
       return Center(child: CircularProgressIndicator());
     }
@@ -261,9 +263,11 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
           //Graph Title
           Text("Historical Phone Usage", style: TextStyle(fontSize: 18),),
           Expanded(
-            child: BarChart(
+            child: SizedBox(
+              width: screenWidth - (screenWidth * 0.05),
+              child: BarChart(
               BarChartData(
-                maxY: tallestDayBar(weekData) + 1,
+                maxY: tallestDayBar(weekData).ceilToDouble(),
                 groupsSpace: 60,
                 alignment: BarChartAlignment.spaceAround,
                 backgroundColor: lightBlue,
@@ -271,7 +275,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
-                      maxIncluded: false,
+                      maxIncluded: true,
                       showTitles: true,
                       interval: 1,
                       reservedSize: 20,
@@ -280,10 +284,10 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   ),
                   rightTitles: AxisTitles(
                     sideTitles: SideTitles(
-                      maxIncluded: false,
+                      maxIncluded: true,
                       showTitles: true,
                       interval: 1,
-                      reservedSize: 25,
+                      reservedSize: 20,
                       getTitlesWidget: sideTitles,
                     )
                   ),
@@ -311,7 +315,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                 barTouchData: loadTouch(weekData),
                 barGroups: generateWeeklyChart(weekData),
               )
-            )
+            ),
+            ),
           ),
           Row(
             //Equal spacing between children
@@ -406,6 +411,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   Future<void> _initializeData() async {
     totalDaily = await fetchTotalDayScreentime();
     points = await fetchPoints();
+    if (!mounted) return;
     setState(() {
       availableApps = screenTimeData.keys.toList();
     });
@@ -540,20 +546,20 @@ class _DailyGraphViewState extends State<DailyGraphView> {
             ],
           ),
           //Title for graph
-          Text("Current Phone Usage", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+          Text("Current Phone Usage", style: TextStyle(fontSize: 18),),
           Expanded(
             //Widget to allow scrolling of graph if it overflows the screen
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 //Sets a minimum size for graph
-                constraints: BoxConstraints(minWidth: screenWidth - (screenWidth * 0.075)),
+                constraints: BoxConstraints(minWidth: screenWidth - (screenWidth * 0.05)),
                 child: SizedBox(
                   //Dynamically size graph based on amount of apps
                   width: 100 + availableApps.length * 70,
                   child: BarChart(
                     BarChartData(
-                      maxY: tallestAppBar(dailyData) + 1,
+                      maxY: tallestAppBar(dailyData).ceilToDouble(),
                       groupsSpace: 60,
                       alignment: BarChartAlignment.spaceAround,
                       backgroundColor: lightBlue,
@@ -561,19 +567,19 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                       titlesData: FlTitlesData(
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
-                            maxIncluded: false,
+                            maxIncluded: true,
                             showTitles: true,
                             interval: 1,
-                            reservedSize: 25,
+                            reservedSize: 20,
                             getTitlesWidget: sideTitles,
                           )
                         ),
                         rightTitles: AxisTitles(
                           sideTitles: SideTitles(
-                            maxIncluded: false,
+                            maxIncluded: true,
                             showTitles: true,
                             interval: 1,
-                            reservedSize: 25,
+                            reservedSize: 20,
                             getTitlesWidget: sideTitles,
                           )
                         ),

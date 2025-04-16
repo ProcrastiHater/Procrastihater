@@ -52,8 +52,8 @@ String? uid = auth.currentUser?.uid;
 //Reference to user's document in Firestore
 DocumentReference userRef = mainCollection.doc(uid);
 
-const Color darkBlue = Color.fromRGBO(10, 29, 55, 1);
-const Color lightBlue = Color.fromRGBO(12, 36, 68, 1);
+const Color darkBlue = Color.fromRGBO(10, 27, 46, 1);
+const Color lightBlue = Color.fromRGBO(14, 40, 77, 1);
 const Color beige = Color.fromARGB(255, 229, 214, 160);
 const Color lightBeige = Color.fromARGB(255, 208, 196, 153);
 

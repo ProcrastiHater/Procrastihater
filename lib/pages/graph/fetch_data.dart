@@ -113,18 +113,18 @@ Future<void> fetchWeeklyScreenTime() async {
 }
 
 Future<double> fetchTotalDayScreentime() async {
-   //Update the reference to the user doc before accessing
-  updateUserRef();
-  //Variable for scoping into the users appUsageHistory collection
-  final current = await userRef.get();
-  double totalDaily = current['totalDailyHours'];  
-  return totalDaily;
+  final dailyScreenTime = (await FirebaseFirestore.instance
+    .collection('UID')
+    .doc(userRef.id)
+    .get())
+    .get('totalDailyHours') as double;
+    return dailyScreenTime;
 }
 Future<int> fetchPoints() async {
-   //Update the reference to the user doc before accessing
-  updateUserRef();
-  //Variable for scoping into the users appUsageHistory collection
-  final current = await userRef.get();
-  int points = current['points'];  
-  return points;
+  final points = (await FirebaseFirestore.instance
+    .collection('UID')
+    .doc(userRef.id)
+    .get())
+    .get('points') as int;
+    return points;
 }

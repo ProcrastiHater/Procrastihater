@@ -192,6 +192,15 @@ BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function
 BarTouchData getBarWeekTouch(Map<String, Map<String, Map<String, dynamic>>> data, void Function(String) onDaySelected) {
 return BarTouchData(
     enabled: true,
+    touchExtraThreshold: const EdgeInsets.only(top: 300),
+    //Reads touch and updates the selectedDay to load list view
+    touchCallback: (event, response){
+      if (response != null && response.spot != null) {
+        int dayIndex = response.spot!.touchedBarGroupIndex;
+        String day = availableDays[dayIndex];
+        onDaySelected(day);
+      }
+    },
     //Loads app data on touch of specific bar
     touchTooltipData: BarTouchTooltipData(
       fitInsideHorizontally: true,

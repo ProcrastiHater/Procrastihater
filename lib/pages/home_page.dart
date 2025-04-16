@@ -57,7 +57,7 @@ class HomePage extends StatelessWidget {
           Navigator.pushReplacementNamed(context, '/friendsPage');
         }
       },
-      child: Container(padding: const EdgeInsets.all(4.0), child: MyHomePage())
+      child: Container(padding: const EdgeInsets.all(0.0), child: MyHomePage())
     );
   }
 }
@@ -207,37 +207,55 @@ class _MyHomePageState extends State<MyHomePage> {
                           color: graphIndex == 0? beige : null,
                           elevation: 3,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            icon: Icon(
-                              Icons.calendar_today_rounded,
-                              color: graphIndex == 0? lightBlue : null,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedBar = "null";
-                                graphIndex = 0;
-                              }); 
-                            },
-                          ), 
+                          child: InkWell(
+                            child: Padding(
+                              padding: EdgeInsets.all(5.0),
+                              child: Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                color: graphIndex == 0? lightBlue : lightBeige,
+                                size: screenHeight * 0.035,
+                              ),
+                              Text("  Daily  ", style: TextStyle(color: graphIndex == 0? darkBlue : null)),
+                            ],
+                          ),
+                            ), 
+                        
+                          onTap: () {
+                             setState(() {
+                              selectedBar = "null";
+                              graphIndex = 0;
+                            }); 
+                          },
+                          ),
                         ),
                         Card(
                           color: graphIndex == 1? beige : null,
                           elevation: 3,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            icon: Icon(
-                              Icons.calendar_view_week_rounded,
-                              color: graphIndex == 1? lightBlue : null,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                               selectedBar = "null";
-                                graphIndex = 1;
-                              }); 
-                            },
-                          ), 
+                          child: InkWell(
+                            child: Padding(
+                              padding: EdgeInsets.all(5.0),
+                              child: Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_view_week_rounded,
+                                color: graphIndex == 1? lightBlue : lightBeige,
+                                size: screenHeight * 0.035,
+                              ),
+                              Text("  Weekly  ", style: TextStyle(color: graphIndex == 1? darkBlue : null)),
+                            ],
+                          ),
+                            ), 
+                        
+                          onTap: () {
+                             setState(() {
+                              selectedBar = "null";
+                              graphIndex = 1;
+                            }); 
+                          },
+                          ),
                         ),
                       ],
                     ),
@@ -247,14 +265,10 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             )         
           ),
-          const SizedBox(height: 4.0),
           Expanded(
             flex: 7,
             //Container holding list view in bottom portion of screen
-            child: Container(
-              padding: const EdgeInsets.all(4.0),
-              child: ExpandedListView(dayFilteredData: dayData, weekFilteredData: weekData, selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
-            ),
+            child: ExpandedListView(dayFilteredData: dayData, weekFilteredData: weekData, selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
           ),
         ],
       ),
