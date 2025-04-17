@@ -15,6 +15,9 @@ import 'package:intl/intl.dart';
 //fl_chart imports
 import 'package:fl_chart/fl_chart.dart';
 
+//smooth_page_indicator imports
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,7 +34,6 @@ import '/pages/graph/fetch_data.dart';
 import '/pages/graph/widget.dart';
 import '/pages/graph/colors.dart';
 
-
 ///*********************************
 /// Name: HomePage
 ///
@@ -44,21 +46,21 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     //Wait for a gesture
     return GestureDetector(
-      //The user swipes horizontally
-      onHorizontalDragEnd: (details) {
-        //The user swipes from right to left
-        if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
-          //Load animation for leaderboard page
-          Navigator.pushReplacementNamed(context, '/leaderBoardPage');
-        }
-        //The user swipes from left to right
-        if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
-          //Load animation for friends page
-          Navigator.pushReplacementNamed(context, '/friendsPage');
-        }
-      },
-      child: Container(padding: const EdgeInsets.all(0.0), child: MyHomePage())
-    );
+        //The user swipes horizontally
+        onHorizontalDragEnd: (details) {
+          //The user swipes from right to left
+          if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
+            //Load animation for leaderboard page
+            Navigator.pushReplacementNamed(context, '/leaderBoardPage');
+          }
+          //The user swipes from left to right
+          if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
+            //Load animation for friends page
+            Navigator.pushReplacementNamed(context, '/friendsPage');
+          }
+        },
+        child:
+            Container(padding: const EdgeInsets.all(0.0), child: MyHomePage()));
   }
 }
 
@@ -96,12 +98,15 @@ class _MyHomePageState extends State<MyHomePage> {
       selectedBar = bar;
     });
   }
+
   void updateFilteredDayData(Map<String, Map<String, String>> data) {
     setState(() {
       dayData = data;
     });
   }
-  void updateFilteredWeekData(Map<String, Map<String, Map<String, dynamic>>> data) {
+
+  void updateFilteredWeekData(
+      Map<String, Map<String, Map<String, dynamic>>> data) {
     setState(() {
       weekData = data;
     });
@@ -121,7 +126,8 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: CircleAvatar(
               backgroundImage: NetworkImage(
                 // Use user's pfp as icon image if there is no pfp use this link as a default
-                auth.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
+                auth.currentUser?.photoURL ??
+                    'https://picsum.photos/id/237/200/300',
               ),
             ),
             onPressed: () async {
@@ -141,26 +147,30 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: screenHeight * .15,
               child: DrawerHeader(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("ProcrastiTools",),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12.0),
-                      child: Image.asset("assets/logo.jpg"),
-                    ),
-                  ],
-                )
-              ),
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "ProcrastiTools",
+                  ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: Image.asset("assets/logo.jpg"),
+                  ),
+                ],
+              )),
             ),
             ListTile(
               trailing: Icon(Icons.calendar_today),
               title: Text("Calendar"),
-              onTap:() {
+              onTap: () {
                 Navigator.pushNamed(context, '/calendarPage');
               },
             ),
-            const Divider(height: 1, color: lightBeige,),
+            const Divider(
+              height: 1,
+              color: lightBeige,
+            ),
             ListTile(
               trailing: Icon(Icons.school),
               title: Text("Study Mode"),
@@ -168,7 +178,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pushNamed(context, '/studyModePage');
               },
             ),
-            const Divider(height: 1, color: lightBeige,),
+            const Divider(
+              height: 1,
+              color: lightBeige,
+            ),
             ListTile(
               trailing: Icon(Icons.alarm),
               title: Text("App Limits"),
@@ -180,96 +193,142 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       body: Column(
-        children: [ 
+        children: [
           Expanded(
-            flex: 13,
-            //Container holding graph in top portion of screen
-            child: Scaffold(
-              body: [
-                //Daily Graph
-                Container(
-                  child: DailyGraphView(onFilteredData: updateFilteredDayData, onBarSelected: updateSelectedBar),
-                ),
-                //Weekly Graph
-                Container(
-                  child: WeeklyGraphView(onFilteredData: updateFilteredWeekData, onBarSelected: updateSelectedBar),
-                ),
-              ][graphIndex],
-              bottomNavigationBar: Container(
-                height: 72,
-                child: Column(
-                  children: [
-                    Container(color: beige, height: 2,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Card(
-                          color: graphIndex == 0? beige : null,
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                          child: InkWell(
-                            child: Padding(
-                              padding: EdgeInsets.all(5.0),
-                              child: Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_today_rounded,
-                                color: graphIndex == 0? lightBlue : lightBeige,
-                                size: screenHeight * 0.035,
+              flex: 13,
+              //Container holding graph in top portion of screen
+              child: Scaffold(
+                body: [
+                  //Daily Graph
+                  Container(
+                    child: DailyGraphView(
+                        onFilteredData: updateFilteredDayData,
+                        onBarSelected: updateSelectedBar),
+                  ),
+                  //Weekly Graph
+                  Container(
+                    child: WeeklyGraphView(
+                        onFilteredData: updateFilteredWeekData,
+                        onBarSelected: updateSelectedBar),
+                  ),
+                ][graphIndex],
+                bottomNavigationBar: Container(
+                  height: 72,
+                  child: Column(
+                    children: [
+                      Container(
+                        color: beige,
+                        height: 2,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Card(
+                            color: graphIndex == 0 ? beige : null,
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0))),
+                            child: InkWell(
+                              child: Padding(
+                                padding: EdgeInsets.all(5.0),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today_rounded,
+                                      color: graphIndex == 0
+                                          ? lightBlue
+                                          : lightBeige,
+                                      size: screenHeight * 0.035,
+                                    ),
+                                    Text("  Daily  ",
+                                        style: TextStyle(
+                                            color: graphIndex == 0
+                                                ? darkBlue
+                                                : null)),
+                                  ],
+                                ),
                               ),
-                              Text("  Daily  ", style: TextStyle(color: graphIndex == 0? darkBlue : null)),
-                            ],
+                              onTap: () {
+                                setState(() {
+                                  selectedBar = "null";
+                                  graphIndex = 0;
+                                });
+                              },
+                            ),
                           ),
-                            ), 
-                        
-                          onTap: () {
-                             setState(() {
-                              selectedBar = "null";
-                              graphIndex = 0;
-                            }); 
-                          },
-                          ),
-                        ),
-                        Card(
-                          color: graphIndex == 1? beige : null,
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                          child: InkWell(
-                            child: Padding(
-                              padding: EdgeInsets.all(5.0),
-                              child: Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_view_week_rounded,
-                                color: graphIndex == 1? lightBlue : lightBeige,
-                                size: screenHeight * 0.035,
+                          Card(
+                            color: graphIndex == 1 ? beige : null,
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0))),
+                            child: InkWell(
+                              child: Padding(
+                                padding: EdgeInsets.all(5.0),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_view_week_rounded,
+                                      color: graphIndex == 1
+                                          ? lightBlue
+                                          : lightBeige,
+                                      size: screenHeight * 0.035,
+                                    ),
+                                    Text("  Weekly  ",
+                                        style: TextStyle(
+                                            color: graphIndex == 1
+                                                ? darkBlue
+                                                : null)),
+                                  ],
+                                ),
                               ),
-                              Text("  Weekly  ", style: TextStyle(color: graphIndex == 1? darkBlue : null)),
-                            ],
+                              onTap: () {
+                                setState(() {
+                                  selectedBar = "null";
+                                  graphIndex = 1;
+                                });
+                              },
+                            ),
                           ),
-                            ), 
-                        
-                          onTap: () {
-                             setState(() {
-                              selectedBar = "null";
-                              graphIndex = 1;
-                            }); 
-                          },
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(color: beige, height: 2,),
-                  ],
+                        ],
+                      ),
+                      Container(
+                        color: beige,
+                        height: 2,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            )         
-          ),
+              )),
           Expanded(
             flex: 7,
             //Container holding list view in bottom portion of screen
-            child: ExpandedListView(dayFilteredData: dayData, weekFilteredData: weekData, selectedBar: selectedBar, appColors: appNameToColor, graphIndex: graphIndex),
+            child: ExpandedListView(
+                dayFilteredData: dayData,
+                weekFilteredData: weekData,
+                selectedBar: selectedBar,
+                appColors: appNameToColor,
+                graphIndex: graphIndex),
           ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Center(
+              child: SmoothPageIndicator(
+                controller: PageController(initialPage: 1), // Dummy controller
+                count: 3,
+                effect: WormEffect(
+                  paintStyle: PaintingStyle.stroke,
+                  activeDotColor: beige,
+                  dotColor: lightBeige,
+                  dotHeight: 8,
+                  dotWidth: 8,
+                  spacing: 12,
+                ),
+              ),
+            ),
+          ),
+          Container(height: 16),
         ],
       ),
     );
