@@ -12,11 +12,13 @@ import 'dart:ffi';
 import 'package:app_screen_time/apps_list.dart';
 import 'package:app_screen_time/main.dart';
 import 'package:app_screen_time/pages/graph/colors.dart';
+import 'package:app_screen_time/pages/study_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 ///*********************************
 /// Name: AppLimitsPage
 /// 
@@ -58,43 +60,53 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
     return Scaffold(
       appBar: AppBar(
         title: Text("App Screen Time Limits"),
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+        ),
       ),
       body: ListView.builder(
-        padding: EdgeInsets.zero,
+        padding: EdgeInsets.all(4.0),
         itemCount: appNames.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            contentPadding: EdgeInsets.only(bottom: 5, left: 10, right: 10),
-            //: Colors.indigo.shade100,
-            title: Text(
-              appNames[index],
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: appNameToColor[appNames[index]],
+          return Card(
+            child: ListTile(
+              titleAlignment: ListTileTitleAlignment.center,
+              contentPadding: EdgeInsets.only(bottom: 5, left: 10),
+              title: Text(
+                appNames[index],
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: appNameToColor[appNames[index]],
+                ),
               ),
-            ),
-            trailing: SizedBox(
-              width: 200,
-              child: TextField(
-                controller: _appLimitControllers[index],
-                decoration: InputDecoration(
-                  labelText: 'Time limit',
-                  prefixIcon: IconButton(
-                    icon: Icon(
-                      Icons.save
+              trailing: SizedBox(
+                width: 200,
+                child: TextField(
+                  controller: _appLimitControllers[index],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'\d')),
+                    LengthLimitingTextInputFormatter(4)
+                  ],
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    labelText: 'Time limit',
+                    prefixIcon: IconButton(
+                      icon: Icon(
+                        Icons.save_rounded,
+                      ),
+                      onPressed: () => _updateAppLimit(appNames[index], _appLimitControllers[index].text),
                     ),
-                    onPressed: () => _updateAppLimit(appNames[index], _appLimitControllers[index].text),
-                  ),
-                  suffixIcon: IconButton(
-                    onPressed: () => _deleteAppLimit(appNames[index]), 
-                    icon: Icon(
-                      Icons.close,
-                      color: Colors.red,
+                    suffixIcon: IconButton(
+                      onPressed: () => _deleteAppLimit(index), 
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: Colors.red,
+                      )
                     )
                   )
                 )
               )
-            )
+            ),
           );
         }
       )
@@ -133,9 +145,9 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
   Future<void> _updateAppLimit(String appName, String newLimitStr) async {
     updateUserRef();
     int? newLimit = int.tryParse(newLimitStr);
-    if (newLimit == null) {
+    if (newLimit! > 1440) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Entered limit is not a number'))
+        const SnackBar(content: Text('Limit cannot be greater than 24 hours'))
       );
     }
     else{
@@ -165,14 +177,15 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
   /// Description: Deletes the limit for
   /// the given app
   ///*********************************
-  Future<void> _deleteAppLimit(String appName) async {
+  Future<void> _deleteAppLimit(int index) async {
     updateUserRef();
+    _appLimitControllers[index].text = "";
     try {
-      var limitRef = userRef.collection('limits').doc(appName);
+      var limitRef = userRef.collection('limits').doc(appNames[index]);
       var limitDoc = await limitRef.get();
       //Delete limit if it already exists
       if (limitDoc.exists) {
-        limitRef.delete();
+        await limitRef.delete();
       } else {
         //Print "Limit doesn't exist yet" or something
       }
