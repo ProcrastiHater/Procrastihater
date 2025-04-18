@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
-HSLColor inter = HSLColor.fromColor(BG);
-Color BUTTON_BG = inter.withLightness(inter.lightness + 0.05).toColor();
 class StudyModePage extends StatefulWidget {
   const StudyModePage({super.key});
 
@@ -158,14 +156,9 @@ String formatTime(Duration duration) {
       appBar: AppBar(
         title: const Text("Study Mode"),
         titleTextStyle: TextStyle(
-          fontFamily: font,
-          color: FG,
           fontSize: 20
         ),
-        foregroundColor: FG,
-        backgroundColor: BG,
       ),
-      backgroundColor: BG,
       body: Center(
         child: _isStudying
             ? Column(
@@ -173,25 +166,21 @@ String formatTime(Duration duration) {
                 children: [
                   Text(
                     formatTime(_stopwatch.elapsed),
-                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: FG),
+                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _endSession,
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(BUTTON_BG),
-                      foregroundColor: WidgetStatePropertyAll(FG)
-                    ),
                     child: const Text("End Study Session"),
                   ),
                   const SizedBox(height: 40),
                   Text(
                     "Points Earned: ${_stopwatch.elapsed.inMinutes}", 
-                    style: const TextStyle(fontSize: 20, color: FG),
+                    style: const TextStyle(fontSize: 20),
                   ),
                   Text(
                     "Your Total Points: $_totalPoints",
-                    style: const TextStyle(fontSize: 20, color: FG),
+                    style: const TextStyle(fontSize: 20),
                   )
                 ],
               )
@@ -205,7 +194,6 @@ String formatTime(Duration duration) {
                     " once you exit study mode. However, if you leave the app without"
                     " exiting study mode, a large amount of points will be deducted instead.",
                     style: const TextStyle(
-                      color: FG,
                       fontSize: 20
                     ),
                     textAlign: TextAlign.center
@@ -214,16 +202,12 @@ String formatTime(Duration duration) {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _startStudySession,
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(BUTTON_BG),
-                    foregroundColor: WidgetStatePropertyAll(FG)
-                  ),
                   child: const Text("Begin Study Session"),
                 ),
                 const SizedBox(height: 40),
                 Text(
                   "Your Total Points: $_totalPoints",
-                  style: const TextStyle(fontSize: 20, color: FG),
+                  style: const TextStyle(fontSize: 20),
                 )
               ] 
             )

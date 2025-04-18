@@ -17,24 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
-//OG blue: 18,51,86
-//Good blues: 60,65,86 (gr1)
-//            32,58,86 (gr2)
-//            10,27,46 (darker OG)
-//            28,31,41 (darker gr1)
-//            20,36,54 (darker gr2)
-//            7,19,33 (even darker OG)
-const Color BG = Color.fromARGB(255, 10, 27, 46);
-//OG beige-ish: 252,231,193
-const Color FG = Color.fromARGB(255, 252, 231, 193);
-
-String font = "sans-serif";
-
-TextStyle style = TextStyle(
-  color: FG,
-  fontFamily: font
-);
-
 ///*********************************
 /// Name: AppLimitsPage
 /// 
@@ -77,20 +59,14 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
       appBar: AppBar(
         title: Text("App Screen Time Limits"),
         titleTextStyle: TextStyle(
-          fontFamily: font,
           fontSize: 20,
-          color: FG
         ),
-        backgroundColor: BG,
-        foregroundColor: FG,
       ),
-      backgroundColor: BG,
       body: ListView.builder(
         padding: EdgeInsets.all(4.0),
         itemCount: appNames.length,
         itemBuilder: (context, index) {
           return Card(
-            color: BUTTON_BG,
             child: ListTile(
               titleAlignment: ListTileTitleAlignment.center,
               contentPadding: EdgeInsets.only(bottom: 5, left: 10),
@@ -98,7 +74,6 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
                 appNames[index],
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontFamily: font,
                   color: appNameToColor[appNames[index]],
                 ),
               ),
@@ -106,20 +81,17 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
                 width: 200,
                 child: TextField(
                   controller: _appLimitControllers[index],
-                  style: style,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     labelText: 'Time limit',
-                    labelStyle: style,
                     prefixIcon: IconButton(
                       icon: Icon(
                         Icons.save_rounded,
-                        color: FG,
                       ),
                       onPressed: () => _updateAppLimit(appNames[index], _appLimitControllers[index].text),
                     ),
                     suffixIcon: IconButton(
-                      onPressed: () => _deleteAppLimit(appNames[index]), 
+                      onPressed: () => _deleteAppLimit(index), 
                       icon: Icon(
                         Icons.close_rounded,
                         color: Colors.red,
@@ -199,14 +171,15 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
   /// Description: Deletes the limit for
   /// the given app
   ///*********************************
-  Future<void> _deleteAppLimit(String appName) async {
+  Future<void> _deleteAppLimit(int index) async {
     updateUserRef();
     try {
-      var limitRef = userRef.collection('limits').doc(appName);
+      var limitRef = userRef.collection('limits').doc(appNames[index]);
       var limitDoc = await limitRef.get();
       //Delete limit if it already exists
       if (limitDoc.exists) {
-        limitRef.delete();
+        await limitRef.delete();
+        _appLimitControllers[index].text = "";
       } else {
         //Print "Limit doesn't exist yet" or something
       }
