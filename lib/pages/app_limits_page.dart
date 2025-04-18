@@ -17,6 +17,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
+
+import 'package:flutter/services.dart';
 ///*********************************
 /// Name: AppLimitsPage
 /// 
@@ -81,6 +83,10 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
                 width: 200,
                 child: TextField(
                   controller: _appLimitControllers[index],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'\d')),
+                    LengthLimitingTextInputFormatter(4)
+                  ],
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     labelText: 'Time limit',
@@ -139,9 +145,9 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
   Future<void> _updateAppLimit(String appName, String newLimitStr) async {
     updateUserRef();
     int? newLimit = int.tryParse(newLimitStr);
-    if (newLimit == null) {
+    if (newLimit! > 1440) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Entered limit is not a number'))
+        const SnackBar(content: Text('Limit cannot be greater than 24 hours'))
       );
     }
     else{
@@ -173,13 +179,13 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
   ///*********************************
   Future<void> _deleteAppLimit(int index) async {
     updateUserRef();
+    _appLimitControllers[index].text = "";
     try {
       var limitRef = userRef.collection('limits').doc(appNames[index]);
       var limitDoc = await limitRef.get();
       //Delete limit if it already exists
       if (limitDoc.exists) {
         await limitRef.delete();
-        _appLimitControllers[index].text = "";
       } else {
         //Print "Limit doesn't exist yet" or something
       }
