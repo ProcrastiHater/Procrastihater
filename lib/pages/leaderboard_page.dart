@@ -166,13 +166,12 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                           'uid': doc.id,
                           'displayName': data['displayName'] ?? 'Unknown',
                           'pfp': data['pfp'] ?? 'https://picsum.photos/200/200',
-                          'totalDailyHours':
-                              (data['totalDailyHours'] ?? 0.0) as num,
+                          'points': (data['points'] ?? 0) as num,
                         };
                       }).toList();
 
-                      users.sort((a, b) => (b['totalDailyHours'] as num)
-                          .compareTo(a['totalDailyHours'] as num));
+                      users.sort((a, b) =>
+                          (b['points'] as num).compareTo(a['points'] as num));
 
                       return ListView.builder(
                         itemCount: users.length,
@@ -184,8 +183,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                             ),
                             title: Text(user['displayName']),
                             subtitle: Text(
-                              'Daily Hours: ${(user['totalDailyHours'] as num).toStringAsFixed(2)}',
-                              //style: const TextStyle(color: Colors.grey),
+                              'Points: ${(user['points'] as num).toStringAsFixed(0)}',
                             ),
                             trailing: Text("${index + 1}"),
                           );
