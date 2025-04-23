@@ -516,6 +516,10 @@ class ShowAddFriendsSheet extends StatelessWidget {
           // Friend search bar
           TextField(
             controller: _searchController,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9a-zA-Z]*')),
+              LengthLimitingTextInputFormatter(28)
+            ],
             decoration: InputDecoration(
               labelText: 'Enter Friend UID',
               suffixIcon: IconButton(
