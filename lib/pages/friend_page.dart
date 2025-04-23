@@ -292,7 +292,31 @@ class _FriendsListState extends State<FriendsList>
                                     IconButton(
                                       icon: const Icon(Icons.close,
                                           color: Colors.red),
-                                      onPressed: () => _deleteFriend(friendUID),
+                                      onPressed: () => showDialog(
+                                        context: context,
+                                        builder: (BuildContext alertContext) => AlertDialog(
+                                          title: Text("Delete Friend"),
+                                          content: Text("Are you sure you want to delete $displayName from your friends?"),
+                                          actions: [
+                                            ElevatedButton(
+                                              onPressed: (){
+                                                Navigator.pop(alertContext, "Delete Friend");
+                                                _deleteFriend(friendUID);
+                                              },
+                                              child: Text("Yes")
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () => Navigator.pop(alertContext, "Cancel"),
+                                              child: Text(
+                                                "Cancel",
+                                                style: TextStyle(
+                                                  color: Colors.red
+                                                )
+                                              )
+                                            )
+                                          ],
+                                        )
+                                      )
                                     ),
                                   ],
                                 ),
