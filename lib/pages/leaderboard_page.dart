@@ -70,23 +70,23 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                 },
               )
             ],
-            bottom: AppBar(
-              title: Text(showFriendsLeaderboard
-                  ? "Friends Leaderboard"
-                  : "Global Leaderboard"),
-              automaticallyImplyLeading: false,
-              actions: [
-                Icon(showFriendsLeaderboard ? Icons.group : Icons.public),
-                Switch(
-                  value: showFriendsLeaderboard,
-                  onChanged: (value) {
-                    setState(() {
-                      showFriendsLeaderboard = value;
-                    });
-                  },
-                ),
-              ],
-            ),
+            // bottom: AppBar(
+            //   title: Text(showFriendsLeaderboard
+            //       ? "Friends Leaderboard"
+            //       : "Global Leaderboard"),
+            //   automaticallyImplyLeading: false,
+            //   actions: [
+            //     Icon(showFriendsLeaderboard ? Icons.group : Icons.public),
+            //     Switch(
+            //       value: showFriendsLeaderboard,
+            //       onChanged: (value) {
+            //         setState(() {
+            //           showFriendsLeaderboard = value;
+            //         });
+            //       },
+            //     ),
+            //   ],
+            // ),
           ),
           drawer: Drawer(
             child: ListView(
@@ -116,7 +116,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                     Navigator.pushNamed(context, '/calendarPage');
                   },
                 ),
-                // const Divider(),
+              
                 ListTile(
                   trailing: Icon(Icons.school),
                   title: Text("Study Mode"),
@@ -124,7 +124,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                     Navigator.pushNamed(context, '/studyModePage');
                   },
                 ),
-                //const Divider(),
+
                 ListTile(
                   trailing: Icon(Icons.alarm),
                   title: Text("App Limits"),
@@ -136,6 +136,97 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
             ),
           ),
           body: Column(children: [
+            FutureBuilder<QuerySnapshot>(
+              future: firestore
+                  .collection('UID')
+                  .orderBy('points') // ascending = lowest points first
+                  .limit(3)
+                  .get(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                var losers = snapshot.data!.docs.map((doc) {
+                  var data = doc.data() as Map<String, dynamic>;
+                  return {
+                    'displayName': data['displayName'] ?? 'Unknown',
+                    'pfp': data['pfp'] ?? 'https://picsum.photos/200/200',
+                    'points': (data['points'] ?? 0) as num,
+                  };
+                }).toList();
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Loserboard',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(losers.length, (index) {
+                          var user = losers[index];
+                          return Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundImage: NetworkImage(user['pfp']),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                user['displayName'],
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                '${user['points']} pts',
+                              ),
+                            ],
+                          );
+                        }),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    showFriendsLeaderboard
+                        ? "Friends Leaderboard"
+                        : "Global Leaderboard",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        showFriendsLeaderboard ? Icons.group : Icons.public,
+                      ),
+                      Switch(
+                        value: showFriendsLeaderboard,
+                        onChanged: (value) {
+                          setState(() {
+                            showFriendsLeaderboard = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: FutureBuilder<DocumentSnapshot>(
                 future: firestore.collection('UID').doc(currentUserId).get(),
