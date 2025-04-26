@@ -131,7 +131,7 @@ void _startStudySession() {
     final user = auth.currentUser;
     if (user != null) {
       await firestore.collection('UID').doc(user.uid).update({
-        'points': FieldValue.increment(-50),
+        'points': FieldValue.increment(-20),
       });
     }
     await _updateTotalPoints();

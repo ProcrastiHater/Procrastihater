@@ -416,27 +416,11 @@ Future<void> _currentToHistorical() async {
       } else {
         pointChange = 50;
       }
-      var generalUserData = await userRef.get();
-      var currentUserPoints = generalUserData.data() as Map<String, dynamic>;
 
-      if (currentUserPoints.containsKey('points')) {
-        currentUserPoints['points'] += pointChange;
-        await userRef.update({'points': currentUserPoints['points']});
-      } else {
-        await userRef.update({'points': pointChange});
-      }
-
-      //Commit the batch
-      await batch.commit();
-
-      debugPrint('Successfully wrote screen time data to History');
-    } catch (e) {
-      debugPrint('Error writing screen time data to Firestore: $e');
-      rethrow;
-    }
-  } else {
-    debugPrint('No data needed to be written to history');
-  }
+      await userRef.update({
+        'points': FieldValue.increment(pointChange),
+      });
+     
 }
 
 ///*********************************
