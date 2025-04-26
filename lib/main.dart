@@ -400,7 +400,23 @@ Future<void> _currentToHistorical() async {
           );
         }
       }
-
+      int pointChange = 0;
+      if(totalDaily >= 12){
+        pointChange = -20;
+      } else if(totalDaily >= 8){
+        pointChange = -10;
+      } else if (totalDaily >= 6){
+        pointChange = 10;
+      } else if (totalDaily >= 4){
+        pointChange = 20;
+      } else if (totalDaily >= 2){
+        pointChange = 30;
+      } else if (totalDaily >= 1){
+        pointChange = 40;
+      } else {
+        pointChange = 50;
+      }
+    
       //Commit the batch
       await batch.commit();
 
