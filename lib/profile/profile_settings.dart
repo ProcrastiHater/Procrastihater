@@ -49,7 +49,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
     super.initState();
     _user = _auth.currentUser;
     _displayNameController = TextEditingController(
-      text: _user?.displayName ?? 'Choose a name!',
+      text: _user?.displayName ?? '',
     );
   }
 
@@ -151,6 +151,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
               controller: _displayNameController,
               decoration: InputDecoration(
                 labelText: 'Display Name',
+                hintText: 'Choose a Name!',
                 border: OutlineInputBorder()
               ),
               onSubmitted: (value) => _updateDisplayName(),
