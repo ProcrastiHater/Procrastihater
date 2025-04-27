@@ -116,7 +116,6 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                     Navigator.pushNamed(context, '/calendarPage');
                   },
                 ),
-              
                 ListTile(
                   trailing: Icon(Icons.school),
                   title: Text("Study Mode"),
@@ -124,7 +123,6 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                     Navigator.pushNamed(context, '/studyModePage');
                   },
                 ),
-
                 ListTile(
                   trailing: Icon(Icons.alarm),
                   title: Text("App Limits"),
@@ -151,7 +149,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                   var data = doc.data() as Map<String, dynamic>;
                   return {
                     'displayName': data['displayName'] ?? 'Unknown',
-                    'pfp': data['pfp'] ?? 'https://picsum.photos/200/200',
+                    'pfp': data['pfp'] ?? 'https://picsum.photos/id/443/367/267',
                     'points': (data['points'] ?? 0) as num,
                   };
                 }).toList();
@@ -161,7 +159,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                   child: Column(
                     children: [
                       Text(
-                        'Loserboard',
+                        'Global Loserboard',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -170,25 +168,18 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                       SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(losers.length, (index) {
-                          var user = losers[index];
-                          return Column(
-                            children: [
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundImage: NetworkImage(user['pfp']),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                user['displayName'],
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                '${user['points']} pts',
-                              ),
-                            ],
-                          );
-                        }),
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (losers.length > 1)
+                            buildLoserColumn(losers[1], 25,
+                                '🥈'), // 2nd lowest, left, smaller pfp
+                          if (losers.length > 0)
+                            buildLoserColumn(losers[0], 30,
+                                '🥇'), // lowest, middle, bigger pfp
+                          if (losers.length > 2)
+                            buildLoserColumn(losers[2], 20,
+                                '🥉'), // 3rd lowest, right, smaller pfp
+                        ],
                       ),
                     ],
                   ),
@@ -256,7 +247,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                         return {
                           'uid': doc.id,
                           'displayName': data['displayName'] ?? 'Unknown',
-                          'pfp': data['pfp'] ?? 'https://picsum.photos/200/200',
+                          'pfp': data['pfp'] ?? 'https://picsum.photos/id/443/367/267',
                           'points': (data['points'] ?? 0) as num,
                         };
                       }).toList();
@@ -307,4 +298,26 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
           ]),
         ));
   }
+}
+
+Widget buildLoserColumn(
+    Map<String, dynamic> user, double radius, String medal) {
+  return Column(
+    children: [
+      CircleAvatar(
+        radius: radius,
+        backgroundImage: NetworkImage(user['pfp']),
+      ),
+      SizedBox(height: 8),
+      Text(
+        '$medal ${user['displayName']}',
+        style: TextStyle(fontSize: 12),
+      ),
+      SizedBox(height: 4),
+      Text(
+        '${user['points']} pts',
+        style: TextStyle(fontSize: 10),
+      ),
+    ],
+  );
 }

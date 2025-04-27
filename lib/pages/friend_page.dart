@@ -199,7 +199,7 @@ class _FriendsListState extends State<FriendsList>
                             String displayName =
                                 friendData['displayName'] ?? 'Unknown';
                             String photoUrl = friendData['pfp'] ??
-                                'https://picsum.photos/200/200';
+                                'https://picsum.photos/id/443/367/267';
                             double totalDailyHours =
                                 friendData['totalDailyHours'] ?? 0.0;
 
@@ -435,7 +435,7 @@ class ShowAddFriendsSheet extends StatelessWidget {
           CircleAvatar(
             radius: 50,
             backgroundImage: NetworkImage(
-                _auth.currentUser?.photoURL ?? 'https://picsum.photos/200/200'),
+                _auth.currentUser?.photoURL ?? 'https://picsum.photos/id/443/367/267'),
           ),
           const SizedBox(height: 16),
 
