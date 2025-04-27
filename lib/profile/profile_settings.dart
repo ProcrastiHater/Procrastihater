@@ -149,6 +149,10 @@ class ProfileSettingsState extends State<ProfileSettings> {
             SizedBox(height: 10),
             TextField(
               controller: _displayNameController,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9a-zA-Z ._]*')),
+                LengthLimitingTextInputFormatter(32)
+              ],
               decoration: InputDecoration(
                 labelText: 'Display Name',
                 hintText: 'Choose a Name!',
