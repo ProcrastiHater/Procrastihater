@@ -45,12 +45,73 @@ class FriendsPage extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: const Text(
-            "ProcrastiFriends",
-          ),
-          centerTitle: true,
+        title: Text("ProcrastiFriends"),
+        actions: [
+          // Creating little user icon you can press to view account info
+          IconButton(
+            icon: CircleAvatar(
+              backgroundImage: NetworkImage(
+                // Use user's pfp as icon image if there is no pfp use this link as a default
+                auth.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
+              ),
+            ),
+            onPressed: () async {
+              await Navigator.pushNamed(context, "/profileSettings");
+              // Reload the user in case anything changed
+              await auth.currentUser?.reload();
+              // Reload UI in case things changed
+             // setState(() {});
+            },
+          )
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            SizedBox(
+              height: 80,
+              child:  DrawerHeader(
+              decoration: BoxDecoration(
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: Image.asset("assets/logo.jpg"),
+                  ),
+                  Text("ProcrastiTools",),
+              ],
+              )
+              ),
+            ),
+              ListTile(
+              trailing: Icon(Icons.calendar_today),
+              title: Text("Calendar"),
+              onTap:() {
+                Navigator.pushNamed(context, '/calendarPage');
+              },
+            ),
+           // const Divider(),
+             ListTile(
+              trailing: Icon(Icons.school),
+              title: Text("Study Mode"),
+              onTap: () {
+                Navigator.pushNamed(context, '/studyModePage');
+              },
+            ),
+            //const Divider(),
+            ListTile(
+              trailing: Icon(Icons.alarm),
+              title: Text("App Limits"),
+              onTap: () {
+                Navigator.pushNamed(context, '/appLimitsPage');
+              },
+            )
+          ],
         ),
+      ),
         body: FriendsList(),
       ),
     );
@@ -231,7 +292,31 @@ class _FriendsListState extends State<FriendsList>
                                     IconButton(
                                       icon: const Icon(Icons.close,
                                           color: Colors.red),
-                                      onPressed: () => _deleteFriend(friendUID),
+                                      onPressed: () => showDialog(
+                                        context: context,
+                                        builder: (BuildContext alertContext) => AlertDialog(
+                                          title: Text("Delete Friend"),
+                                          content: Text("Are you sure you want to delete $displayName from your friends?"),
+                                          actions: [
+                                            ElevatedButton(
+                                              onPressed: (){
+                                                Navigator.pop(alertContext, "Delete Friend");
+                                                _deleteFriend(friendUID);
+                                              },
+                                              child: Text("Yes")
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () => Navigator.pop(alertContext, "Cancel"),
+                                              child: Text(
+                                                "Cancel",
+                                                style: TextStyle(
+                                                  color: Colors.red
+                                                )
+                                              )
+                                            )
+                                          ],
+                                        )
+                                      )
                                     ),
                                   ],
                                 ),
