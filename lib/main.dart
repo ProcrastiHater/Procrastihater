@@ -78,7 +78,7 @@ Future<void> initializeMain() async {
   if (auth.currentUser != null) {
     await _currentToHistorical();
     await _checkSTPermission();
-    await _getScreenTime();
+    await getScreenTime();
     await getAvailableWeeks();
     await fetchWeeklyScreenTime();
     await generateAppsList();
@@ -483,7 +483,7 @@ Future<void> _startTestNotifications() async {
 /// Description: Accesses screentime data
 /// by storing into a Map.
 ///*********************************
-Future<void> _getScreenTime() async {
+Future<void> getScreenTime() async {
   //Checks if user has permission, if not it requests the permissions
   if (!hasPermission) {
     await _requestSTPermission();
