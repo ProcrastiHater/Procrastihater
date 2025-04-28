@@ -31,6 +31,8 @@ import '/pages/graph/list_view.dart';
 import '/pages/graph/widget.dart';
 import '/pages/graph/colors.dart';
 
+Map<String, Map<String, String>> dailyData = {};
+
 ///*********************************
 /// Name: WeeklyGraphView
 /// 
@@ -396,7 +398,6 @@ class DailyGraphView extends StatefulWidget {
 ///*********************************
 class _DailyGraphViewState extends State<DailyGraphView> {
   List<String> selectedCategories = [];
-  Map<String, Map<String, String>> dailyData = {};
   String? selectedFilter = "";
   double totalDaily = 0;
   int points = 0;

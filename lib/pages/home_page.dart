@@ -117,7 +117,9 @@ class _MyHomePageState extends State<MyHomePage> {
     await fetchWeeklyScreenTime(); 
     await Future.delayed(Duration(seconds: 1));
     setState(() {
-      
+      dailyData = screenTimeData;
+      dayData = screenTimeData;
+      weekData = weeklyData;
     });
   }
 
