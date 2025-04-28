@@ -187,7 +187,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
               },
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -311,12 +311,12 @@ Widget buildLoserColumn(
       SizedBox(height: 8),
       Text(
         '$medal ${user['displayName']}',
-        style: TextStyle(fontSize: 12),
+        style: TextStyle(fontSize: 16),
       ),
       SizedBox(height: 4),
       Text(
         '${user['points']} pts',
-        style: TextStyle(fontSize: 10),
+        style: TextStyle(fontSize: 14),
       ),
     ],
   );
