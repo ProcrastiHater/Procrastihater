@@ -10,6 +10,7 @@ library;
 //Dart Imports
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 //Calendar Imports
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
@@ -144,6 +145,9 @@ class _CalendarPageState extends State<CalendarPage> {
           children: [
             TextField(
               controller: _titleController,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(1000)
+              ],
               decoration: const InputDecoration(
                 labelText: 'Event Title',
                 border: OutlineInputBorder(),
@@ -152,6 +156,9 @@ class _CalendarPageState extends State<CalendarPage> {
             const SizedBox(height: 16),
             TextField(
               controller: _descriptionController,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(8192)
+              ],
               decoration: const InputDecoration(
                 labelText: 'Event Description',
                 border: OutlineInputBorder(),
@@ -161,6 +168,9 @@ class _CalendarPageState extends State<CalendarPage> {
             const SizedBox(height: 16),
             TextField(
               controller: _locationController,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(1000)
+              ],
               decoration: const InputDecoration(
                 labelText: 'Event Location',
                 border: OutlineInputBorder(),
