@@ -187,7 +187,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
               },
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
