@@ -70,7 +70,6 @@ void main() async {
   await Firebase.initializeApp();
   await initializeMain();
   runApp(const ProcrastiHater());
-
 }
 
 Future<void> initializeMain() async {
@@ -84,7 +83,7 @@ Future<void> initializeMain() async {
     await generateAppsList();
     await initializeAppNameColorMapping();
     await _writeScreenTimeData();
- }
+  }
 }
 
 ///*********************************
@@ -137,14 +136,14 @@ class ProcrastiHater extends StatelessWidget {
           toolbarHeight: screenHeight * .06,
           backgroundColor: lightBlue,
           foregroundColor: beige,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: lightBlue,
-            foregroundColor: beige,
-          )
-        ),
+            style: ElevatedButton.styleFrom(
+          backgroundColor: lightBlue,
+          foregroundColor: beige,
+        )),
         dividerTheme: DividerThemeData(
           color: Color(0xFFC9D1D9),
           indent: 5,
@@ -153,18 +152,19 @@ class ProcrastiHater extends StatelessWidget {
         ),
         cardTheme: CardThemeData(
           color: lightBlue,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         dialogTheme: DialogThemeData(
           backgroundColor: darkBlue,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
-        home: StreamBuilder<User?>(
+      home: StreamBuilder<User?>(
         // Listen to auth state changes instead of using a FutureBuilder
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          
           // If user is null (signed out), show login screen
           if (snapshot.data == null) {
             return const LoginScreen();
@@ -228,46 +228,44 @@ class ProcrastiHater extends StatelessWidget {
         );
       default:
         return MaterialPageRoute(builder: (_) => const HomePage());
-      }
     }
   }
+}
 
-  ///*********************************
-  /// Name: createSwipingRoute
-  ///
-  /// Description: Function to build the
-  /// navigation and swiping animation for
-  /// main pages of the app
-  ///*********************************
-  Route createSwipingRoute(Widget page, Offset beginOffset) {
-    return PageRouteBuilder(
-        //Navigation for the page param
-        pageBuilder: (context, animation, secondaryAnimation) => page,
-        //Duration of the animation
-        transitionDuration: Duration(milliseconds: 400),
-        //Animation builder
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          //Animation style for swipe
-          final curvedAnimation = CurvedAnimation(
-            parent: animation,
-            curve: Curves.fastEaseInToSlowEaseOut,
-          );
-          //Tween variable for animation
-          final tween = Tween(begin: beginOffset, end: Offset.zero)
-              .chain(CurveTween(curve: Curves.fastEaseInToSlowEaseOut));
-          //Actual slide transition variable
-          return SlideTransition(
-            position: curvedAnimation.drive(tween),
-            //Fade transition for smoothness
-            child: FadeTransition(
-              opacity: curvedAnimation,
-              child: child,
-            ),
-          );
-        }
-      );
-  }
-
+///*********************************
+/// Name: createSwipingRoute
+///
+/// Description: Function to build the
+/// navigation and swiping animation for
+/// main pages of the app
+///*********************************
+Route createSwipingRoute(Widget page, Offset beginOffset) {
+  return PageRouteBuilder(
+      //Navigation for the page param
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      //Duration of the animation
+      transitionDuration: Duration(milliseconds: 400),
+      //Animation builder
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        //Animation style for swipe
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.fastEaseInToSlowEaseOut,
+        );
+        //Tween variable for animation
+        final tween = Tween(begin: beginOffset, end: Offset.zero)
+            .chain(CurveTween(curve: Curves.fastEaseInToSlowEaseOut));
+        //Actual slide transition variable
+        return SlideTransition(
+          position: curvedAnimation.drive(tween),
+          //Fade transition for smoothness
+          child: FadeTransition(
+            opacity: curvedAnimation,
+            child: child,
+          ),
+        );
+      });
+}
 
 ///**************************************************
 /// Name: _updateUserRef
@@ -401,6 +399,28 @@ Future<void> _currentToHistorical() async {
         }
       }
 
+      // Code for calculating and updating a user's points
+      int pointChange = 0;
+      if (totalDaily >= 12) {
+        pointChange = -20;
+      } else if (totalDaily >= 8) {
+        pointChange = -10;
+      } else if (totalDaily >= 6) {
+        pointChange = 10;
+      } else if (totalDaily >= 4) {
+        pointChange = 20;
+      } else if (totalDaily >= 2) {
+        pointChange = 30;
+      } else if (totalDaily >= 1) {
+        pointChange = 40;
+      } else {
+        pointChange = 50;
+      }
+
+      await userRef.update({
+        'points': FieldValue.increment(pointChange),
+      });
+      
       //Commit the batch
       await batch.commit();
 
