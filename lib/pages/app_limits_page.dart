@@ -63,6 +63,34 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
         titleTextStyle: TextStyle(
           fontSize: 20,
         ),
+        actions: [
+          IconButton(
+            onPressed: () => showDialog(
+              context: context, 
+              builder: (BuildContext infoContext) => AlertDialog(
+                title: Text("App Limits Page Help"),
+                content: Text(
+                  "This page allows you to set limits for how many minutes you want to be allowed to spend on an app."
+                  " When you reach the limit you set for an app, as long as you have ProcrastiHater open, you will receive"
+                  " a notification\n\nTo set a limit for an app:\n\t•Scroll down the App Limits Page and locate the app\n"
+                  "\t•Enter a limit (in minutes) less than 24 hours\n\t•Save the limit using the Save button on the left\n\n"
+                  "NOTE: Limits smaller than about 5 minutes do not work properly due to ProcrastiHater only checking if you've reached"
+                  " a limit after the first 5 minutes of ProcrastiHater being open. Apps that are not found on the App Limits Page have"
+                  " not been used for more than 3 minutes since you've installed ProcrastiHater, and are therefore unable to have their"
+                  " limits set."
+                ),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(infoContext, "Close Help"),
+                    child: Text("Close Help")
+                  )
+                ],
+                scrollable: true,
+              )
+            ),
+            icon: Icon(Icons.help_outline_rounded)
+          )
+        ],
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(4.0),
@@ -92,7 +120,7 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
                     labelText: 'Time limit',
                     prefixIcon: IconButton(
                       icon: Icon(
-                        Icons.save_rounded,
+                        Icons.save,
                       ),
                       onPressed: () => _updateAppLimit(appNames[index], _appLimitControllers[index].text),
                     ),
