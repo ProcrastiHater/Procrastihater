@@ -1,8 +1,16 @@
+///*********************************************
+/// Name: study_mode_page.dart
+///
+/// Description: Page for entering study mode
+///*********************************************
+library;
+
 import 'package:app_screen_time/pages/app_limits_page.dart';
 import 'package:app_screen_time/profile/profile_picture_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'dart:async';
 class StudyModePage extends StatefulWidget {
   const StudyModePage({super.key});
@@ -94,7 +102,9 @@ void _startStudySession() {
       setState(() {}); 
     }
   });
-  }
+
+  WakelockPlus.enable();
+}
 
 ///*********************************************************
 /// Name: _endSession
@@ -111,7 +121,7 @@ void _startStudySession() {
     });
 
     _stopwatch.stop();
-   _stopwatch.reset();
+    _stopwatch.reset();
 
     if (earnedPoints >= 1 && user != null) {
       await firestore.collection('UID').doc(user.uid).update({
@@ -119,6 +129,8 @@ void _startStudySession() {
       });
     }
     await _updateTotalPoints();
+
+    WakelockPlus.disable();
   }
 
   ///*********************************************************
