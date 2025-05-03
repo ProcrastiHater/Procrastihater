@@ -202,9 +202,10 @@ String formatTime(Duration duration) {
                 Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
-                    "While in study mode, a timer will show and you will gain points for every minute you studied for"
-                    " once you exit study mode. However, if you leave the app without"
-                    " exiting study mode, a large amount of points will be deducted instead.",
+                    "While in study mode, a timer will show and you will gain 1 point for every minute you studied for."
+                    " Points earned will only be saved once you exit study mode via the \"End Study Session\" button."
+                    " If you minimize or leave the app without exiting study mode via the \"End Study Session\" button," 
+                    " 25 points will be deducted, and no points will be earned.",
                     style: const TextStyle(
                       fontSize: 20
                     ),
