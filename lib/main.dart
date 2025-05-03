@@ -68,7 +68,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase initialization
   await Firebase.initializeApp();
-  await initializeMain();
+  //await initializeMain();
   runApp(const ProcrastiHater());
 }
 
@@ -477,23 +477,6 @@ Future<void> requestNotifsPermission() async {
     await checkNotifsPermission();
   } on PlatformException catch (e) {
     debugPrint("Failed to request permission: ${e.message}");
-  }
-}
-
-///*********************************
-/// Name: _startTestNotifications
-///
-/// Description: Invokes method from platform channel to
-/// start sending the test notification
-///*********************************
-Future<void> _startTestNotifications() async {
-  if (!hasNotifsPermission) {
-    return;
-  }
-  try {
-    await platformChannel.invokeMethod('startTestNotifications');
-  } on PlatformException catch (e) {
-    debugPrint("Failed to start notifications: ${e.message}");
   }
 }
 

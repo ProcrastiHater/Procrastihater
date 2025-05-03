@@ -147,10 +147,6 @@ class MainActivity: FlutterActivity() {
                         openNotificationSettings()
                         result.success(true)
                     }
-                    "startTestNotifications" -> {
-                        startTestNotifs()
-                        result.success(true)
-                    }
                     "startTotalSTNotifications" -> {
                         startTotalSTNotifs()
                         Log.d("MainActivity", "Started Screen Time Notifications")
@@ -261,31 +257,6 @@ class MainActivity: FlutterActivity() {
             //Register notification channel
             notificationManager.createNotificationChannel(channel)
         }
-    }
-
-    ///**********************************************
-    /// Name: startTestNotifs
-    /// 
-    /// Description: Starts background task for
-    /// sending test notification
-    ///**********************************************
-    fun startTestNotifs() {
-        //Give bg work requirements for working
-        // In this case, make it require internet connection
-        // val constraints = Constraints.Builder()
-        //     .setRequiredNetworkType(NetworkType.CONNECTED)
-        //     .build()
-        //Create bg work request
-        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<TestNotifWorker>(
-            15, TimeUnit.MINUTES
-        )
-            .build()
-        //Put work into queue
-        wm.enqueueUniquePeriodicWork(
-            "testNotification",
-            ExistingPeriodicWorkPolicy.REPLACE,
-            notifRequest,
-        )
     }
 
     ///**********************************************
