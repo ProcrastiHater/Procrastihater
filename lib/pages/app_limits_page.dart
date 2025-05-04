@@ -200,9 +200,9 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
     }
     else{
       var limitRef = userRef.collection('limits').doc(appName);
-      if (newLimit <= 5){
+      if (newLimit < 5){
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Limit must be greater than 5'))
+          const SnackBar(content: Text('Limit must not be less than 5'))
         );
         return false;
       }
