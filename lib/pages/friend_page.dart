@@ -245,10 +245,11 @@ class _FriendsListState extends State<FriendsList>
                         String friendUID = friends[index];
 
                         return FutureBuilder<DocumentSnapshot>(
-                          future:
-                              _firestore.collection('UID').doc(friendUID).get(),
+                          future: _firestore.collection('UID').doc(friendUID).get(),
                           builder: (context, friendSnapshot) {
-                            if (!friendSnapshot.hasData) {
+                            if (!friendSnapshot.hasData ||
+                                !friendSnapshot.data!.exists ||
+                                friendSnapshot.data?.data() == null) {
                               return const SizedBox.shrink();
                             }
 
