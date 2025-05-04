@@ -177,6 +177,29 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                                         ),
                                         SetOptions.merge()
                                     )
+
+                                    var pointChange : Long = 0
+                                    if (totalDaily >= 12) {
+                                        pointChange = -20
+                                    } else if (totalDaily >= 8) {
+                                        pointChange = -10
+                                    } else if (totalDaily >= 6) {
+                                        pointChange = 10
+                                    } else if (totalDaily >= 4) {
+                                        pointChange = 20
+                                    } else if (totalDaily >= 2) {
+                                        pointChange = 30
+                                    } else if (totalDaily >= 1) {
+                                        pointChange = 40
+                                    } else {
+                                        pointChange = 50
+                                    }
+
+                                    batch.update(
+                                        userRef!!,
+                                        "points",
+                                        FieldValue.increment(pointChange)
+                                    ) 
                                 }
                             }
 
