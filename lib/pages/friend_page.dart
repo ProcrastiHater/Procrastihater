@@ -233,7 +233,7 @@ class _FriendsListState extends State<FriendsList>
                   stream: _firestore.collection('UID').doc(uid).snapshots(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData || snapshot.data?.data() == null) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Text("No Friends Yet");
                     }
 
                     Map<String, dynamic>? data = snapshot.data!.data() as Map<String, dynamic>?;
