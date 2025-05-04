@@ -74,10 +74,8 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
                   " When you reach the limit you set for an app, as long as you have ProcrastiHater open, you will receive"
                   " a notification\n\nTo set a limit for an app:\n\t•Scroll down the App Limits Page and locate the app\n"
                   "\t•Enter a limit (in minutes) less than 24 hours\n\t•Save the limit using the Save button on the left\n\n"
-                  "NOTE: Limits smaller than about 5 minutes do not work properly due to ProcrastiHater only checking if you've reached"
-                  " a limit after the first 5 minutes of ProcrastiHater being open. Apps that are not found on the App Limits Page have"
-                  " not been used for more than 3 minutes since you've installed ProcrastiHater, and are therefore unable to have their"
-                  " limits set."
+                  "NOTE: If you have not used an app since you installed ProcrastiHater, you cannot set a limit for it. You cannot"
+                  " set a limit for less than 5 minutes"
                 ),
                 actions: [
                   ElevatedButton(
@@ -180,9 +178,9 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
     }
     else{
       var limitRef = userRef.collection('limits').doc(appName);
-      if (newLimit < 3){
+      if (newLimit <= 5){
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Limit must be greater than or equal to 3'))
+          const SnackBar(content: Text('Limit must be greater than 5'))
         );
       }
       else{
