@@ -42,6 +42,7 @@ class AppLimitsPage extends StatefulWidget{
 class _AppLimitsPageState extends State<AppLimitsPage>{
   final List<TextEditingController> _appLimitControllers = List.generate(appNames.length, (int i) => TextEditingController());
   Map<String, int> appLimits = {};
+  List<Color> _limitTextColors = List.generate(appNames.length, (int i) => Colors.transparent);
   @override
   void initState() {
     super.initState();
@@ -50,6 +51,9 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
         if(appLimits.containsKey(appNames[ii]))
         {
           _appLimitControllers[ii].text = appLimits[appNames[ii]]!.toString();
+          if(context.mounted){
+            _limitTextColors[ii] = TextTheme.of(context).bodyLarge!.color!;
+          }
         }
       }
     });
@@ -113,6 +117,15 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
                     FilteringTextInputFormatter.allow(RegExp(r'\d')),
                     LengthLimitingTextInputFormatter(4)
                   ],
+                  onChanged: (String val){
+                    setState(() {
+                      _limitTextColors[index] = Colors.red;
+                    });
+                    return;
+                  },
+                  style: TextStyle(
+                    color: _limitTextColors[index]
+                  ),
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     labelText: 'Time limit',
@@ -120,7 +133,15 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
                       icon: Icon(
                         Icons.save,
                       ),
-                      onPressed: () => _updateAppLimit(appNames[index], _appLimitControllers[index].text),
+                      onPressed: () {
+                        _updateAppLimit(appNames[index], _appLimitControllers[index].text).then((updated){
+                          if(updated){
+                            setState(() {
+                              _limitTextColors[index] = const Color.fromARGB(255, 65, 228, 70);
+                            });
+                          }
+                        });
+                      },
                     ),
                     suffixIcon: IconButton(
                       onPressed: () => _deleteAppLimit(index), 
@@ -168,13 +189,14 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
   /// Description: Updates the limit
   /// for the specific app
   ///*********************************
-  Future<void> _updateAppLimit(String appName, String newLimitStr) async {
+  Future<bool> _updateAppLimit(String appName, String newLimitStr) async {
     updateUserRef();
     int? newLimit = int.tryParse(newLimitStr);
     if (newLimit! > 1440) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Limit cannot be greater than 24 hours'))
       );
+      return false;
     }
     else{
       var limitRef = userRef.collection('limits').doc(appName);
@@ -182,6 +204,7 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Limit must be greater than 5'))
         );
+        return false;
       }
       else{
         try {
@@ -189,9 +212,11 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
           await limitRef.set(
               {'limit': ((newLimit / 60) * 100).round().toDouble() / 100},
               SetOptions(merge: true));
+          return true;
         }
         catch(e){
           debugPrint("Error setting limit: $e");
+          return false;
         }
       }
     }
