@@ -230,17 +230,14 @@ class _FriendsListState extends State<FriendsList>
               ),
               Expanded(
                 child: StreamBuilder<DocumentSnapshot>(
-                  stream: _firestore
-                      .collection('UID')
-                      .doc(_auth.currentUser?.uid)
-                      .snapshots(),
+                  stream: _firestore.collection('UID').doc(uid).snapshots(),
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const CircularProgressIndicator();
+                    if (!snapshot.hasData || snapshot.data?.data() == null) {
+                      return const Center(child: CircularProgressIndicator());
                     }
-                    List<dynamic> friends = (snapshot.data?.data()
-                            as Map<String, dynamic>)['friends'] ??
-                        [];
+
+                    Map<String, dynamic>? data = snapshot.data!.data() as Map<String, dynamic>?;
+                    List<dynamic> friends = data?['friends'] is List ? data!['friends'] : [];
 
                     return ListView.builder(
                       itemCount: friends.length,
@@ -260,7 +257,7 @@ class _FriendsListState extends State<FriendsList>
                             String displayName =
                                 friendData['displayName'] ?? 'Unknown';
                             String photoUrl = friendData['pfp'] ??
-                                'https://picsum.photos/200/200';
+                                'https://picsum.photos/id/443/367/267';
                             double totalDailyHours =
                                 friendData['totalDailyHours'] ?? 0.0;
 
@@ -520,7 +517,7 @@ class ShowAddFriendsSheet extends StatelessWidget {
           CircleAvatar(
             radius: 50,
             backgroundImage: NetworkImage(
-                _auth.currentUser?.photoURL ?? 'https://picsum.photos/200/200'),
+                _auth.currentUser?.photoURL ?? 'https://picsum.photos/id/443/367/267'),
           ),
           const SizedBox(height: 16),
 
