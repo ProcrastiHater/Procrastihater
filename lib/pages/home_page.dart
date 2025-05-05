@@ -123,7 +123,6 @@ class _MyHomePageState extends State<MyHomePage> {
   /// paused or force closed. If detected it displays a warning to the
   /// user to ensure they want to exit the app
   ///*********************************************************
-  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
@@ -146,7 +145,6 @@ class _MyHomePageState extends State<MyHomePage> {
             TextButton(
               child: Text('Exit'),
               onPressed: () {
-                // Handle exit action
                 SystemNavigator.pop(); // This will close the app
               },
             ),
