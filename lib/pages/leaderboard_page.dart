@@ -38,15 +38,23 @@ class LeaderBoardPage extends StatefulWidget {
 
 class _LeaderBoardPageState extends State<LeaderBoardPage> {
   bool showFriendsLeaderboard = false; // Toggle state
+  bool _isInitialized = false;
   final String currentUserId = auth.currentUser!.uid;
 
- @override
+  @override
   void initState() {
     super.initState();
-    _initializeUserPoints();
+    _setup();
   }
 
-Future<void> _initializeUserPoints() async {
+  Future<void> _setup() async {
+    await _initializeUserPoints();
+    setState(() {
+      _isInitialized = true;
+    });
+  }
+
+  Future<void> _initializeUserPoints() async {
     final userRef = firestore.collection('UID').doc(currentUserId);
     final doc = await userRef.get();
 
@@ -59,9 +67,13 @@ Future<void> _initializeUserPoints() async {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
+      if (!_isInitialized) {
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
+    );
+  }
     return GestureDetector(
         onHorizontalDragEnd: (details) {
           if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
@@ -234,7 +246,10 @@ Future<void> _initializeUserPoints() async {
 
                   List<String> friends =
                       List<String>.from(userData['friends'] ?? []);
-
+                  if(showFriendsLeaderboard)
+                  {
+                    return const Text("You have no friends! :(");
+                  }
                   return StreamBuilder<QuerySnapshot>(
                     stream: showFriendsLeaderboard
                         ? firestore.collection('UID').where(
