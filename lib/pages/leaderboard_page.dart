@@ -70,23 +70,6 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                 },
               )
             ],
-            // bottom: AppBar(
-            //   title: Text(showFriendsLeaderboard
-            //       ? "Friends Leaderboard"
-            //       : "Global Leaderboard"),
-            //   automaticallyImplyLeading: false,
-            //   actions: [
-            //     Icon(showFriendsLeaderboard ? Icons.group : Icons.public),
-            //     Switch(
-            //       value: showFriendsLeaderboard,
-            //       onChanged: (value) {
-            //         setState(() {
-            //           showFriendsLeaderboard = value;
-            //         });
-            //       },
-            //     ),
-            //   ],
-            // ),
           ),
           drawer: Drawer(
             child: ListView(
