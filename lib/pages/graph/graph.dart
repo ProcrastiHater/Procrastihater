@@ -31,6 +31,7 @@ import '/pages/graph/list_view.dart';
 import '/pages/graph/widget.dart';
 import '/pages/graph/colors.dart';
 
+//Global Variables
 Map<String, Map<String, String>> dailyData = {};
 
 ///*********************************
@@ -56,9 +57,12 @@ class WeeklyGraphView extends StatefulWidget {
 /// weekly graph
 ///*********************************
 class _WeeklyGraphViewState extends State<WeeklyGraphView> {
+  //Variables for filtered data
   List<String> selectedCategories = [];
   List<String> selectedApps = [];
   String? selectedFilter = "";
+  
+  //Varaibles for week scrolling data
   Map<String, Map<String, Map<String, dynamic>>> weekData = {};
   String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
   bool isLoading = false;
@@ -68,9 +72,12 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     return getBarWeekTouch(data, widget.onBarSelected);
   }
 
+  //Asynchronous function for initializing data
   Future<void> initWeeklyData() async {
     await fetchWeeklyScreenTime();
+    //Do not run following code if the build context is mounted
     if (!mounted) return;
+    //Reload page with updated data
     setState(() {
       weekData = weeklyData;
       availableDays = weekData.keys.toList();
@@ -78,7 +85,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     });
   }
 
-  //TODO: Check if async is handled properly
+  //Initial state for view
   @override
   void initState() {
     super.initState();
@@ -88,8 +95,11 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     initWeeklyData();
   }
 
+  //Filter function for data
   Map<String, Map<String, Map<String, dynamic>>> filterData() {
+    //Member for holding filtered data
     Map<String, Map<String, Map<String, dynamic>>> filteredData = {};
+    //Fill member with unfiltered data
     weeklyData.forEach((dayKey, dayData) {
       Map<String, Map<String, dynamic>> appsMap = {};
       dayData.forEach((appKey, appData) {
@@ -98,6 +108,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       filteredData[dayKey] = appsMap;
     });
 
+    //Dropdown Multi-Select Search filtering for individual apps
     if (selectedApps.isNotEmpty) {
       filteredData.forEach((dayKey, dayData) {
         dayData.removeWhere((appKey, appData) {
@@ -107,6 +118,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       });
     }
 
+    //Multi-Select filtering for selecting one or more categories
     if (selectedCategories.isNotEmpty){
       filteredData.forEach((dayKey, dayData) {
         dayData.removeWhere((appKey, appData) {
@@ -116,8 +128,9 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       }); 
     }
 
-
+    //Filtering options for sorting data
     filteredData.forEach((dayKey, appsKey) {
+      //Convert the map to list of entries for sorting
       final entries = appsKey.entries.toList();
       switch (selectedFilter) {
         case 'Alphabet(asc)':
@@ -143,21 +156,27 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
         default:
           break;
         }
+      //Convert list of entries back into map
       filteredData[dayKey] = Map<String, Map<String, dynamic>>.fromEntries(entries);
     });    
     return filteredData;
   }
 
+  //Weekly graph view widget tree
   @override
   Widget build(BuildContext context) {
+    //Height of users phone
     double? screenWidth = MediaQuery.of(context).size.width;
+    //Display loading indicator while async function returns
     if (weekData.isEmpty) {
       return Center(child: CircularProgressIndicator());
     }
     return Padding(
       padding: const EdgeInsets.all(4.0),
+      //Column structure for home page
       child: Column(
         children: [
+          //Filter for individual apps
           CustomDropdown.multiSelectSearch(
             decoration: CustomDropdownDecoration(
                     closedFillColor: lightBlue,
@@ -192,9 +211,11 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
               });
             },
           ),
+          //Row structure for other filters
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              //Filter for categories
               Expanded(
                 child: CustomDropdown.multiSelect(
                   decoration: CustomDropdownDecoration(
@@ -228,6 +249,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   }
                 ),
               ),
+              //Filters for data sorting
               Expanded(
                 child: CustomDropdown(
                   decoration: CustomDropdownDecoration(
