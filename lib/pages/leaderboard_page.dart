@@ -118,14 +118,10 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
           ),
           body: Column(children: [
             FutureBuilder<QuerySnapshot>(
-              future: firestore
-                  .collection('UID')
-                  .orderBy('points') // ascending = lowest points first
-                  .limit(3)
-                  .get(),
+              future: firestore.collection('UID').orderBy('points').limit(3).get(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Text("There are not 3 users in the database, this is bad!");
                 }
 
                 var losers = snapshot.data!.docs.map((doc) {
