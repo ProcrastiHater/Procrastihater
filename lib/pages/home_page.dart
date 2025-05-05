@@ -11,6 +11,7 @@ library;
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 //fl_chart imports
 import 'package:fl_chart/fl_chart.dart';
@@ -93,6 +94,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Map<String, Map<String, String>> dayData = screenTimeData;
   Map<String, Map<String, Map<String, dynamic>>> weekData = weeklyData;
   int graphIndex = 0;
+
+  bool showAlertOnPause = false;
+
   void updateSelectedBar(String bar) {
     setState(() {
       selectedBar = bar;
@@ -115,16 +119,47 @@ class _MyHomePageState extends State<MyHomePage> {
   ///*********************************************************
   /// Name: didChangeAppLifecycleState
   ///
-  /// Description: Monitors the app's widet to detect if it has been
-  /// paused or force closed. If detected it applys the point penalty
-  /// and resets the timer page back to its default state
+  /// Description: Monitors the app's widget to detect if it has been
+  /// paused or force closed. If detected it displays a warning to the
+  /// user to ensure they want to exit the app
   ///*********************************************************
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-
+      showAlertOnPause = true;
+      _showExitWarningDialog();
+    } else if (state == AppLifecycleState.resumed || !showAlertOnPause) {
+      showAlertOnPause = false;
     }
+  }
+
+  void _showExitWarningDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Warning'),
+          content:
+              Text('You are about to exit the app. Do you want to continue?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Exit'),
+              onPressed: () {
+                // Handle exit action
+                SystemNavigator.pop(); // This will close the app
+              },
+            ),
+            TextButton(
+              child: Text('Continue'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
