@@ -78,7 +78,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     });
   }
 
-
+  //TODO: Check if async is handled properly
   @override
   void initState() {
     super.initState();
@@ -151,7 +151,6 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
   @override
   Widget build(BuildContext context) {
     double? screenWidth = MediaQuery.of(context).size.width;
-    double? screenHeight = MediaQuery.of(context).size.height;
     if (weekData.isEmpty) {
       return Center(child: CircularProgressIndicator());
     }
@@ -462,10 +461,6 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   @override
   Widget build(BuildContext context) {
     double? screenWidth = MediaQuery.of(context).size.width;
-    double? screenHeight = MediaQuery.of(context).size.height;
-    /*if (dailyData.isEmpty) {
-      return Center(child: CircularProgressIndicator());
-    }*/
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: Column(

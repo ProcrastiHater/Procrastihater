@@ -395,7 +395,7 @@ class PokeNotificationsPage extends StatelessWidget {
             ));
           }
 
-          return Container(
+          return SizedBox(
             child: ListView.builder(
               itemCount: pokes.length,
               itemBuilder: (context, index) {
@@ -608,8 +608,9 @@ class FriendRequestsSheet extends StatelessWidget {
                     return FutureBuilder<DocumentSnapshot>(
                       future: _firestore.collection('UID').doc(senderUID).get(),
                       builder: (context, userSnapshot) {
-                        if (!userSnapshot.hasData)
+                        if (!userSnapshot.hasData) {
                           return const SizedBox.shrink();
+                        }
                         var friendData =
                             userSnapshot.data!.data() as Map<String, dynamic>;
                         String senderName =

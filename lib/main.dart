@@ -98,7 +98,6 @@ class ProcrastiHater extends StatelessWidget {
   @override
   //Main material app for app
   Widget build(BuildContext context) {
-    double? screenWidth = MediaQuery.of(context).size.width;
     double? screenHeight = MediaQuery.of(context).size.height;
     return MaterialApp(
       theme: ThemeData(

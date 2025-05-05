@@ -33,6 +33,8 @@ String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 /// querysnapshot of collection appUsageHistory
 /// into a list
 ///*********************************
+///
+///TODO: Add try catch block
 Future<void> getAvailableWeeks() async{
    //Update the reference to the user doc before accessing
   updateUserRef();
@@ -41,6 +43,7 @@ Future<void> getAvailableWeeks() async{
 
   //Get all documents from the collection
   QuerySnapshot querySnapshot = await current.get();
+  //TODO: Check querySnapshot for NULL
   //Extract the document IDs
   List<String> availableWeeks =
       querySnapshot.docs.map((doc) => doc.id).toList();
@@ -111,7 +114,7 @@ Future<void> fetchWeeklyScreenTime() async {
       ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key))),
   );
 }
-
+//TODO: error handling 
 Future<double> fetchTotalDayScreentime() async {
   final dailyScreenTime = (await FirebaseFirestore.instance
     .collection('UID')
@@ -120,6 +123,7 @@ Future<double> fetchTotalDayScreentime() async {
     .get('totalDailyHours') as double;
     return dailyScreenTime;
 }
+//TODO: error handling 
 Future<int> fetchPoints() async {
   final points = (await FirebaseFirestore.instance
     .collection('UID')
