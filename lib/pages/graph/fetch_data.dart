@@ -34,24 +34,29 @@ String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 /// into a list
 ///*********************************
 ///
-///TODO: Add try catch block
 Future<void> getAvailableWeeks() async{
    //Update the reference to the user doc before accessing
   updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
-
+  try {
   //Get all documents from the collection
   QuerySnapshot querySnapshot = await current.get();
-  //TODO: Check querySnapshot for NULL
-  //Extract the document IDs
-  List<String> availableWeeks =
-      querySnapshot.docs.map((doc) => doc.id).toList();
+  if (querySnapshot.docs.isNotEmpty)
+  {
+    //Extract the document IDs
+    List<String> availableWeeks =
+        querySnapshot.docs.map((doc) => doc.id).toList();
 
-  // Sort the week keys by date
-  final DateFormat formatter = DateFormat('MM-dd-yyyy');
-  availableWeeks.sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
-  availableWeekKeys = availableWeeks;
+    // Sort the week keys by date
+    final DateFormat formatter = DateFormat('MM-dd-yyyy');
+    availableWeeks.sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
+    availableWeekKeys = availableWeeks;
+  }
+  }
+  catch (e) {
+    debugPrint("error fetching screentime data: $e");
+  }
 }
 
 ///*********************************
@@ -114,21 +119,31 @@ Future<void> fetchWeeklyScreenTime() async {
       ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key))),
   );
 }
-//TODO: error handling 
 Future<double> fetchTotalDayScreentime() async {
-  final dailyScreenTime = (await FirebaseFirestore.instance
-    .collection('UID')
-    .doc(userRef.id)
-    .get())
-    .get('totalDailyHours') as double;
-    return dailyScreenTime;
+  try {
+    double dailyScreenTime = (await FirebaseFirestore.instance
+      .collection('UID')
+      .doc(userRef.id)
+      .get())
+      .get('totalDailyHours') as double;
+      return dailyScreenTime;
+  }
+  catch (e) {
+    debugPrint("error fetching daily screentime data: $e");
+  }
+  return -1;
 }
-//TODO: error handling 
 Future<int> fetchPoints() async {
-  final points = (await FirebaseFirestore.instance
+  try {
+  int points = (await FirebaseFirestore.instance
     .collection('UID')
     .doc(userRef.id)
     .get())
     .get('points') as int;
     return points;
+  }
+  catch (e) {
+    debugPrint("error fetching screentime data: $e");
+  }
+  return -1;
 }
