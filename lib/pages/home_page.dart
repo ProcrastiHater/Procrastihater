@@ -116,8 +116,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  //TODO: see if WillPopScope gives the neccesary functionality
-
   Future<bool> _showExitConfirmationDialog() async {
     return await showDialog(
           context: context,
