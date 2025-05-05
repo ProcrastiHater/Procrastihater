@@ -112,6 +112,21 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  ///*********************************************************
+  /// Name: didChangeAppLifecycleState
+  ///
+  /// Description: Monitors the app's widet to detect if it has been
+  /// paused or force closed. If detected it applys the point penalty
+  /// and resets the timer page back to its default state
+  ///*********************************************************
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     //Screensize
