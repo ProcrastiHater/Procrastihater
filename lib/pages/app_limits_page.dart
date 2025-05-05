@@ -76,10 +76,11 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
                 content: Text(
                   "This page allows you to set limits for how many minutes you want to be allowed to spend on an app."
                   " When you reach the limit you set for an app, as long as you have ProcrastiHater open, you will receive"
-                  " a notification\n\nTo set a limit for an app:\n\t•Scroll down the App Limits Page and locate the app\n"
-                  "\t•Enter a limit (in minutes) less than 24 hours\n\t•Save the limit using the Save button on the left\n\n"
-                  "NOTE: If you have not used an app since you installed ProcrastiHater, you cannot set a limit for it. You cannot"
-                  " set a limit for less than 5 minutes"
+                  " a notification. Limits you have previously set will be the default text color\n\nTo set a limit for an app:"
+                  "\n\t•Scroll down the App Limits Page and locate the app\n \t•Enter a limit (in minutes) less than 24 hours"
+                  ". The text for the limit will be red\n\t•Save the limit using the Save button on the left. The text for the limit"
+                  " will turn green\n\n NOTE: If you have not used an app since you installed ProcrastiHater, you cannot set a limit"
+                  " for it. You cannot set a limit for less than 5 minutes"
                 ),
                 actions: [
                   ElevatedButton(
