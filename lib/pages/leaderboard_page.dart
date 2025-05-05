@@ -40,6 +40,26 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
   bool showFriendsLeaderboard = false; // Toggle state
   final String currentUserId = auth.currentUser!.uid;
 
+ @override
+  void initState() {
+    super.initState();
+    _initializeUserPoints();
+  }
+
+Future<void> _initializeUserPoints() async {
+    final userRef = firestore.collection('UID').doc(currentUserId);
+    final doc = await userRef.get();
+
+    if (!doc.exists || doc.data() == null) {
+      await userRef.set({'points': 0}, SetOptions(merge: true));
+    } else {
+      final data = doc.data() as Map<String, dynamic>;
+      final points = data['points'] ?? 0;
+      await userRef.set({'points': points}, SetOptions(merge: true));
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -118,17 +138,20 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
           ),
           body: Column(children: [
             FutureBuilder<QuerySnapshot>(
-              future: firestore.collection('UID').orderBy('points').limit(3).get(),
+              future:
+                  firestore.collection('UID').orderBy('points').limit(3).get(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Text("There are not 3 users in the database, this is bad!");
+                  return const Text(
+                      "There are not 3 users in the database, this is bad!");
                 }
 
                 var losers = snapshot.data!.docs.map((doc) {
                   var data = doc.data() as Map<String, dynamic>;
                   return {
                     'displayName': data['displayName'] ?? 'Unknown',
-                    'pfp': data['pfp'] ?? 'https://picsum.photos/id/443/367/267',
+                    'pfp':
+                        data['pfp'] ?? 'https://picsum.photos/id/443/367/267',
                     'points': (data['points'] ?? 0) as num,
                   };
                 }).toList();
@@ -201,12 +224,14 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
               child: FutureBuilder<DocumentSnapshot>(
                 future: firestore.collection('UID').doc(currentUserId).get(),
                 builder: (context, userSnapshot) {
-                  if (!userSnapshot.hasData) {
+                  if (!userSnapshot.hasData ||
+                      userSnapshot.data?.data() == null) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
                   var userData =
-                      userSnapshot.data!.data() as Map<String, dynamic>;
+                      userSnapshot.data?.data() as Map<String, dynamic>? ?? {};
+
                   List<String> friends =
                       List<String>.from(userData['friends'] ?? []);
 
@@ -226,7 +251,8 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                         return {
                           'uid': doc.id,
                           'displayName': data['displayName'] ?? 'Unknown',
-                          'pfp': data['pfp'] ?? 'https://picsum.photos/id/443/367/267',
+                          'pfp': data['pfp'] ??
+                              'https://picsum.photos/id/443/367/267',
                           'points': (data['points'] ?? 0) as num,
                         };
                       }).toList();
