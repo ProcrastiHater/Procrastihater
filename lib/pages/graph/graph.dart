@@ -192,7 +192,9 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   ),
             closedHeaderPadding: EdgeInsets.all(8.0),
             expandedHeaderPadding: EdgeInsets.all(8.0),
+            //Options to select for this dropdown
             items: appNameToColor.keys.toList(), 
+            //Text displayed when no options are selected
             hintBuilder: (context, hint, enabled) {
               return Text(
                 "All Apps", 
@@ -202,6 +204,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                   ),
                 );
               },   
+            //Filter the data on click and rerender all elements holding data
             onListChanged: (value) {  
               setState(() {
                 selectedApps = value;
@@ -226,10 +229,12 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                       selectedColor: darkBlue,
                     )
                   ),
-                  items: categories, 
                   overlayHeight: 525,
                   closedHeaderPadding: EdgeInsets.all(8.0),
                   expandedHeaderPadding: EdgeInsets.all(8.0),
+                  //Options to select for this dropdown
+                  items: categories,
+                  //Text displayed when no options are selected
                   hintBuilder: (context, hint, enabled) {
                     return Text(
                       "All Categories", 
@@ -238,7 +243,8 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                         fontSize: 16.0,
                         ),
                     );
-                  },                
+                  }, 
+                  //Filter the data on click and rerender all elements holding data               
                   onListChanged: (value) {
                     setState(() {
                       selectedCategories = value;
@@ -272,6 +278,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
                         ),
                     );
                   },
+                  //Filter the data on click and rerender all elements holding data
                   onChanged: (value) {
                     setState(() {
                       selectedFilter = value;
