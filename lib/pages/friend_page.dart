@@ -230,17 +230,14 @@ class _FriendsListState extends State<FriendsList>
               ),
               Expanded(
                 child: StreamBuilder<DocumentSnapshot>(
-                  stream: _firestore
-                      .collection('UID')
-                      .doc(_auth.currentUser?.uid)
-                      .snapshots(),
+                  stream: _firestore.collection('UID').doc(uid).snapshots(),
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const CircularProgressIndicator();
+                    if (!snapshot.hasData || snapshot.data?.data() == null) {
+                      return const Text("No Friends Yet");
                     }
-                    List<dynamic> friends = (snapshot.data?.data()
-                            as Map<String, dynamic>)['friends'] ??
-                        [];
+
+                    Map<String, dynamic>? data = snapshot.data!.data() as Map<String, dynamic>?;
+                    List<dynamic> friends = data?['friends'] is List ? data!['friends'] : [];
 
                     return ListView.builder(
                       itemCount: friends.length,
@@ -248,10 +245,11 @@ class _FriendsListState extends State<FriendsList>
                         String friendUID = friends[index];
 
                         return FutureBuilder<DocumentSnapshot>(
-                          future:
-                              _firestore.collection('UID').doc(friendUID).get(),
+                          future: _firestore.collection('UID').doc(friendUID).get(),
                           builder: (context, friendSnapshot) {
-                            if (!friendSnapshot.hasData) {
+                            if (!friendSnapshot.hasData ||
+                                !friendSnapshot.data!.exists ||
+                                friendSnapshot.data?.data() == null) {
                               return const SizedBox.shrink();
                             }
 
