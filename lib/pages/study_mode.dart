@@ -204,7 +204,7 @@ String formatTime(Duration duration) {
                   child: Text(
                     "While in study mode, a timer will show and you will gain 1 point for every minute you studied for."
                     " Points earned will only be saved once you exit study mode via the \"End Study Session\" button."
-                    " If you minimize the app, close the app, or turn off your screen without exiting study mode via the"
+                    " If you minimize the app, close the app, or turn off your screen without pressing the"
                     " \"End Study Session\" button, 25 points will be deducted, and no points will be earned.",
                     style: const TextStyle(
                       fontSize: 20
