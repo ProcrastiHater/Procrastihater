@@ -61,7 +61,110 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    if(appNames.isNotEmpty){
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("App Screen Time Limits"),
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+          ),
+          actions: [
+            IconButton(
+              onPressed: () => showDialog(
+                context: context, 
+                builder: (BuildContext infoContext) => AlertDialog(
+                  title: Text("App Limits Page Help"),
+                  content: Text(
+                    "This page allows you to set limits for how many minutes you want to be allowed to spend on an app."
+                    " When you reach the limit you set for an app, as long as you have ProcrastiHater open, you will receive"
+                    " a notification. Limits you have previously set will be the default text color\n\nTo set a limit for an app:"
+                    "\n\t•Scroll down the App Limits Page and locate the app\n \t•Enter a limit (in minutes) less than 24 hours"
+                    ". The text for the limit will be red\n\t•Save the limit using the Save button on the left. The text for the limit"
+                    " will turn green\n\n NOTE: If you have not used an app since you installed ProcrastiHater, you cannot set a limit"
+                    " for it. You cannot set a limit for less than 5 minutes"
+                  ),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(infoContext, "Close Help"),
+                      child: Text("Close Help")
+                    )
+                  ],
+                  scrollable: true,
+                )
+              ),
+              icon: Icon(Icons.help_outline_rounded)
+            )
+          ],
+        ),
+        body: ListView.builder(
+          padding: EdgeInsets.all(4.0),
+          itemCount: appNames.length,
+          itemBuilder: (context, index) {
+            return Card(
+              child: ListTile(
+                titleAlignment: ListTileTitleAlignment.center,
+                contentPadding: EdgeInsets.only(bottom: 5, left: 10),
+                title: Text(
+                  appNames[index],
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: appNameToColor[appNames[index]],
+                  ),
+                ),
+                trailing: SizedBox(
+                  width: 200,
+                  child: TextField(
+                    controller: _appLimitControllers[index],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'\d')),
+                      LengthLimitingTextInputFormatter(4)
+                    ],
+                    onChanged: (String val){
+                      setState(() {
+                        _limitTextColors[index] = Colors.red;
+                      });
+                      return;
+                    },
+                    style: TextStyle(
+                      color: _limitTextColors[index]
+                    ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      labelText: 'Time limit',
+                      prefixIcon: IconButton(
+                        icon: Icon(
+                          Icons.save,
+                        ),
+                        onPressed: () {
+                          _updateAppLimit(appNames[index], _appLimitControllers[index].text).then((updated){
+                            if(updated){
+                              setState(() {
+                                _limitTextColors[index] = const Color.fromARGB(255, 65, 228, 70);
+                              });
+                            }
+                          });
+                        },
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: () => _deleteAppLimit(index), 
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: Colors.red,
+                        )
+                      )
+                    )
+                  )
+                )
+              ),
+            );
+          }
+        )
+      );
+    }
+    //If this else happens, the app list failed to generate
+    // or the user simply hasn't used any apps the day they downloaded ours
+    else {
+      return Scaffold(
       appBar: AppBar(
         title: Text("App Screen Time Limits"),
         titleTextStyle: TextStyle(
@@ -95,70 +198,16 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
           )
         ],
       ),
-      body: ListView.builder(
-        padding: EdgeInsets.all(4.0),
-        itemCount: appNames.length,
-        itemBuilder: (context, index) {
-          return Card(
-            child: ListTile(
-              titleAlignment: ListTileTitleAlignment.center,
-              contentPadding: EdgeInsets.only(bottom: 5, left: 10),
-              title: Text(
-                appNames[index],
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: appNameToColor[appNames[index]],
-                ),
-              ),
-              trailing: SizedBox(
-                width: 200,
-                child: TextField(
-                  controller: _appLimitControllers[index],
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'\d')),
-                    LengthLimitingTextInputFormatter(4)
-                  ],
-                  onChanged: (String val){
-                    setState(() {
-                      _limitTextColors[index] = Colors.red;
-                    });
-                    return;
-                  },
-                  style: TextStyle(
-                    color: _limitTextColors[index]
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    labelText: 'Time limit',
-                    prefixIcon: IconButton(
-                      icon: Icon(
-                        Icons.save,
-                      ),
-                      onPressed: () {
-                        _updateAppLimit(appNames[index], _appLimitControllers[index].text).then((updated){
-                          if(updated){
-                            setState(() {
-                              _limitTextColors[index] = const Color.fromARGB(255, 65, 228, 70);
-                            });
-                          }
-                        });
-                      },
-                    ),
-                    suffixIcon: IconButton(
-                      onPressed: () => _deleteAppLimit(index), 
-                      icon: Icon(
-                        Icons.close_rounded,
-                        color: Colors.red,
-                      )
-                    )
-                  )
-                )
-              )
-            ),
-          );
-        }
-      )
-    );
+      body: 
+        Text(
+          "There are either no apps with recorded screen time or something went wrong",
+          style: TextStyle(
+            fontSize: 18,
+          ),
+          textAlign: TextAlign.center,
+        )
+      );
+    }    
   }
 
   ///*********************************
