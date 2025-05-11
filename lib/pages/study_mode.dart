@@ -5,8 +5,8 @@
 ///*********************************************
 library;
 
+import 'package:app_screen_time/main.dart';
 import 'package:app_screen_time/pages/app_limits_page.dart';
-import 'package:app_screen_time/profile/profile_picture_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -71,10 +71,11 @@ class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserve
 /// object
 ///*********************************************************
 Future<void> _updateTotalPoints() async {
+  updateUserRef();
   final user = auth.currentUser;
   final userDoc = await userRef.get();
   int totalPoints = 0;
-  if(user != null){
+  if((userDoc.data() as Map<String, dynamic>).containsKey("points")){
     totalPoints = await userDoc.get("points");
   }
   setState(() {
@@ -113,9 +114,10 @@ void _startStudySession() {
 /// stopwatch, and refreshes the UI to display the new components
 ///*********************************************************
  Future<void> _endSession() async {
+    updateUserRef();
     final user = auth.currentUser;
     int earnedPoints = _stopwatch.elapsed.inMinutes;
-
+    final userDoc = await userRef.get();
     setState(() {
       _isStudying = false;
     });
@@ -123,10 +125,19 @@ void _startStudySession() {
     _stopwatch.stop();
     _stopwatch.reset();
 
-    if (earnedPoints >= 1 && user != null) {
-      await firestore.collection('UID').doc(user.uid).update({
-        'points': FieldValue.increment(earnedPoints),
-      });
+    if (earnedPoints >= 1 && userDoc.exists) {
+      if((userDoc.data() as Map<String,dynamic>).containsKey("points"))
+      {
+        await userRef.update({
+          'points': FieldValue.increment(earnedPoints),
+        });
+      }
+      else
+      {
+        await userRef.set({
+          'points': earnedPoints
+        });
+      }
     }
     await _updateTotalPoints();
 
@@ -140,6 +151,7 @@ void _startStudySession() {
   /// firestore object.
   ///*********************************************************
   Future<void> applyPenalty() async {
+    updateUserRef();
     final user = auth.currentUser;
     if (user != null) {
       await firestore.collection('UID').doc(user.uid).update({
