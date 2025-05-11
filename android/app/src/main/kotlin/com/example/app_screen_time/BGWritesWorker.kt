@@ -107,6 +107,7 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                         val batch = firestore.batch()
                         var totalDaily : Double = 0.0
                         var totalWeekly : Double = 0.0
+                        var pointChange : Long = 0
                         var histTask : Task<DocumentSnapshot>? = null
                         var histSnapshot : DocumentSnapshot? = null
                         val sdf = SimpleDateFormat("EEEE") //SimpleDateFormat
@@ -162,6 +163,12 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                                     }
                                     totalDaily += screenTimeHours
                                     totalWeekly += screenTimeHours
+                                    if(category == "Productivity"){
+                                        pointChange += (screenTimeHours*3).toInt()
+                                    }
+                                    if(category == "Social & Communication"){
+                                        pointChange -= (screenTimeHours*3).toInt()
+                                    }
                                     batch.set(
                                         historical,
                                         hashMapOf(
@@ -178,21 +185,20 @@ class BGWritesWorker(context: Context, workerParams: WorkerParameters) : Worker 
                                         SetOptions.merge()
                                     )
 
-                                    var pointChange : Long = 0
                                     if (totalDaily >= 12) {
-                                        pointChange = -20
+                                        pointChange += -20
                                     } else if (totalDaily >= 8) {
-                                        pointChange = -10
+                                        pointChange += -10
                                     } else if (totalDaily >= 6) {
-                                        pointChange = 10
+                                        pointChange += 10
                                     } else if (totalDaily >= 4) {
-                                        pointChange = 20
+                                        pointChange += 20
                                     } else if (totalDaily >= 2) {
-                                        pointChange = 30
+                                        pointChange += 30
                                     } else if (totalDaily >= 1) {
-                                        pointChange = 40
+                                        pointChange += 40
                                     } else {
-                                        pointChange = 50
+                                        pointChange += 50
                                     }
 
                                     batch.update(

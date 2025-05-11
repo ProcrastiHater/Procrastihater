@@ -77,7 +77,7 @@ Future<void> initializeMain() async {
   if (auth.currentUser != null) {
     await _currentToHistorical();
     await _checkSTPermission();
-    await _getScreenTime();
+    //await _getScreenTime();
     await getAvailableWeeks();
     await fetchWeeklyScreenTime();
     await generateAppsList();
@@ -408,19 +408,19 @@ Future<void> _currentToHistorical() async {
 
       // Code for calculating and updating a user's points
       if (totalDaily >= 12) {
-        pointChange = -20;
+        pointChange += -20;
       } else if (totalDaily >= 8) {
-        pointChange = -10;
+        pointChange += -10;
       } else if (totalDaily >= 6) {
-        pointChange = 10;
+        pointChange += 10;
       } else if (totalDaily >= 4) {
-        pointChange = 20;
+        pointChange += 20;
       } else if (totalDaily >= 2) {
-        pointChange = 30;
+        pointChange += 30;
       } else if (totalDaily >= 1) {
-        pointChange = 40;
+        pointChange += 40;
       } else {
-        pointChange = 50;
+        pointChange += 50;
       }
 
       await userRef.update({
