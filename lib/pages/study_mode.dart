@@ -73,10 +73,15 @@ class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserve
 Future<void> _updateTotalPoints() async {
   updateUserRef();
   final user = auth.currentUser;
-  final userDoc = await userRef.get();
   int totalPoints = 0;
-  if(userDoc.exists && (userDoc.data() as Map<String, dynamic>).containsKey("points")){
-    totalPoints = await userDoc.get("points");
+  try {
+    final userDoc = await userRef.get();
+    if (userDoc.exists &&
+      (userDoc.data() as Map<String, dynamic>).containsKey("points")) {
+        totalPoints = await userDoc.get("points");
+    }
+  } catch (e) {
+    debugPrint("error obtaining points from db: $e");
   }
   setState(() {
     _totalPoints = totalPoints;
@@ -117,33 +122,28 @@ void _startStudySession() {
     updateUserRef();
     final user = auth.currentUser;
     int earnedPoints = _stopwatch.elapsed.inMinutes;
-    final userDoc = await userRef.get();
-    setState(() {
-      _isStudying = false;
-    });
-
-    _stopwatch.stop();
-    _stopwatch.reset();
-
-    if (earnedPoints >= 1 && userDoc.exists) {
-      if((userDoc.data() as Map<String,dynamic>).containsKey("points"))
-      {
-        await userRef.update({
-          'points': FieldValue.increment(earnedPoints),
-        });
-      }
-      else
-      {
-        await userRef.set({
-          'points': earnedPoints
-        });
-      }
-    }
-    else if (earnedPoints >= 1)
-    {
-      await userRef.set({
-        'points': earnedPoints
+    try {
+      final userDoc = await userRef.get();
+      setState(() {
+        _isStudying = false;
       });
+
+      _stopwatch.stop();
+      _stopwatch.reset();
+
+      if (earnedPoints >= 1 && userDoc.exists) {
+        if ((userDoc.data() as Map<String, dynamic>).containsKey("points")) {
+          await userRef.update({
+            'points': FieldValue.increment(earnedPoints),
+          });
+        } else {
+          await userRef.set({'points': earnedPoints});
+        }
+      } else if (earnedPoints >= 1) {
+        await userRef.set({'points': earnedPoints});
+      }
+    } catch (e) {
+      debugPrint("error applying earned points: $e");
     }
     await _updateTotalPoints();
 
@@ -159,24 +159,21 @@ void _startStudySession() {
   Future<void> applyPenalty() async {
     updateUserRef();
     final user = auth.currentUser;
-    final userDoc = await userRef.get();
-    if (userDoc.exists) {
-      if((userDoc.data() as Map<String, dynamic>).containsKey("points")){
-        await userRef.update({
-          'points': FieldValue.increment(-25),
-        });
+    try {
+      final userDoc = await userRef.get();
+      if (userDoc.exists) {
+        if ((userDoc.data() as Map<String, dynamic>).containsKey("points")) {
+          await userRef.update({
+            'points': FieldValue.increment(-25),
+          });
+        } else {
+          await userRef.set({'points': -25});
+        }
+      } else {
+        await userRef.set({'points': -25});
       }
-      else {
-        await userRef.set({
-          'points': -25
-        });
-      }
-    }
-    else
-    {
-      await userRef.set({
-        'points': -25
-      });
+    } catch (e) {
+      debugPrint("error applying penalty: $e");
     }
     await _updateTotalPoints();
   }
