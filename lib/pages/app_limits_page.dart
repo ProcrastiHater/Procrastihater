@@ -287,8 +287,6 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
       //Delete limit if it already exists
       if (limitDoc.exists) {
         await limitRef.delete();
-      } else {
-        //Print "Limit doesn't exist yet" or something
       }
     }
     catch(e){
