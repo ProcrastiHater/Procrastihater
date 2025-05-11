@@ -77,7 +77,7 @@ Future<void> initializeMain() async {
   if (auth.currentUser != null) {
     await _currentToHistorical();
     await _checkSTPermission();
-    //await _getScreenTime();
+    await _getScreenTime();
     await getAvailableWeeks();
     await fetchWeeklyScreenTime();
     await generateAppsList();
