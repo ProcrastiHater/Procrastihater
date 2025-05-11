@@ -75,7 +75,7 @@ Future<void> _updateTotalPoints() async {
   final user = auth.currentUser;
   final userDoc = await userRef.get();
   int totalPoints = 0;
-  if((userDoc.data() as Map<String, dynamic>).containsKey("points")){
+  if(userDoc.exists && (userDoc.data() as Map<String, dynamic>).containsKey("points")){
     totalPoints = await userDoc.get("points");
   }
   setState(() {
@@ -139,6 +139,12 @@ void _startStudySession() {
         });
       }
     }
+    else if (earnedPoints >= 1)
+    {
+      await userRef.set({
+        'points': earnedPoints
+      });
+    }
     await _updateTotalPoints();
 
     WakelockPlus.disable();
@@ -153,9 +159,23 @@ void _startStudySession() {
   Future<void> applyPenalty() async {
     updateUserRef();
     final user = auth.currentUser;
-    if (user != null) {
-      await firestore.collection('UID').doc(user.uid).update({
-        'points': FieldValue.increment(-25),
+    final userDoc = await userRef.get();
+    if (userDoc.exists) {
+      if((userDoc.data() as Map<String, dynamic>).containsKey("points")){
+        await userRef.update({
+          'points': FieldValue.increment(-25),
+        });
+      }
+      else {
+        await userRef.set({
+          'points': -25
+        });
+      }
+    }
+    else
+    {
+      await userRef.set({
+        'points': -25
       });
     }
     await _updateTotalPoints();
