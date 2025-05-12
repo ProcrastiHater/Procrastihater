@@ -38,10 +38,42 @@ class LeaderBoardPage extends StatefulWidget {
 
 class _LeaderBoardPageState extends State<LeaderBoardPage> {
   bool showFriendsLeaderboard = false; // Toggle state
+  bool _isInitialized = false;
   final String currentUserId = auth.currentUser!.uid;
 
   @override
+  void initState() {
+    super.initState();
+    _setup();
+  }
+
+  Future<void> _setup() async {
+    await _initializeUserPoints();
+    setState(() {
+      _isInitialized = true;
+    });
+  }
+
+  Future<void> _initializeUserPoints() async {
+    final userRef = firestore.collection('UID').doc(currentUserId);
+    final doc = await userRef.get();
+
+    if (!doc.exists || doc.data() == null) {
+      await userRef.set({'points': 0}, SetOptions(merge: true));
+    } else {
+      final data = doc.data() as Map<String, dynamic>;
+      final points = data['points'] ?? 0;
+      await userRef.set({'points': points}, SetOptions(merge: true));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+      if (!_isInitialized) {
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
+    );
+  }
     return GestureDetector(
         onHorizontalDragEnd: (details) {
           if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
@@ -70,23 +102,6 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                 },
               )
             ],
-            // bottom: AppBar(
-            //   title: Text(showFriendsLeaderboard
-            //       ? "Friends Leaderboard"
-            //       : "Global Leaderboard"),
-            //   automaticallyImplyLeading: false,
-            //   actions: [
-            //     Icon(showFriendsLeaderboard ? Icons.group : Icons.public),
-            //     Switch(
-            //       value: showFriendsLeaderboard,
-            //       onChanged: (value) {
-            //         setState(() {
-            //           showFriendsLeaderboard = value;
-            //         });
-            //       },
-            //     ),
-            //   ],
-            // ),
           ),
           drawer: Drawer(
             child: ListView(
@@ -135,21 +150,20 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
           ),
           body: Column(children: [
             FutureBuilder<QuerySnapshot>(
-              future: firestore
-                  .collection('UID')
-                  .orderBy('points') // ascending = lowest points first
-                  .limit(3)
-                  .get(),
+              future:
+                  firestore.collection('UID').orderBy('points').limit(3).get(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Text(
+                      "There are not 3 users in the database, this is bad!");
                 }
 
                 var losers = snapshot.data!.docs.map((doc) {
                   var data = doc.data() as Map<String, dynamic>;
                   return {
                     'displayName': data['displayName'] ?? 'Unknown',
-                    'pfp': data['pfp'] ?? 'https://picsum.photos/id/443/367/267',
+                    'pfp':
+                        data['pfp'] ?? 'https://picsum.photos/id/443/367/267',
                     'points': (data['points'] ?? 0) as num,
                   };
                 }).toList();
@@ -222,15 +236,20 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
               child: FutureBuilder<DocumentSnapshot>(
                 future: firestore.collection('UID').doc(currentUserId).get(),
                 builder: (context, userSnapshot) {
-                  if (!userSnapshot.hasData) {
+                  if (!userSnapshot.hasData ||
+                      userSnapshot.data?.data() == null) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
                   var userData =
-                      userSnapshot.data!.data() as Map<String, dynamic>;
+                      userSnapshot.data?.data() as Map<String, dynamic>? ?? {};
+
                   List<String> friends =
                       List<String>.from(userData['friends'] ?? []);
-
+                  if(showFriendsLeaderboard && friends.isEmpty)
+                  {
+                    return const Text("You have no friends! :(");
+                  }
                   return StreamBuilder<QuerySnapshot>(
                     stream: showFriendsLeaderboard
                         ? firestore.collection('UID').where(
@@ -247,7 +266,8 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                         return {
                           'uid': doc.id,
                           'displayName': data['displayName'] ?? 'Unknown',
-                          'pfp': data['pfp'] ?? 'https://picsum.photos/id/443/367/267',
+                          'pfp': data['pfp'] ??
+                              'https://picsum.photos/id/443/367/267',
                           'points': (data['points'] ?? 0) as num,
                         };
                       }).toList();
