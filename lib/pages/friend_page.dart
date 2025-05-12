@@ -234,7 +234,7 @@ class _FriendsListState extends State<FriendsList>
                   stream: _firestore.collection('UID').doc(uid).snapshots(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData || snapshot.data?.data() == null) {
-                      return const Text("No Friends Yet");
+                      return const Center(child: Text("No Friends Yet"));
                     }
 
                     Map<String, dynamic>? data =
@@ -245,7 +245,7 @@ class _FriendsListState extends State<FriendsList>
                     if (friends.isEmpty) {
                       return const Center(child: Text("No Friends Yet"));
                     }
-                    
+
                     return ListView.builder(
                       itemCount: friends.length,
                       itemBuilder: (context, index) {
