@@ -1,8 +1,16 @@
+///*********************************************
+/// Name: study_mode_page.dart
+///
+/// Description: Page for entering study mode
+///*********************************************
+library;
+
+import 'package:app_screen_time/main.dart';
 import 'package:app_screen_time/pages/app_limits_page.dart';
-import 'package:app_screen_time/profile/profile_picture_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'dart:async';
 class StudyModePage extends StatefulWidget {
   const StudyModePage({super.key});
@@ -63,11 +71,17 @@ class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserve
 /// object
 ///*********************************************************
 Future<void> _updateTotalPoints() async {
+  updateUserRef();
   final user = auth.currentUser;
-  final userDoc = await userRef.get();
   int totalPoints = 0;
-  if(user != null){
-    totalPoints = await userDoc.get("points");
+  try {
+    final userDoc = await userRef.get();
+    if (userDoc.exists &&
+      (userDoc.data() as Map<String, dynamic>).containsKey("points")) {
+        totalPoints = await userDoc.get("points");
+    }
+  } catch (e) {
+    debugPrint("error obtaining points from db: $e");
   }
   setState(() {
     _totalPoints = totalPoints;
@@ -94,7 +108,9 @@ void _startStudySession() {
       setState(() {}); 
     }
   });
-  }
+
+  WakelockPlus.enable();
+}
 
 ///*********************************************************
 /// Name: _endSession
@@ -103,22 +119,35 @@ void _startStudySession() {
 /// stopwatch, and refreshes the UI to display the new components
 ///*********************************************************
  Future<void> _endSession() async {
+    updateUserRef();
     final user = auth.currentUser;
     int earnedPoints = _stopwatch.elapsed.inMinutes;
-
-    setState(() {
-      _isStudying = false;
-    });
-
-    _stopwatch.stop();
-   _stopwatch.reset();
-
-    if (earnedPoints >= 1 && user != null) {
-      await firestore.collection('UID').doc(user.uid).update({
-        'points': FieldValue.increment(earnedPoints),
+    try {
+      final userDoc = await userRef.get();
+      setState(() {
+        _isStudying = false;
       });
+
+      _stopwatch.stop();
+      _stopwatch.reset();
+
+      if (earnedPoints >= 1 && userDoc.exists) {
+        if ((userDoc.data() as Map<String, dynamic>).containsKey("points")) {
+          await userRef.update({
+            'points': FieldValue.increment(earnedPoints),
+          });
+        } else {
+          await userRef.set({'points': earnedPoints});
+        }
+      } else if (earnedPoints >= 1) {
+        await userRef.set({'points': earnedPoints});
+      }
+    } catch (e) {
+      debugPrint("error applying earned points: $e");
     }
     await _updateTotalPoints();
+
+    WakelockPlus.disable();
   }
 
   ///*********************************************************
@@ -128,11 +157,23 @@ void _startStudySession() {
   /// firestore object.
   ///*********************************************************
   Future<void> applyPenalty() async {
+    updateUserRef();
     final user = auth.currentUser;
-    if (user != null) {
-      await firestore.collection('UID').doc(user.uid).update({
-        'points': FieldValue.increment(-25),
-      });
+    try {
+      final userDoc = await userRef.get();
+      if (userDoc.exists) {
+        if ((userDoc.data() as Map<String, dynamic>).containsKey("points")) {
+          await userRef.update({
+            'points': FieldValue.increment(-25),
+          });
+        } else {
+          await userRef.set({'points': -25});
+        }
+      } else {
+        await userRef.set({'points': -25});
+      }
+    } catch (e) {
+      debugPrint("error applying penalty: $e");
     }
     await _updateTotalPoints();
   }
@@ -190,9 +231,10 @@ String formatTime(Duration duration) {
                 Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
-                    "While in study mode, a timer will show and you will gain points for every minute you studied for"
-                    " once you exit study mode. However, if you leave the app without"
-                    " exiting study mode, a large amount of points will be deducted instead.",
+                    "While in study mode, a timer will show and you will gain 1 point for every minute you studied for."
+                    " Points earned will only be saved once you exit study mode via the \"End Study Session\" button."
+                    " If you minimize the app, close the app, or turn off your screen without pressing the"
+                    " \"End Study Session\" button, 25 points will be deducted, and no points will be earned.",
                     style: const TextStyle(
                       fontSize: 20
                     ),
