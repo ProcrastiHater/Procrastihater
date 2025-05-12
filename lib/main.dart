@@ -170,8 +170,17 @@ class ProcrastiHater extends StatelessWidget {
           }
 
           // If user is authenticated, initialize app data and show home page
-          initializeMain();
-          return const HomePage();
+          //initializeMain();
+          //return const HomePage();
+          return FutureBuilder(
+            future: initializeMain(), 
+            builder: (builder, initSnap) {
+              if (initSnap.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator(),);
+              }
+              return const HomePage();
+            }
+            );
         },
       ),
       onGenerateRoute: _generateRoutes,
