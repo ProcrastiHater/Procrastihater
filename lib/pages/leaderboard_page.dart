@@ -41,6 +41,11 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
   bool showFriendsLeaderboard = false; // Toggle state
   final String currentUserId = auth.currentUser!.uid;
 
+  ///*********************************
+  /// Name: _showExitConfirmationDialog
+  ///
+  /// Description: Creates the exit app dialog
+  ///*********************************
   Future<bool> _showExitConfirmationDialog() async {
     return await showDialog(
           context: context,

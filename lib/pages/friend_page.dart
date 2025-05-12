@@ -133,6 +133,11 @@ class FriendsPage extends StatelessWidget {
   }
 }
 
+///*********************************
+/// Name: _showExitConfirmationDialog
+///
+/// Description: Creates the exit app dialog
+///*********************************
 Future<bool> _showExitConfirmationDialog(dynamic context) async {
   return await showDialog(
         context: context,

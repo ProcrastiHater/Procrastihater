@@ -70,8 +70,8 @@ class _CalendarPageState extends State<CalendarPage> {
   ///*********************************
   /// Name: getColor
   ///
-  /// Description: gets and sets the color of the
-  /// all day checkbox based off the interaction state
+  /// Description: sets the color of the
+  /// all day checkbox 
   ///*********************************
   Color getColor(Set<WidgetState> states) {
     return lightBlue;
