@@ -121,10 +121,11 @@ Future<void> fetchWeeklyScreenTime() async {
 }
 Future<double> fetchTotalDayScreentime() async {
   try {
-    double dailyScreenTime = (await userRef
-      .get())
-      .get('totalDailyHours') as double;
+    final userDoc = await userRef.get();
+    if (userDoc.exists) {
+      double dailyScreenTime = await userDoc.get("totalDailyHours") ?? 0.0;
       return dailyScreenTime;
+    }
   }
   catch (e) {
     debugPrint("error fetching daily screentime data: $e");
@@ -133,10 +134,11 @@ Future<double> fetchTotalDayScreentime() async {
 }
 Future<int> fetchPoints() async {
   try {
-  int points = (await userRef
-    .get())
-    .get('points') as int;
-    return points;
+    final userDoc = await userRef.get();
+    if (userDoc.exists) {
+      int points = await userDoc.get("points") ?? 0.0;
+      return points;
+    }
   }
   catch (e) {
     debugPrint("error fetching screentime data: $e");
