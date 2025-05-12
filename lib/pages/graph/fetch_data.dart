@@ -23,7 +23,7 @@ Map<String, Map<String, Map<String, dynamic>>> weeklyData = {};
 
 //Variables for multi-week view
 List<String> availableWeekKeys = [];
-DateTime currentDataset = DateFormat('MM-dd-yyyy').parse(availableWeekKeys.last);
+DateTime currentDataset = DateTime.now();
 String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 
 ///*********************************
@@ -53,6 +53,7 @@ Future<void> getAvailableWeeks() async{
       availableWeeks.sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
       availableWeekKeys = availableWeeks;
     }
+    currentDataset = DateFormat('MM-dd-yyyy').parse(availableWeekKeys.last);
   }
   catch (e) {
     debugPrint("error fetching screentime data: $e");
@@ -130,10 +131,10 @@ Future<double> fetchTotalDayScreentime() async {
   catch (e) {
     debugPrint("error fetching daily screentime data: $e");
   }
-  return -1;
+  return 0;
 }
 Future<int> fetchPoints() async {
-  try {
+    try {
     final userDoc = await userRef.get();
     if (userDoc.exists) {
       int points = await userDoc.get("points") ?? 0.0;
@@ -143,5 +144,5 @@ Future<int> fetchPoints() async {
   catch (e) {
     debugPrint("error fetching screentime data: $e");
   }
-  return -1;
+  return 0;
 }

@@ -68,7 +68,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase initialization
   await Firebase.initializeApp();
-  //await initializeMain();
+  await _checkSTPermission();
   runApp(const ProcrastiHater());
 }
 
@@ -78,11 +78,11 @@ Future<void> initializeMain() async {
     await _currentToHistorical();
     await _checkSTPermission();
     await getScreenTime();
+    await _writeScreenTimeData();
     await getAvailableWeeks();
     await fetchWeeklyScreenTime();
     await generateAppsList();
     await initializeAppNameColorMapping();
-    await _writeScreenTimeData();
   }
 }
 
