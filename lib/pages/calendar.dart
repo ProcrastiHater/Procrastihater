@@ -9,6 +9,7 @@ library;
 
 //Dart Imports
 import 'dart:async';
+import '/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -73,15 +74,7 @@ class _CalendarPageState extends State<CalendarPage> {
   /// all day checkbox based off the interaction state
   ///*********************************
   Color getColor(Set<WidgetState> states) {
-    const Set<WidgetState> interactiveStates = <WidgetState>{
-      WidgetState.pressed,
-      WidgetState.hovered,
-      WidgetState.focused,
-    };
-    if (states.any(interactiveStates.contains)) {
-      return Colors.blue;
-    }
-    return Colors.grey;
+    return lightBlue;
   }
 
   @override
@@ -173,7 +166,7 @@ class _CalendarPageState extends State<CalendarPage> {
             ListTile(
                 title: const Text('All Day'),
                 trailing: Checkbox(
-                  checkColor: Colors.white,
+                  checkColor: beige,
                   fillColor: WidgetStateProperty.resolveWith(getColor),
                   value: isAllDay,
                   onChanged: (bool? value) {
