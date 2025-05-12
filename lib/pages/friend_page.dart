@@ -48,116 +48,119 @@ class FriendsPage extends StatelessWidget {
         }
       },
       child: GestureDetector(
-        //The user swipes horizontally
-        onHorizontalDragEnd: (details) {
-          //The user swipes from right to left
-          if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
-            //Load back animation for page
-            Navigator.pushReplacementNamed(context, '/friendsPageBack');
-          }
-        },
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text("ProcrastiFriends"),
-            actions: [
-              // Creating little user icon you can press to view account info
-              IconButton(
-                icon: CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    // Use user's pfp as icon image if there is no pfp use this link as a default
-                    auth.currentUser?.photoURL ??
-                        'https://picsum.photos/id/237/200/300',
-                  ),
+      //The user swipes horizontally
+      onHorizontalDragEnd: (details) {
+        //The user swipes from right to left
+        if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
+          //Load back animation for page
+          Navigator.pushReplacementNamed(context, '/friendsPageBack');
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("ProcrastiFriends"),
+          actions: [
+            // Creating little user icon you can press to view account info
+            IconButton(
+              icon: CircleAvatar(
+                backgroundImage: NetworkImage(
+                  // Use user's pfp as icon image if there is no pfp use this link as a default
+                  auth.currentUser?.photoURL ??
+                      'https://picsum.photos/id/237/200/300',
                 ),
-                onPressed: () async {
-                  await Navigator.pushNamed(context, "/profileSettings");
-                  // Reload the user in case anything changed
-                  await auth.currentUser?.reload();
-                  // Reload UI in case things changed
-                  // setState(() {});
+              ),
+              onPressed: () async {
+                await Navigator.pushNamed(context, "/profileSettings");
+                // Reload the user in case anything changed
+                await auth.currentUser?.reload();
+                // Reload UI in case things changed
+                // setState(() {});
+              },
+            )
+          ],
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              SizedBox(
+                height: 80,
+                child: DrawerHeader(
+                    decoration: BoxDecoration(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12.0),
+                          child: Image.asset("assets/logo.jpg"),
+                        ),
+                        Text(
+                          "ProcrastiTools",
+                        ),
+                      ],
+                    )),
+              ),
+              ListTile(
+                trailing: Icon(Icons.calendar_today),
+                title: Text("Calendar"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/calendarPage');
+                },
+              ),
+              // const Divider(),
+              ListTile(
+                trailing: Icon(Icons.school),
+                title: Text("Study Mode"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/studyModePage');
+                },
+              ),
+              //const Divider(),
+              ListTile(
+                trailing: Icon(Icons.alarm),
+                title: Text("App Limits"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/appLimitsPage');
                 },
               )
             ],
           ),
-          drawer: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                SizedBox(
-                  height: 80,
-                  child: DrawerHeader(
-                      decoration: BoxDecoration(),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12.0),
-                            child: Image.asset("assets/logo.jpg"),
-                          ),
-                          Text(
-                            "ProcrastiTools",
-                          ),
-                        ],
-                      )),
-                ),
-                ListTile(
-                  trailing: Icon(Icons.calendar_today),
-                  title: Text("Calendar"),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/calendarPage');
-                  },
-                ),
-                // const Divider(),
-                ListTile(
-                  trailing: Icon(Icons.school),
-                  title: Text("Study Mode"),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/studyModePage');
-                  },
-                ),
-                //const Divider(),
-                ListTile(
-                  trailing: Icon(Icons.alarm),
-                  title: Text("App Limits"),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/appLimitsPage');
-                  },
-                )
-              ],
-            ),
-          ),
-          body: FriendsList(),
         ),
+        body: FriendsList(),
+      ),
       ),
     );
   }
 }
 
-///*********************************
-/// Name: _showExitConfirmationDialog
-///
-/// Description: Creates the exit app dialog
-///*********************************
-Future<bool> _showExitConfirmationDialog(dynamic context) async {
-  return await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Exit App'),
-          content: Text('Are you sure you want to exit the app?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text('No'),
+    ///*********************************
+    /// Name: _showExitConfirmationDialog
+    ///
+    /// Description: Creates the exit app dialog
+    ///*********************************
+    Future<bool> _showExitConfirmationDialog(dynamic context) async {
+      return await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Exit App'),
+              content: Text('Are you sure you want to exit the app?'),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text('Yes'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text('Yes'),
-            ),
-          ],
-        ),
-      ) ??
-      false;
-}
+          ) ??
+          false;
+    }
 
 ///********************************************************
 /// Name: FriendsList
@@ -271,17 +274,20 @@ class _FriendsListState extends State<FriendsList>
               ),
               Expanded(
                 child: StreamBuilder<DocumentSnapshot>(
-                  stream: _firestore
-                      .collection('UID')
-                      .doc(_auth.currentUser?.uid)
-                      .snapshots(),
+                  stream: _firestore.collection('UID').doc(uid).snapshots(),
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const CircularProgressIndicator();
+                    if (!snapshot.hasData || snapshot.data?.data() == null) {
+                      return const Center(child: Text("No Friends Yet"));
                     }
-                    List<dynamic> friends = (snapshot.data?.data()
-                            as Map<String, dynamic>)['friends'] ??
-                        [];
+
+                    Map<String, dynamic>? data =
+                        snapshot.data!.data() as Map<String, dynamic>?;
+                    List<dynamic> friends =
+                        data?['friends'] is List ? data!['friends'] : [];
+
+                    if (friends.isEmpty) {
+                      return const Center(child: Text("No Friends Yet"));
+                    }
 
                     return ListView.builder(
                       itemCount: friends.length,
@@ -292,7 +298,9 @@ class _FriendsListState extends State<FriendsList>
                           future:
                               _firestore.collection('UID').doc(friendUID).get(),
                           builder: (context, friendSnapshot) {
-                            if (!friendSnapshot.hasData) {
+                            if (!friendSnapshot.hasData ||
+                                !friendSnapshot.data!.exists ||
+                                friendSnapshot.data?.data() == null) {
                               return const SizedBox.shrink();
                             }
 

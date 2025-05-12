@@ -116,33 +116,34 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-
-
-  ///*********************************
-  /// Name: _showExitConfirmationDialog
-  ///
-  /// Description: Creates the exit app dialog
-  ///*********************************
-  Future<bool> _showExitConfirmationDialog() async {
-    return await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Exit App'),
-            content: Text('Are you sure you want to exit the app?'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text('No'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text('Yes'),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-  }
+    ///*********************************
+    /// Name: _showExitConfirmationDialog
+    ///
+    /// Description: Creates the exit app dialog
+    ///*********************************
+    Future<bool> _showExitConfirmationDialog() async {
+      return await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Exit App'),
+              content: Text('Are you sure you want to exit the app?'),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text('Yes'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+          ) ??
+          false;
+    }
 
   @override
   Widget build(BuildContext context) {

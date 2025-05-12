@@ -68,7 +68,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase initialization
   await Firebase.initializeApp();
-  await initializeMain();
+  //await initializeMain();
   runApp(const ProcrastiHater());
 }
 
@@ -349,6 +349,7 @@ Future<void> _currentToHistorical() async {
     var batch = firestore.batch();
     double totalDaily = 0.0;
     double totalWeekly = 0.0;
+    int pointChange = 0;
     DocumentSnapshot<Map<String, dynamic>>? histSnapshot;
     try {
       // Iterate through each app and its screen time
@@ -380,6 +381,12 @@ Future<void> _currentToHistorical() async {
           }
           totalDaily += screenTimeHours;
           totalWeekly += screenTimeHours;
+          if(appMap.value['appType'] == 'Productivity'){
+            pointChange += (screenTimeHours * 3).toInt();
+          }
+          if(appMap.value['appType'] == 'Social & Communication'){
+            pointChange -= (screenTimeHours * 3).toInt();
+          }
           // Move data to historical
           batch.set(
             historical,
@@ -400,21 +407,20 @@ Future<void> _currentToHistorical() async {
       }
 
       // Code for calculating and updating a user's points
-      int pointChange = 0;
       if (totalDaily >= 12) {
-        pointChange = -20;
+        pointChange += -20;
       } else if (totalDaily >= 8) {
-        pointChange = -10;
+        pointChange += -10;
       } else if (totalDaily >= 6) {
-        pointChange = 10;
+        pointChange += 10;
       } else if (totalDaily >= 4) {
-        pointChange = 20;
+        pointChange += 20;
       } else if (totalDaily >= 2) {
-        pointChange = 30;
+        pointChange += 30;
       } else if (totalDaily >= 1) {
-        pointChange = 40;
+        pointChange += 40;
       } else {
-        pointChange = 50;
+        pointChange += 50;
       }
 
       await userRef.update({
@@ -477,23 +483,6 @@ Future<void> requestNotifsPermission() async {
     await checkNotifsPermission();
   } on PlatformException catch (e) {
     debugPrint("Failed to request permission: ${e.message}");
-  }
-}
-
-///*********************************
-/// Name: _startTestNotifications
-///
-/// Description: Invokes method from platform channel to
-/// start sending the test notification
-///*********************************
-Future<void> _startTestNotifications() async {
-  if (!hasNotifsPermission) {
-    return;
-  }
-  try {
-    await platformChannel.invokeMethod('startTestNotifications');
-  } on PlatformException catch (e) {
-    debugPrint("Failed to start notifications: ${e.message}");
   }
 }
 
