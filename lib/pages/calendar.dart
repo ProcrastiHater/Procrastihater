@@ -145,9 +145,7 @@ class _CalendarPageState extends State<CalendarPage> {
           children: [
             TextField(
               controller: _titleController,
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(1000)
-              ],
+              inputFormatters: [LengthLimitingTextInputFormatter(1000)],
               decoration: const InputDecoration(
                 labelText: 'Event Title',
                 border: OutlineInputBorder(),
@@ -156,9 +154,7 @@ class _CalendarPageState extends State<CalendarPage> {
             const SizedBox(height: 16),
             TextField(
               controller: _descriptionController,
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(8192)
-              ],
+              inputFormatters: [LengthLimitingTextInputFormatter(8192)],
               decoration: const InputDecoration(
                 labelText: 'Event Description',
                 border: OutlineInputBorder(),
@@ -168,9 +164,7 @@ class _CalendarPageState extends State<CalendarPage> {
             const SizedBox(height: 16),
             TextField(
               controller: _locationController,
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(1000)
-              ],
+              inputFormatters: [LengthLimitingTextInputFormatter(1000)],
               decoration: const InputDecoration(
                 labelText: 'Event Location',
                 border: OutlineInputBorder(),
@@ -221,14 +215,19 @@ class _CalendarPageState extends State<CalendarPage> {
               child: const Text('Event Times'),
             ),
             const SizedBox(height: 24),
-            ListTile(
-              title: const Text('Add event to calendar'),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () {
-                Add2Calendar.addEvent2Cal(
-                  buildEvent(),
-                );
-              },
+            Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25))),
+              elevation: 5,
+              child: ListTile(
+                title: const Text('Add event to calendar'),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () {
+                  Add2Calendar.addEvent2Cal(
+                    buildEvent(),
+                  );
+                },
+              ),
             ),
           ],
         ),
