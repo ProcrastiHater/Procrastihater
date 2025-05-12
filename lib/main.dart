@@ -69,6 +69,9 @@ void main() async {
   //Firebase initialization
   await Firebase.initializeApp();
   await _checkSTPermission();
+  if (!hasPermission) {
+    await _requestSTPermission();
+  }
   runApp(const ProcrastiHater());
 }
 

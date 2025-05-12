@@ -89,9 +89,11 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
   @override
   void initState() {
     super.initState();
-    formattedCurrent = availableWeekKeys.last;
-    currentWeek = formattedCurrent;
-    currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
+    if (availableWeekKeys.isNotEmpty) {
+      formattedCurrent = availableWeekKeys.last;
+      currentWeek = formattedCurrent;
+      currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
+    }
     initWeeklyData();
   }
 
