@@ -246,7 +246,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
 
                   List<String> friends =
                       List<String>.from(userData['friends'] ?? []);
-                  if(showFriendsLeaderboard)
+                  if(showFriendsLeaderboard && friends.isEmpty)
                   {
                     return const Text("You have no friends! :(");
                   }
