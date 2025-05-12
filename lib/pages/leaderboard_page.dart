@@ -7,6 +7,7 @@
 library;
 
 //smooth_page_indicator imports
+import 'package:flutter/services.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 //Dart Imports
@@ -41,6 +42,35 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
   bool _isInitialized = false;
   final String currentUserId = auth.currentUser!.uid;
 
+    ///*********************************
+    /// Name: _showExitConfirmationDialog
+    ///
+    /// Description: Creates the exit app dialog
+    ///*********************************
+    Future<bool> _showExitConfirmationDialog() async {
+      return await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Exit App'),
+              content: Text('Are you sure you want to exit the app?'),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text('Yes'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+          ) ??
+          false;
+    }
+
   @override
   void initState() {
     super.initState();
@@ -74,7 +104,19 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
       body: Center(child: CircularProgressIndicator()),
     );
   }
-    return GestureDetector(
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+
+        final bool shouldPop = await _showExitConfirmationDialog();
+
+        // If user confirmed exit, close the app
+        if (shouldPop && context.mounted) {
+          SystemNavigator.pop();
+        }
+      },
+      child: GestureDetector(
         onHorizontalDragEnd: (details) {
           if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
             Navigator.pushReplacementNamed(context, '/leaderBoardPageBack');
@@ -272,51 +314,53 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                         };
                       }).toList();
 
-                      users.sort((a, b) =>
-                          (b['points'] as num).compareTo(a['points'] as num));
+                        users.sort((a, b) =>
+                            (b['points'] as num).compareTo(a['points'] as num));
 
-                      return ListView.builder(
-                        itemCount: users.length,
-                        itemBuilder: (context, index) {
-                          var user = users[index];
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage: NetworkImage(user['pfp']),
-                            ),
-                            title: Text(user['displayName']),
-                            subtitle: Text(
-                              'Points: ${(user['points'] as num).toStringAsFixed(0)}',
-                            ),
-                            trailing: Text("${index + 1}"),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
+                        return ListView.builder(
+                          itemCount: users.length,
+                          itemBuilder: (context, index) {
+                            var user = users[index];
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: NetworkImage(user['pfp']),
+                              ),
+                              title: Text(user['displayName']),
+                              subtitle: Text(
+                                'Points: ${(user['points'] as num).toStringAsFixed(0)}',
+                              ),
+                              trailing: Text("${index + 1}"),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Center(
-                child: SmoothPageIndicator(
-                  controller:
-                      PageController(initialPage: 2), // Dummy controller
-                  count: 3,
-                  effect: WormEffect(
-                    paintStyle: PaintingStyle.stroke,
-                    activeDotColor: beige,
-                    dotColor: lightBeige,
-                    dotHeight: 8,
-                    dotWidth: 8,
-                    spacing: 12,
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Center(
+                  child: SmoothPageIndicator(
+                    controller:
+                        PageController(initialPage: 2), // Dummy controller
+                    count: 3,
+                    effect: WormEffect(
+                      paintStyle: PaintingStyle.stroke,
+                      activeDotColor: beige,
+                      dotColor: lightBeige,
+                      dotHeight: 8,
+                      dotWidth: 8,
+                      spacing: 12,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Container(height: 16),
-          ]),
-        ));
+              Container(height: 16),
+            ]),
+          ),
+      ),
+    );
   }
 }
 

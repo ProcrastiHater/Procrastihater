@@ -21,6 +21,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 //Page imports
 import '/main.dart';
+import '/pages/home_page.dart';
 
 ///*********************************
 /// Name: HistoricalDataPage
@@ -34,7 +35,19 @@ class FriendsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //Wait for a gesture
-    return GestureDetector(
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+
+        final bool shouldPop = await _showExitConfirmationDialog(context);
+
+        // If user confirmed exit, close the app
+        if (shouldPop && context.mounted) {
+          SystemNavigator.pop();
+        }
+      },
+      child: GestureDetector(
       //The user swipes horizontally
       onHorizontalDragEnd: (details) {
         //The user swipes from right to left
@@ -115,9 +128,39 @@ class FriendsPage extends StatelessWidget {
         ),
         body: FriendsList(),
       ),
+      ),
     );
   }
 }
+
+    ///*********************************
+    /// Name: _showExitConfirmationDialog
+    ///
+    /// Description: Creates the exit app dialog
+    ///*********************************
+    Future<bool> _showExitConfirmationDialog(dynamic context) async {
+      return await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Exit App'),
+              content: Text('Are you sure you want to exit the app?'),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text('Yes'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+          ) ??
+          false;
+    }
 
 ///********************************************************
 /// Name: FriendsList

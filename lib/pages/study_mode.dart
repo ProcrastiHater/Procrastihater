@@ -12,6 +12,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'dart:async';
+
+import 'package:flutter/services.dart';
+
 class StudyModePage extends StatefulWidget {
   const StudyModePage({super.key});
 
@@ -19,11 +22,11 @@ class StudyModePage extends StatefulWidget {
   StudyModePageState createState() => StudyModePageState();
 }
 
-class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserver {
+class StudyModePageState extends State<StudyModePage>
+    with WidgetsBindingObserver {
   bool _isStudying = false;
   final Stopwatch _stopwatch = Stopwatch();
   int _totalPoints = 0;
- 
 
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -37,30 +40,31 @@ class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserve
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); 
+    WidgetsBinding.instance.removeObserver(this);
     _isStudying = false;
     _stopwatch.stop();
     super.dispose();
   }
 
-///*********************************************************
-/// Name: didChangeAppLifecycleState
-/// 
-/// Description: Monitors the app's widet to detect if it has been
-/// paused or force closed. If detected it applys the point penalty
-/// and resets the timer page back to its default state
-///*********************************************************
- @override
+  ///*********************************************************
+  /// Name: didChangeAppLifecycleState
+  ///
+  /// Description: Monitors the app's widet to detect if it has been
+  /// paused or force closed. If detected it applys the point penalty
+  /// and resets the timer page back to its default state
+  ///*********************************************************
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (_isStudying) {
-      if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
-        applyPenalty(); 
+      if (state == AppLifecycleState.paused ||
+          state == AppLifecycleState.detached) {
+        applyPenalty();
         _stopwatch.stop();
-        _stopwatch.reset(); 
+        _stopwatch.reset();
         setState(() {
           _isStudying = false;
         });
-      } 
+      }
     }
   }
 
@@ -88,17 +92,17 @@ Future<void> _updateTotalPoints() async {
   });
 }
 
-///*********************************************************
-/// Name: _startStudySession
-/// 
-/// Description: Sets the isStudying flag to true, begins the 
-/// stopwatch, and refreshes the UI to display the new components
-///*********************************************************
-void _startStudySession() {
+  ///*********************************************************
+  /// Name: _startStudySession
+  ///
+  /// Description: Sets the isStudying flag to true, begins the
+  /// stopwatch, and refreshes the UI to display the new components
+  ///*********************************************************
+  void _startStudySession() {
     setState(() {
-    _isStudying = true;
-    _stopwatch.start();  
-  });
+      _isStudying = true;
+      _stopwatch.start();
+    });
 
   // Refreshing the UI every second so that the stopwatch can be displayed
   Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -152,8 +156,8 @@ void _startStudySession() {
 
   ///*********************************************************
   /// Name: applyPenalty
-  /// 
-  /// Description: applys the point deduction to the user's 
+  ///
+  /// Description: applys the point deduction to the user's
   /// firestore object.
   ///*********************************************************
   Future<void> applyPenalty() async {
@@ -178,27 +182,25 @@ void _startStudySession() {
     await _updateTotalPoints();
   }
 
-///*********************************************************
-/// Name: formatTime
-/// 
-/// Description: converts the stop watches duration object to
-/// a nicer looking string to display
-///*********************************************************
-String formatTime(Duration duration) {
-  String hours = duration.inHours.toString().padLeft(2, '0');
-  String minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
-  String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-  return "$hours:$minutes:$seconds";
-}
+  ///*********************************************************
+  /// Name: formatTime
+  ///
+  /// Description: converts the stop watches duration object to
+  /// a nicer looking string to display
+  ///*********************************************************
+  String formatTime(Duration duration) {
+    String hours = duration.inHours.toString().padLeft(2, '0');
+    String minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
+    String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return "$hours:$minutes:$seconds";
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Study Mode"),
-        titleTextStyle: TextStyle(
-          fontSize: 20
-        ),
+        titleTextStyle: TextStyle(fontSize: 20),
       ),
       body: Center(
         child: _isStudying
