@@ -26,7 +26,7 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 //Page Imports
 import '/pages/graph/graph.dart';
-
+import 'package:app_screen_time/apps_list.dart';
 import '/main.dart';
 import '/pages/graph/list_view.dart';
 import '/profile/profile_settings.dart';
@@ -82,7 +82,7 @@ class MyHomePage extends StatefulWidget {
 /// Description: State for MyHomePage,
 /// holds main layout widget for page
 ///*********************************
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   String selectedBar = "null";
   Map<String, Map<String, String>> dayData = screenTimeData;
   Map<String, Map<String, Map<String, dynamic>>> weekData = weeklyData;
@@ -91,6 +91,13 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);   
+  }
+  
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   void updateSelectedBar(String bar) {
@@ -112,14 +119,21 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      onRefresh();
+    }
+  }
+
   Future<void> onRefresh() async {
     await getScreenTime();
     await fetchWeeklyScreenTime(); 
-    await Future.delayed(Duration(seconds: 1));
+    await generateAppsList();
+    await initializeAppNameColorMapping();
     setState(() {
-      dailyData = screenTimeData;
-      dayData = screenTimeData;
-      weekData = weeklyData;
+      updateFilteredDayData(screenTimeData);
     });
   }
 
@@ -211,9 +225,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 body: [
                   //Daily Graph
                   SizedBox(
-                    child: DailyGraphView(
-                        onFilteredData: updateFilteredDayData,
-                        onBarSelected: updateSelectedBar),
+                    child: DailyGraphView(onFilteredData: updateFilteredDayData, data: dayData),
                   ),
                   //Weekly Graph
                   SizedBox(

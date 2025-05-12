@@ -409,9 +409,9 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
 /// daily state
 ///*********************************
 class DailyGraphView extends StatefulWidget {
-  final Function(String) onBarSelected;
+  final Map<String, Map<String, String>> data;
   final Function(Map<String, Map<String, String>>) onFilteredData;
-  const DailyGraphView({super.key, required this.onBarSelected, required this.onFilteredData});
+  const DailyGraphView({super.key, required this.onFilteredData, required this.data});
 
   @override
   State<DailyGraphView> createState() => _DailyGraphViewState();
@@ -438,6 +438,18 @@ class _DailyGraphViewState extends State<DailyGraphView> {
     _initializeData();
     dailyData = screenTimeData;
   }
+
+  @override
+  void didUpdateWidget(covariant DailyGraphView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.data != widget.data) {
+      setState(() {
+        dailyData = widget.data;
+        availableApps = dailyData.keys.toList();
+      });
+    }
+  }
+
 
   Future<void> _initializeData() async {
     totalDaily = await fetchTotalDayScreentime();
@@ -486,14 +498,11 @@ class _DailyGraphViewState extends State<DailyGraphView> {
 
   //Wrapper for loading bar touch
   BarTouchData loadTouch(Map<String, Map<String, String>> data) {
-    return getBarDayTouch(data, widget.onBarSelected);
+    return getBarDayTouch(data);
   }
   @override
   Widget build(BuildContext context) {
     double? screenWidth = MediaQuery.of(context).size.width;
-    /*if (_loading) {
-      return Center(child: CircularProgressIndicator());
-    }*/
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: Column(
