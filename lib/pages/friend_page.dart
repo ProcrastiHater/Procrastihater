@@ -45,73 +45,74 @@ class FriendsPage extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-        title: Text("ProcrastiFriends"),
-        actions: [
-          // Creating little user icon you can press to view account info
-          IconButton(
-            icon: CircleAvatar(
-              backgroundImage: NetworkImage(
-                // Use user's pfp as icon image if there is no pfp use this link as a default
-                auth.currentUser?.photoURL ?? 'https://picsum.photos/id/237/200/300',
+          title: Text("ProcrastiFriends"),
+          actions: [
+            // Creating little user icon you can press to view account info
+            IconButton(
+              icon: CircleAvatar(
+                backgroundImage: NetworkImage(
+                  // Use user's pfp as icon image if there is no pfp use this link as a default
+                  auth.currentUser?.photoURL ??
+                      'https://picsum.photos/id/237/200/300',
+                ),
               ),
-            ),
-            onPressed: () async {
-              await Navigator.pushNamed(context, "/profileSettings");
-              // Reload the user in case anything changed
-              await auth.currentUser?.reload();
-              // Reload UI in case things changed
-             // setState(() {});
-            },
-          )
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            SizedBox(
-              height: 80,
-              child:  DrawerHeader(
-              decoration: BoxDecoration(
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: Image.asset("assets/logo.jpg"),
-                  ),
-                  Text("ProcrastiTools",),
-              ],
-              )
-              ),
-            ),
-              ListTile(
-              trailing: Icon(Icons.calendar_today),
-              title: Text("Calendar"),
-              onTap:() {
-                Navigator.pushNamed(context, '/calendarPage');
-              },
-            ),
-           // const Divider(),
-             ListTile(
-              trailing: Icon(Icons.school),
-              title: Text("Study Mode"),
-              onTap: () {
-                Navigator.pushNamed(context, '/studyModePage');
-              },
-            ),
-            //const Divider(),
-            ListTile(
-              trailing: Icon(Icons.alarm),
-              title: Text("App Limits"),
-              onTap: () {
-                Navigator.pushNamed(context, '/appLimitsPage');
+              onPressed: () async {
+                await Navigator.pushNamed(context, "/profileSettings");
+                // Reload the user in case anything changed
+                await auth.currentUser?.reload();
+                // Reload UI in case things changed
+                // setState(() {});
               },
             )
           ],
         ),
-      ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              SizedBox(
+                height: 80,
+                child: DrawerHeader(
+                    decoration: BoxDecoration(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12.0),
+                          child: Image.asset("assets/logo.jpg"),
+                        ),
+                        Text(
+                          "ProcrastiTools",
+                        ),
+                      ],
+                    )),
+              ),
+              ListTile(
+                trailing: Icon(Icons.calendar_today),
+                title: Text("Calendar"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/calendarPage');
+                },
+              ),
+              // const Divider(),
+              ListTile(
+                trailing: Icon(Icons.school),
+                title: Text("Study Mode"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/studyModePage');
+                },
+              ),
+              //const Divider(),
+              ListTile(
+                trailing: Icon(Icons.alarm),
+                title: Text("App Limits"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/appLimitsPage');
+                },
+              )
+            ],
+          ),
+        ),
         body: FriendsList(),
       ),
     );
@@ -236,16 +237,23 @@ class _FriendsListState extends State<FriendsList>
                       return const Text("No Friends Yet");
                     }
 
-                    Map<String, dynamic>? data = snapshot.data!.data() as Map<String, dynamic>?;
-                    List<dynamic> friends = data?['friends'] is List ? data!['friends'] : [];
+                    Map<String, dynamic>? data =
+                        snapshot.data!.data() as Map<String, dynamic>?;
+                    List<dynamic> friends =
+                        data?['friends'] is List ? data!['friends'] : [];
 
+                    if (friends.isEmpty) {
+                      return const Center(child: Text("No Friends Yet"));
+                    }
+                    
                     return ListView.builder(
                       itemCount: friends.length,
                       itemBuilder: (context, index) {
                         String friendUID = friends[index];
 
                         return FutureBuilder<DocumentSnapshot>(
-                          future: _firestore.collection('UID').doc(friendUID).get(),
+                          future:
+                              _firestore.collection('UID').doc(friendUID).get(),
                           builder: (context, friendSnapshot) {
                             if (!friendSnapshot.hasData ||
                                 !friendSnapshot.data!.exists ||
@@ -288,34 +296,39 @@ class _FriendsListState extends State<FriendsList>
                                       onPressed: () => _pokeFriend(friendUID),
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.close,
-                                          color: Colors.red),
-                                      onPressed: () => showDialog(
-                                        context: context,
-                                        builder: (BuildContext alertContext) => AlertDialog(
-                                          title: Text("Delete Friend"),
-                                          content: Text("Are you sure you want to delete $displayName from your friends?"),
-                                          actions: [
-                                            ElevatedButton(
-                                              onPressed: (){
-                                                Navigator.pop(alertContext, "Delete Friend");
-                                                _deleteFriend(friendUID);
-                                              },
-                                              child: Text("Yes")
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () => Navigator.pop(alertContext, "Cancel"),
-                                              child: Text(
-                                                "Cancel",
-                                                style: TextStyle(
-                                                  color: Colors.red
-                                                )
-                                              )
-                                            )
-                                          ],
-                                        )
-                                      )
-                                    ),
+                                        icon: const Icon(Icons.close,
+                                            color: Colors.red),
+                                        onPressed: () => showDialog(
+                                            context: context,
+                                            builder:
+                                                (BuildContext alertContext) =>
+                                                    AlertDialog(
+                                                      title:
+                                                          Text("Delete Friend"),
+                                                      content: Text(
+                                                          "Are you sure you want to delete $displayName from your friends?"),
+                                                      actions: [
+                                                        ElevatedButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  alertContext,
+                                                                  "Delete Friend");
+                                                              _deleteFriend(
+                                                                  friendUID);
+                                                            },
+                                                            child: Text("Yes")),
+                                                        ElevatedButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                    alertContext,
+                                                                    "Cancel"),
+                                                            child: Text(
+                                                                "Cancel",
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .red)))
+                                                      ],
+                                                    ))),
                                   ],
                                 ),
                               ),
@@ -517,8 +530,8 @@ class ShowAddFriendsSheet extends StatelessWidget {
           // User profile picture
           CircleAvatar(
             radius: 50,
-            backgroundImage: NetworkImage(
-                _auth.currentUser?.photoURL ?? 'https://picsum.photos/id/443/367/267'),
+            backgroundImage: NetworkImage(_auth.currentUser?.photoURL ??
+                'https://picsum.photos/id/443/367/267'),
           ),
           const SizedBox(height: 16),
 
