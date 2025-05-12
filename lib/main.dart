@@ -86,6 +86,8 @@ Future<void> initializeMain() async {
     await fetchWeeklyScreenTime();
     await generateAppsList();
     await initializeAppNameColorMapping();
+    await fetchTotalDayScreentime();
+    await fetchPoints();
   }
 }
 
