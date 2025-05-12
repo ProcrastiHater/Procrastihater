@@ -42,7 +42,7 @@ class AppLimitsPage extends StatefulWidget{
 class _AppLimitsPageState extends State<AppLimitsPage>{
   final List<TextEditingController> _appLimitControllers = List.generate(appNames.length, (int i) => TextEditingController());
   Map<String, int> appLimits = {};
-  List<Color> _limitTextColors = List.generate(appNames.length, (int i) => Colors.transparent);
+  final List<Color> _limitTextColors = List.generate(appNames.length, (int i) => Colors.transparent);
   @override
   void initState() {
     super.initState();

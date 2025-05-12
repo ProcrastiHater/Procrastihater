@@ -299,9 +299,9 @@ void updateUserRef() {
 ///*********************************
 Future<void> _checkSTPermission() async {
   try {
-    final bool _hasPermission =
+    final bool permission =
         await platformChannel.invokeMethod('checkScreenTimePermission');
-    hasPermission = _hasPermission;
+    hasPermission = permission;
   } on PlatformException catch (e) {
     debugPrint("Failed to check permission: ${e.message}");
   }
@@ -471,9 +471,9 @@ Future<void> _requestSTPermission() async {
 ///*********************************
 Future<void> checkNotifsPermission() async {
   try {
-    final bool _hasNotifsPermission =
+    final bool notifsPermission =
         await platformChannel.invokeMethod('checkNotificationsPermission');
-    hasNotifsPermission = _hasNotifsPermission;
+    hasNotifsPermission = notifsPermission;
   } on PlatformException catch (e) {
     debugPrint("Failed to check permission: ${e.message}");
   }

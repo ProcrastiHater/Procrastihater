@@ -127,7 +127,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     //Screensize
     double? screenHeight = MediaQuery.of(context).size.height;
-    double? graphHeight = screenHeight * 0.65;
     return Scaffold(
       appBar: AppBar(
         title: Text("ProcrastiStats"),
@@ -211,19 +210,19 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Scaffold(
                 body: [
                   //Daily Graph
-                  Container(
+                  SizedBox(
                     child: DailyGraphView(
                         onFilteredData: updateFilteredDayData,
                         onBarSelected: updateSelectedBar),
                   ),
                   //Weekly Graph
-                  Container(
+                  SizedBox(
                     child: WeeklyGraphView(
                         onFilteredData: updateFilteredWeekData,
                         onBarSelected: updateSelectedBar),
                   ),
                 ][graphIndex],
-                bottomNavigationBar: Container(
+                bottomNavigationBar: SizedBox(
                   height: 72,
                   child: Column(
                     children: [

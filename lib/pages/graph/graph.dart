@@ -430,7 +430,6 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   String? selectedFilter = "";
   double totalDaily = 0;
   int points = 0;
-  bool _loading = true;
 
   @override
   //Initialize colors making sure all apps are mapped to a color before displaying
