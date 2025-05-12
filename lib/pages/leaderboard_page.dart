@@ -41,7 +41,26 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
   bool showFriendsLeaderboard = false; // Toggle state
   final String currentUserId = auth.currentUser!.uid;
 
-
+  Future<bool> _showExitConfirmationDialog() async {
+    return await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Exit App'),
+            content: Text('Are you sure you want to exit the app?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text('Yes'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
 
   @override
   Widget build(BuildContext context) {
