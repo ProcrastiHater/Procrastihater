@@ -169,7 +169,7 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     double? screenWidth = MediaQuery.of(context).size.width;
     //Display loading indicator while async function returns
     if (weekData.isEmpty) {
-      return Center(child: CircularProgressIndicator());
+      return Center(child: Text("No Weekly Data"));
     }
     return Padding(
       padding: const EdgeInsets.all(4.0),

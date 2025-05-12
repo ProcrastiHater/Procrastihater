@@ -40,19 +40,19 @@ Future<void> getAvailableWeeks() async{
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
   try {
-  //Get all documents from the collection
-  QuerySnapshot querySnapshot = await current.get();
-  if (querySnapshot.docs.isNotEmpty)
-  {
-    //Extract the document IDs
-    List<String> availableWeeks =
+    //Get all documents from the collection
+    QuerySnapshot querySnapshot = await current.get();
+    if (querySnapshot.docs.isNotEmpty)
+    {
+      //Extract the document IDs
+      List<String> availableWeeks =
         querySnapshot.docs.map((doc) => doc.id).toList();
 
-    // Sort the week keys by date
-    final DateFormat formatter = DateFormat('MM-dd-yyyy');
-    availableWeeks.sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
-    availableWeekKeys = availableWeeks;
-  }
+      // Sort the week keys by date
+      final DateFormat formatter = DateFormat('MM-dd-yyyy');
+      availableWeeks.sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
+      availableWeekKeys = availableWeeks;
+    }
   }
   catch (e) {
     debugPrint("error fetching screentime data: $e");
@@ -121,9 +121,7 @@ Future<void> fetchWeeklyScreenTime() async {
 }
 Future<double> fetchTotalDayScreentime() async {
   try {
-    double dailyScreenTime = (await FirebaseFirestore.instance
-      .collection('UID')
-      .doc(userRef.id)
+    double dailyScreenTime = (await userRef
       .get())
       .get('totalDailyHours') as double;
       return dailyScreenTime;
@@ -135,9 +133,7 @@ Future<double> fetchTotalDayScreentime() async {
 }
 Future<int> fetchPoints() async {
   try {
-  int points = (await FirebaseFirestore.instance
-    .collection('UID')
-    .doc(userRef.id)
+  int points = (await userRef
     .get())
     .get('points') as int;
     return points;
