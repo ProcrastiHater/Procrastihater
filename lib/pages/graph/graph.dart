@@ -426,9 +426,11 @@ class DailyGraphView extends StatefulWidget {
 ///*********************************
 class _DailyGraphViewState extends State<DailyGraphView> {
   List<String> selectedCategories = [];
+  Map<String, Map<String, String>> dailyData = {};
   String? selectedFilter = "";
   double totalDaily = 0;
   int points = 0;
+  bool _loading = true;
 
   @override
   //Initialize colors making sure all apps are mapped to a color before displaying
@@ -490,6 +492,9 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   @override
   Widget build(BuildContext context) {
     double? screenWidth = MediaQuery.of(context).size.width;
+    /*if (_loading) {
+      return Center(child: CircularProgressIndicator());
+    }*/
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: Column(

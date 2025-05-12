@@ -83,16 +83,16 @@ class MyHomePage extends StatefulWidget {
 /// holds main layout widget for page
 ///*********************************
 class _MyHomePageState extends State<MyHomePage> {
+  String selectedBar = "null";
+  Map<String, Map<String, String>> dayData = screenTimeData;
+  Map<String, Map<String, Map<String, dynamic>>> weekData = weeklyData;
+  int graphIndex = 0;
+
   @override
   void initState() {
     super.initState();
   }
 
-  //State management for loading list view
-  String selectedBar = "null";
-  Map<String, Map<String, String>> dayData = screenTimeData;
-  Map<String, Map<String, Map<String, dynamic>>> weekData = weeklyData;
-  int graphIndex = 0;
   void updateSelectedBar(String bar) {
     setState(() {
       selectedBar = bar;
@@ -203,149 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      body: RefreshIndicator( 
-        onRefresh: onRefresh,
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            SizedBox(
-              height: screenHeight * 0.6,
-              child: Scaffold(
-                body: [
-                  //Daily Graph
-                  SizedBox(
-                    child: DailyGraphView(
-                        onFilteredData: updateFilteredDayData,
-                        onBarSelected: updateSelectedBar),
-                  ),
-                  //Weekly Graph
-                  SizedBox(
-                    child: WeeklyGraphView(
-                        onFilteredData: updateFilteredWeekData,
-                        onBarSelected: updateSelectedBar),
-                  ),
-                ][graphIndex],
-                bottomNavigationBar: SizedBox(
-                  height: 72,
-                  child: Column(
-                    children: [
-                      Container(
-                        color: beige,
-                        height: 2,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Card(
-                            color: graphIndex == 0 ? beige : null,
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10.0))),
-                            child: InkWell(
-                              child: Padding(
-                                padding: EdgeInsets.all(5.0),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_today_rounded,
-                                      color: graphIndex == 0
-                                          ? lightBlue
-                                          : lightBeige,
-                                      size: screenHeight * 0.035,
-                                    ),
-                                    Text("  Daily  ",
-                                        style: TextStyle(
-                                            color: graphIndex == 0
-                                                ? darkBlue
-                                                : null)),
-                                  ],
-                                ),
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  selectedBar = "null";
-                                  graphIndex = 0;
-                                });
-                              },
-                            ),
-                          ),
-                          Card(
-                            color: graphIndex == 1 ? beige : null,
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10.0))),
-                            child: InkWell(
-                              child: Padding(
-                                padding: EdgeInsets.all(5.0),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_view_week_rounded,
-                                      color: graphIndex == 1
-                                          ? lightBlue
-                                          : lightBeige,
-                                      size: screenHeight * 0.035,
-                                    ),
-                                    Text("  Weekly  ",
-                                        style: TextStyle(
-                                            color: graphIndex == 1
-                                                ? darkBlue
-                                                : null)),
-                                  ],
-                                ),
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  selectedBar = "null";
-                                  graphIndex = 1;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        color: beige,
-                        height: 2,
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ),
-            SizedBox(
-              height: screenHeight - (graphHeight * 1.125),
-              child: ExpandedListView(
-                dayFilteredData: dayData,
-                weekFilteredData: weekData,
-                selectedBar: selectedBar,
-                appColors: appNameToColor,
-                graphIndex: graphIndex),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Center(
-              child: SmoothPageIndicator(
-                controller: PageController(initialPage: 1), // Dummy controller
-                count: 3,
-                effect: WormEffect(
-                  paintStyle: PaintingStyle.stroke,
-                  activeDotColor: beige,
-                  dotColor: lightBeige,
-                  dotHeight: 8,
-                  dotWidth: 8,
-                  spacing: 12,
-                ),
-              ),
-            ),
-          ),
-          Container(height: 16),
-          ],
-        ),
-        )
-      /*Column(
+      body: Column(
         children: [
           Expanded(
               flex: 13,
@@ -483,7 +341,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Container(height: 16),
         ],
-      ),*/
+      ),
     );
   }
 }
