@@ -169,7 +169,7 @@ BarChartGroupData generatedDayData(int index, String appName,Map<String, dynamic
 /// information as a tooltip when 
 /// selecting a bar
 ///*********************************
-BarTouchData getBarDayTouch(Map<String, Map<String, String>> data, void Function(String) onBarSelected) {
+BarTouchData getBarDayTouch(Map<String, Map<String, String>> data) {
   return BarTouchData(
     enabled: true,
     //Loads app data on touch of specific bar

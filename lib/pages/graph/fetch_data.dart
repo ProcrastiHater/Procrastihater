@@ -23,7 +23,7 @@ Map<String, Map<String, Map<String, dynamic>>> weeklyData = {};
 
 //Variables for multi-week view
 List<String> availableWeekKeys = [];
-DateTime currentDataset = DateFormat('MM-dd-yyyy').parse(availableWeekKeys.last);
+DateTime currentDataset = DateTime.now();
 String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 
 ///*********************************
@@ -33,22 +33,31 @@ String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 /// querysnapshot of collection appUsageHistory
 /// into a list
 ///*********************************
+///
 Future<void> getAvailableWeeks() async{
    //Update the reference to the user doc before accessing
   updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
+  try {
+    //Get all documents from the collection
+    QuerySnapshot querySnapshot = await current.get();
+    if (querySnapshot.docs.isNotEmpty)
+    {
+      //Extract the document IDs
+      List<String> availableWeeks =
+        querySnapshot.docs.map((doc) => doc.id).toList();
 
-  //Get all documents from the collection
-  QuerySnapshot querySnapshot = await current.get();
-  //Extract the document IDs
-  List<String> availableWeeks =
-      querySnapshot.docs.map((doc) => doc.id).toList();
-
-  // Sort the week keys by date
-  final DateFormat formatter = DateFormat('MM-dd-yyyy');
-  availableWeeks.sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
-  availableWeekKeys = availableWeeks;
+      // Sort the week keys by date
+      final DateFormat formatter = DateFormat('MM-dd-yyyy');
+      availableWeeks.sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
+      availableWeekKeys = availableWeeks;
+    }
+    currentDataset = DateFormat('MM-dd-yyyy').parse(availableWeekKeys.last);
+  }
+  catch (e) {
+    debugPrint("error fetching screentime data: $e");
+  }
 }
 
 ///*********************************
@@ -111,20 +120,29 @@ Future<void> fetchWeeklyScreenTime() async {
       ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key))),
   );
 }
-
 Future<double> fetchTotalDayScreentime() async {
-  final dailyScreenTime = (await FirebaseFirestore.instance
-    .collection('UID')
-    .doc(userRef.id)
-    .get())
-    .get('totalDailyHours') as double;
-    return dailyScreenTime;
+  try {
+    final userDoc = await userRef.get();
+    if (userDoc.exists) {
+      double dailyScreenTime = await userDoc.get("totalDailyHours") ?? 0.0;
+      return dailyScreenTime;
+    }
+  }
+  catch (e) {
+    debugPrint("error fetching daily screentime data: $e");
+  }
+  return 0;
 }
 Future<int> fetchPoints() async {
-  final points = (await FirebaseFirestore.instance
-    .collection('UID')
-    .doc(userRef.id)
-    .get())
-    .get('points') as int;
-    return points;
+    try {
+    final userDoc = await userRef.get();
+    if (userDoc.exists) {
+      int points = await userDoc.get("points") ?? 0.0;
+      return points;
+    }
+  }
+  catch (e) {
+    debugPrint("error fetching screentime data: $e");
+  }
+  return 0;
 }

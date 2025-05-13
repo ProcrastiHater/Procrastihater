@@ -114,9 +114,9 @@ class _ExpandedListViewState extends State<ExpandedListView> {
         }
         //Load loading screen if data is empty
         if (!weeklyData.containsKey(widget.selectedBar)) {
-          if (weeklyData.isEmpty) {
+          /*if (weeklyData.isEmpty) {
             return Center(child: CircularProgressIndicator());
-          } 
+          } */
           //Return text string if the selected bar does not contain data
           return Center(
             child: Text(

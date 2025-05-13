@@ -68,7 +68,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //Firebase initialization
   await Firebase.initializeApp();
-  //await initializeMain();
+  await _checkSTPermission();
+  if (!hasPermission) {
+    await _requestSTPermission();
+  }
   runApp(const ProcrastiHater());
 }
 
@@ -77,12 +80,14 @@ Future<void> initializeMain() async {
   if (auth.currentUser != null) {
     await _currentToHistorical();
     await _checkSTPermission();
-    await _getScreenTime();
+    await getScreenTime();
+    await _writeScreenTimeData();
     await getAvailableWeeks();
     await fetchWeeklyScreenTime();
     await generateAppsList();
     await initializeAppNameColorMapping();
-    await _writeScreenTimeData();
+    await fetchTotalDayScreentime();
+    await fetchPoints();
   }
 }
 
@@ -98,7 +103,6 @@ class ProcrastiHater extends StatelessWidget {
   @override
   //Main material app for app
   Widget build(BuildContext context) {
-    double? screenWidth = MediaQuery.of(context).size.width;
     double? screenHeight = MediaQuery.of(context).size.height;
     return MaterialApp(
       theme: ThemeData(
@@ -171,8 +175,17 @@ class ProcrastiHater extends StatelessWidget {
           }
 
           // If user is authenticated, initialize app data and show home page
-          initializeMain();
-          return const HomePage();
+          //initializeMain();
+          //return const HomePage();
+          return FutureBuilder(
+            future: initializeMain(), 
+            builder: (builder, initSnap) {
+              if (initSnap.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator(),);
+              }
+              return const HomePage();
+            }
+            );
         },
       ),
       onGenerateRoute: _generateRoutes,
@@ -291,9 +304,9 @@ void updateUserRef() {
 ///*********************************
 Future<void> _checkSTPermission() async {
   try {
-    final bool _hasPermission =
+    final bool permission =
         await platformChannel.invokeMethod('checkScreenTimePermission');
-    hasPermission = _hasPermission;
+    hasPermission = permission;
   } on PlatformException catch (e) {
     debugPrint("Failed to check permission: ${e.message}");
   }
@@ -463,9 +476,9 @@ Future<void> _requestSTPermission() async {
 ///*********************************
 Future<void> checkNotifsPermission() async {
   try {
-    final bool _hasNotifsPermission =
+    final bool notifsPermission =
         await platformChannel.invokeMethod('checkNotificationsPermission');
-    hasNotifsPermission = _hasNotifsPermission;
+    hasNotifsPermission = notifsPermission;
   } on PlatformException catch (e) {
     debugPrint("Failed to check permission: ${e.message}");
   }
@@ -492,7 +505,7 @@ Future<void> requestNotifsPermission() async {
 /// Description: Accesses screentime data
 /// by storing into a Map.
 ///*********************************
-Future<void> _getScreenTime() async {
+Future<void> getScreenTime() async {
   //Checks if user has permission, if not it requests the permissions
   if (!hasPermission) {
     await _requestSTPermission();
