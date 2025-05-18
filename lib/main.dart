@@ -10,11 +10,12 @@ library;
 //Dart Imports
 import 'dart:async';
 import 'dart:io';
-import 'package:app_screen_time/pages/graph/colors.dart';
-import 'package:app_screen_time/pages/graph/fetch_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+//Other Imports
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
@@ -33,6 +34,8 @@ import 'pages/calendar.dart';
 import 'pages/study_mode.dart';
 import 'pages/app_limits_page.dart';
 import 'apps_list.dart';
+import 'package:app_screen_time/pages/graph/colors.dart';
+import 'package:app_screen_time/pages/graph/fetch_data.dart';
 
 //Global Variables
 //Native Kotlin method channel
@@ -50,6 +53,9 @@ final CollectionReference mainCollection = firestore.collection('UID');
 String? uid = auth.currentUser?.uid;
 //Reference to user's document in Firestore
 DocumentReference userRef = mainCollection.doc(uid);
+
+SharedPreferencesWithCache? preferences;
+bool dailySTNotifsOn = false;
 
 const Color darkBlue = Color.fromRGBO(10, 27, 46, 1);
 const Color lightBlue = Color.fromRGBO(14, 40, 77, 1);
@@ -72,11 +78,27 @@ void main() async {
   if (!hasPermission) {
     await _requestSTPermission();
   }
+  preferences = await SharedPreferencesWithCache.create(
+    cacheOptions: SharedPreferencesWithCacheOptions(
+      allowList: <String>{'dailySTNotifsOn'}
+    )
+  );
   runApp(const ProcrastiHater());
 }
 
 Future<void> initializeMain() async {
   await checkNotifsPermission();
+  if(hasNotifsPermission) {
+    if(!preferences!.containsKey('dailySTNotifsOn')) {
+      await preferences!.setBool('dailySTNotifsOn', true);
+    }
+    else if (preferences!.getBool('dailySTNotifsOn')!) {
+      //Start the notifs
+    }
+  }
+  else {
+    await preferences!.setBool('dailySTNotifsOn', false);
+  }
   if (auth.currentUser != null) {
     await _currentToHistorical();
     await _checkSTPermission();
