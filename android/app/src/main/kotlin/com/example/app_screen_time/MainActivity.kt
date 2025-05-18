@@ -306,6 +306,28 @@ class MainActivity: FlutterActivity() {
     }
 
     ///**********************************************
+    /// Name: weeklySTNotif
+    ///
+    /// Description: Sends notification for weekly ST
+    /// report
+    ///***********************************************
+    fun weeklySTNotif(weeklyHrs: Double)
+    {
+        var notifText = "";
+        //Message options
+        var builder = NotificationCompat.Builder(context, "ProcrastiNotif")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle("$totalDaily hours on your phone")
+            .setContentText(notifText)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        //Executes notify on MainActivity
+        with(NotificationManagerCompat.from(context)) {
+            //Sends notification with random id
+            notify(Random.nextInt(), builder.build())
+        }
+    }
+
+    ///**********************************************
     /// Name: startBGWrites
     /// 
     /// Description: Starts background task for
