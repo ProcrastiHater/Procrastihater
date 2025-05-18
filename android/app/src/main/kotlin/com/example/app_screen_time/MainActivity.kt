@@ -146,8 +146,8 @@ class MainActivity: FlutterActivity() {
                         openNotificationSettings()
                         result.success(true)
                     }
-                    "startTotalSTNotifications" -> {
-                        startTotalSTNotifs()
+                    "startDailySTNotifications" -> {
+                        startDailySTNotifs()
                         Log.d("MainActivity", "Started Screen Time Notifications")
                         result.success(true)
                     }
@@ -264,15 +264,15 @@ class MainActivity: FlutterActivity() {
     /// Description: Starts background task for
     /// sending totalSTNotifications
     ///**********************************************
-    fun startTotalSTNotifs() {
+    fun startDailySTNotifs() {
         //Create bg work request
-        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<TotalSTWorker>(
+        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<DailySTWorker>(
             15, TimeUnit.MINUTES
         )
             .build()
         //Put work into queue
         wm.enqueueUniquePeriodicWork(
-            "totalSTNotification",
+            "dailySTNotification",
             ExistingPeriodicWorkPolicy.REPLACE,
             notifRequest,
         )
