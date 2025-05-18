@@ -132,7 +132,6 @@ class ProfileSettingsState extends State<ProfileSettings> {
   ///***************************************************
   @override
   Widget build(BuildContext context) {
-    bool _hasNotifsPermission = hasNotifsPermission;
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile Settings'),
@@ -238,40 +237,6 @@ class ProfileSettingsState extends State<ProfileSettings> {
                 }
               }
             ),
-            //Buttons for Total ST Notifications
-            //Row(
-            //  mainAxisAlignment: MainAxisAlignment.center,
-            //  children: [
-            //    ElevatedButton(
-            //      onPressed: (){
-            //        if (_hasNotifsPermission)
-            //        {
-            //          startDailySTNotifications();
-            //        }else
-            //        {
-            //          ScaffoldMessenger.of(context).showSnackBar(
-            //            const SnackBar(content: Text('I don\'t have permission to send notifications')),
-            //          );
-            //        }
-            //      }, 
-            //      child: Text("Turn On")
-            //    ),
-            //    ElevatedButton(
-            //      onPressed: (){
-            //        if (_hasNotifsPermission)
-            //        {
-            //          cancelDailySTNotifications();
-            //        }else
-            //        {
-            //          ScaffoldMessenger.of(context).showSnackBar(
-            //            const SnackBar(content: Text('Notifications aren\'t on anyways, genius')),
-            //          );
-            //        }
-            //      }, 
-            //      child: Text("Turn Off")
-            //    )
-            //  ],
-            //),
             SizedBox(height: 10),
             // Button to delete account
             ElevatedButton(
