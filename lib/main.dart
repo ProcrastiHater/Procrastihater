@@ -10,6 +10,7 @@ library;
 //Dart Imports
 import 'dart:async';
 import 'dart:io';
+import 'package:app_screen_time/daily_st_notifs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -92,13 +93,11 @@ Future<void> initializeMain() async {
     if(!preferences!.containsKey('dailySTNotifsOn')) {
       await preferences!.setBool('dailySTNotifsOn', true);
     }
-    else if (preferences!.getBool('dailySTNotifsOn')!) {
-      //Start the notifs
-    }
   }
   else {
     await preferences!.setBool('dailySTNotifsOn', false);
   }
+  dailySTNotifsOn = preferences!.getBool('dailySTNotifsOn')!;
   if (auth.currentUser != null) {
     await _currentToHistorical();
     await _checkSTPermission();
@@ -110,6 +109,10 @@ Future<void> initializeMain() async {
     await initializeAppNameColorMapping();
     await fetchTotalDayScreentime();
     await fetchPoints();
+    if(dailySTNotifsOn)
+    {
+      await startDailySTNotifications();
+    }
   }
 }
 

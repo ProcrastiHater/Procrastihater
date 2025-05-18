@@ -212,41 +212,57 @@ class ProfileSettingsState extends State<ProfileSettings> {
               ),
               child: Text('Sign Out'),
             ),
-            //Buttons for Total ST Notifications
             Text("Daily Screen Time Notifications"),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: (){
-                    if (_hasNotifsPermission)
-                    {
-                      startTotalSTNotifications();
-                    }else
-                    {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('I don\'t have permission to send notifications')),
-                      );
-                    }
-                  }, 
-                  child: Text("Turn On")
-                ),
-                ElevatedButton(
-                  onPressed: (){
-                    if (_hasNotifsPermission)
-                    {
-                      cancelTotalSTNotifications();
-                    }else
-                    {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Notifications aren\'t on anyways, genius')),
-                      );
-                    }
-                  }, 
-                  child: Text("Turn Off")
-                )
-              ],
+            //Toggle for Daily ST Notifications
+            Switch(
+              value: dailySTNotifsOn, 
+              onChanged: (value){
+                if(value == true)
+                {
+                  startDailySTNotifications();
+                  preferences!.setBool('dailySTNotifsOn', true);
+                  preferences!.reloadCache();
+                }else
+                {
+                  cancelDailySTNotifications();
+                  preferences!.setBool('dailySTNotifsOn', false);
+                }
+              }
             ),
+            //Buttons for Total ST Notifications
+            //Row(
+            //  mainAxisAlignment: MainAxisAlignment.center,
+            //  children: [
+            //    ElevatedButton(
+            //      onPressed: (){
+            //        if (_hasNotifsPermission)
+            //        {
+            //          startDailySTNotifications();
+            //        }else
+            //        {
+            //          ScaffoldMessenger.of(context).showSnackBar(
+            //            const SnackBar(content: Text('I don\'t have permission to send notifications')),
+            //          );
+            //        }
+            //      }, 
+            //      child: Text("Turn On")
+            //    ),
+            //    ElevatedButton(
+            //      onPressed: (){
+            //        if (_hasNotifsPermission)
+            //        {
+            //          cancelDailySTNotifications();
+            //        }else
+            //        {
+            //          ScaffoldMessenger.of(context).showSnackBar(
+            //            const SnackBar(content: Text('Notifications aren\'t on anyways, genius')),
+            //          );
+            //        }
+            //      }, 
+            //      child: Text("Turn Off")
+            //    )
+            //  ],
+            //),
             SizedBox(height: 10),
             // Button to delete account
             ElevatedButton(
