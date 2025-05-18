@@ -221,11 +221,20 @@ class ProfileSettingsState extends State<ProfileSettings> {
                 {
                   startDailySTNotifications();
                   preferences!.setBool('dailySTNotifsOn', true);
+                  //Ensure preferences got updated
                   preferences!.reloadCache();
+                  dailySTNotifsOn = true;
+                  //Dummy set state to pretend dailySTNotifsOn is state var
+                  setState((){});
                 }else
                 {
                   cancelDailySTNotifications();
                   preferences!.setBool('dailySTNotifsOn', false);
+                  //Ensure preferences got updated
+                  preferences!.reloadCache();
+                  dailySTNotifsOn = false;
+                  //Dummy set state to pretend dailySTNotifsOn is state var
+                  setState((){});
                 }
               }
             ),

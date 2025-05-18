@@ -151,8 +151,8 @@ class MainActivity: FlutterActivity() {
                         Log.d("MainActivity", "Started Screen Time Notifications")
                         result.success(true)
                     }
-                    "cancelTotalSTNotifications" -> {
-                        wm.cancelUniqueWork("totalSTNotification")
+                    "cancelDailySTNotifications" -> {
+                        wm.cancelUniqueWork("dailySTNotification")
                         Log.d("MainActivity", "Canceled Screen Time Notifications")
                         result.success(true)
                     }
