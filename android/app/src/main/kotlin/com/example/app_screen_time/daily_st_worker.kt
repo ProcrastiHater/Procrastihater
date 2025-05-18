@@ -20,12 +20,12 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 
 ///*********************************************
-/// Name: TotalSTWorker
+/// Name: DailySTWorker
 ///
 /// Description: Helper class for sending
 /// total screentime notifications
 ///**********************************************
-class TotalSTWorker(context: Context, workerParams: WorkerParameters) : Worker (context, workerParams){
+class DailySTWorker(context: Context, workerParams: WorkerParameters) : Worker (context, workerParams){
     val context = getApplicationContext()
 
     ///**********************************************

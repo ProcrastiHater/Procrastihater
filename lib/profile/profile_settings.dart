@@ -14,6 +14,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:app_screen_time/main.dart';
+import 'package:app_screen_time/daily_st_notifs.dart';
 
 
 final CollectionReference MAIN_COLLECTION = FirebaseFirestore.instance.collection('UID');
@@ -220,7 +221,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
                   onPressed: (){
                     if (_hasNotifsPermission)
                     {
-                      _startTotalSTNotifications();
+                      startTotalSTNotifications();
                     }else
                     {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -234,7 +235,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
                   onPressed: (){
                     if (_hasNotifsPermission)
                     {
-                      _cancelTotalSTNotifications();
+                      cancelTotalSTNotifications();
                     }else
                     {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -283,36 +284,5 @@ class ProfileSettingsState extends State<ProfileSettings> {
         )
       )
     );
-  }
-}
-
-///*********************************
-/// Name: _cancelTotalSTNotifications
-///   
-/// Description: Invokes method from platform channel to 
-/// stop sending the total screen time notification
-///*********************************
-Future<void> _cancelTotalSTNotifications() async {
-  try {
-    await platformChannel.invokeMethod('cancelTotalSTNotifications');
-  } on PlatformException catch (e) {
-    debugPrint("Failed to stop notifications: ${e.message}");
-  }
-}
-
-///*********************************
-/// Name: _startTotalSTNotifications
-///   
-/// Description: Invokes method from platform channel to 
-/// start sending the total screen time notification
-///*********************************
-Future<void> _startTotalSTNotifications() async {
-  if(!hasPermission) {
-    return;
-  }
-  try {
-    await platformChannel.invokeMethod('startTotalSTNotifications');
-  } on PlatformException catch (e) {
-    debugPrint("Failed to start notifications: ${e.message}");
   }
 }
