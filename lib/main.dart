@@ -352,6 +352,7 @@ Future<void> _currentToHistorical() async {
   DateTime currentTime = DateTime.now();
   DateTime dateUpdated;
   bool needToMoveData = false;
+  bool nextWeek = false;
   //Grab data from current
   try {
     final current = userRef.collection('appUsageCurrent');
@@ -404,11 +405,18 @@ Future<void> _currentToHistorical() async {
             dateUpdated.year != currentTime.year) {
           //Gets the number of the day of the week for the last update day
           int dayOfWeekNum = dateUpdated.weekday;
+          int curDayOfWeekNum = currentTime.weekday;
           //Gets the name of the day of the week for last update day
           String dayOfWeekStr = DateFormat('EEEE').format(dateUpdated);
           //Gets the start of that week
           String startOfWeek = DateFormat('MM-dd-yyyy')
               .format(dateUpdated.subtract(Duration(days: dayOfWeekNum - 1)));
+          String curWeekStart = DateFormat('MM-dd-yyyy')
+              .format(currentTime.subtract(Duration(days: curDayOfWeekNum - 1)));
+          if(startOfWeek != curWeekStart)
+          {
+            nextWeek = true;
+          }
           var historical =
               userRef.collection('appUsageHistory').doc(startOfWeek);
           histSnapshot ??= await historical.get();
@@ -467,9 +475,10 @@ Future<void> _currentToHistorical() async {
       
       //Commit the batch
       await batch.commit();
-
-      await _sendWeeklyNotif(totalWeekly);
-
+      if(nextWeek)
+      {
+        await _sendWeeklyNotif(totalWeekly);
+      }
       debugPrint('Successfully wrote screen time data to History');
     } catch (e) {
       debugPrint('Error writing screen time data to Firestore: $e');
