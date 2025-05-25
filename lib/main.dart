@@ -57,6 +57,7 @@ DocumentReference userRef = mainCollection.doc(uid);
 
 SharedPreferencesWithCache? preferences;
 bool dailySTNotifsOn = false;
+bool dailyNotifsShowing = false;
 
 const Color darkBlue = Color.fromRGBO(10, 27, 46, 1);
 const Color lightBlue = Color.fromRGBO(14, 40, 77, 1);
@@ -109,9 +110,10 @@ Future<void> initializeMain() async {
     await initializeAppNameColorMapping();
     await fetchTotalDayScreentime();
     await fetchPoints();
-    if(dailySTNotifsOn)
+    if(dailySTNotifsOn && !dailyNotifsShowing)
     {
       await startDailySTNotifications();
+      dailyNotifsShowing = true;
     }
   }
 }

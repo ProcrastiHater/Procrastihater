@@ -91,7 +91,7 @@ class MainActivity: FlutterActivity() {
 
         //Purge old instances of notifications
         wm.cancelAllWork()
-        //WorkManager.getInstance().cancelUniqueWork("totalSTNotification")
+        wm.cancelUniqueWork("dailySTNotification")
         createNotificationChannel()
         if(!checkNotificationsPermission())
         {
@@ -441,8 +441,11 @@ class MainActivity: FlutterActivity() {
                 continue
             }
         }
-    
-        prevScreenTime.putAll(screenTimeMap)
+        screenTimeMap.forEach{(key, value) -> prevScreenTime[key] = value.toMutableMap()}
+        for(app in prevScreenTime.entries.iterator())
+        {
+            prevScreenTime[app.component1()]!!["hours"] = "0.05"
+        }
         return screenTimeMap
     }
 }

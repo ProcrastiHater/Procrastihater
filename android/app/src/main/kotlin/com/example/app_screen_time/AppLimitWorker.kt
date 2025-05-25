@@ -43,7 +43,6 @@ class AppLimitWorker(context: Context, workerParams: WorkerParameters) : Worker(
     /// hit limit for an app
     ///**********************************************    
     override fun doWork(): Result {
-        prevScreenTime.putAll(screenTimeMap)
         Log.d("GetStatsAppLimit", "Prev Screen Time: $prevScreenTime");
         getAppLimits()
         Log.d("AppLimitWorker", "Notification should be showing")
@@ -83,6 +82,7 @@ class AppLimitWorker(context: Context, workerParams: WorkerParameters) : Worker(
                 }
             }
         } 
+        screenTimeMap.forEach{(key, value) -> prevScreenTime[key] = value.toMutableMap()}
     }
 
     private fun getAppLimits() : MutableMap<String, Double>{
