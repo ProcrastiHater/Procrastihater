@@ -223,6 +223,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
                   //Ensure preferences got updated
                   preferences!.reloadCache();
                   dailySTNotifsOn = true;
+                  dailyNotifsShowing = true;
                   //Dummy set state to pretend dailySTNotifsOn is state var
                   setState((){});
                 }else
@@ -232,6 +233,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
                   //Ensure preferences got updated
                   preferences!.reloadCache();
                   dailySTNotifsOn = false;
+                  dailyNotifsShowing = false;
                   //Dummy set state to pretend dailySTNotifsOn is state var
                   setState((){});
                 }
