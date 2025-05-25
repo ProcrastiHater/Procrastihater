@@ -156,6 +156,12 @@ class MainActivity: FlutterActivity() {
                         Log.d("MainActivity", "Canceled Screen Time Notifications")
                         result.success(true)
                     }
+                    "sendWeeklyNotification" -> {
+                        var weeklyHrs = call.arguments as Double
+                        weeklySTNotif(weeklyHrs)
+                        Log.d("MainActivity", "Sent Weekly Summary Notification")
+                        result.success(true)
+                    }
                     else -> {
                         Log.e("MainActivity", "Method not implemented: ${call.method}")
                         result.notImplemented()

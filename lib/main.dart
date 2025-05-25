@@ -468,6 +468,8 @@ Future<void> _currentToHistorical() async {
       //Commit the batch
       await batch.commit();
 
+      await _sendWeeklyNotif(totalWeekly);
+
       debugPrint('Successfully wrote screen time data to History');
     } catch (e) {
       debugPrint('Error writing screen time data to Firestore: $e');
@@ -506,6 +508,20 @@ Future<void> checkNotifsPermission() async {
     hasNotifsPermission = notifsPermission;
   } on PlatformException catch (e) {
     debugPrint("Failed to check permission: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: _sendWeeklyNotif
+/// 
+/// Description: Invokes method from platform channel
+/// to send weekly summary notification
+///*********************************
+Future<void> _sendWeeklyNotif(double weeklyHrs) async {
+  try{
+    await platformChannel.invokeMethod('sendWeeklyNotification', weeklyHrs);
+  } on PlatformException catch (e) {
+    debugPrint("Failed to send weekly summary notification: ${e.message}");
   }
 }
 
