@@ -324,6 +324,9 @@ class MainActivity: FlutterActivity() {
         else if (weeklyHrs < 24) {
             notifText += "This phone isn't making you any smarter."
         }
+        else if (weeklyHrs < 36){
+            notifText += "It really is that darn phone."
+        }
         else {
             notifText += "There is this thing called a life. You should get one."
         }
