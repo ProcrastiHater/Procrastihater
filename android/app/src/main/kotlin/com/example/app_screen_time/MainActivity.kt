@@ -315,9 +315,21 @@ class MainActivity: FlutterActivity() {
     {
         var notifText = "";
         //Message options
+        if(weeklyHrs < 12) {
+            notifText += "At least you've been somewhat productive."
+        }else if (weeklyHrs < 16)
+        {
+            notifText += "Maybe spend less time scrolling aimlessly."
+        }
+        else if (weeklyHrs < 24) {
+            notifText += "This phone isn't making you any smarter."
+        }
+        else {
+            notifText += "There is this thing called a life. You should get one."
+        }
         var builder = NotificationCompat.Builder(context, "ProcrastiNotif")
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("$totalDaily hours on your phone")
+            .setContentTitle("$weeklyHrs hours on your phone this week")
             .setContentText(notifText)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         //Executes notify on MainActivity
