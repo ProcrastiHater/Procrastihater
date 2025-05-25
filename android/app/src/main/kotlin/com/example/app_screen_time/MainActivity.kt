@@ -338,7 +338,7 @@ class MainActivity: FlutterActivity() {
         }
         var builder = NotificationCompat.Builder(context, "ProcrastiNotif")
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("$weeklyHrs hours on your phone this week")
+            .setContentTitle("$weeklyHrs hours on your phone last week")
             .setContentText(notifText)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         //Executes notify on MainActivity
