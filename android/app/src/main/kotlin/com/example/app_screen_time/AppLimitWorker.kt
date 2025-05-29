@@ -68,7 +68,7 @@ class AppLimitWorker(context: Context, workerParams: WorkerParameters) : Worker(
                 val hours = screenTimeMap[app.component1()]!!["hours"]!!.toDouble()
                 Log.d("AppLimitWorker", "Prev Hours: $prevhours")
                 Log.d("AppLimitWorker", "Cur Hours: $hours")
-                if(hours >= app.component2() && prevhours <= app.component2()){
+                if(hours + 0.02 >= app.component2() && prevhours - 0.02 <= app.component2()){
                     var builder = NotificationCompat.Builder(context, "ProcrastiNotif")
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("You've exceeded your screen time limit for ${app.component1()}")
