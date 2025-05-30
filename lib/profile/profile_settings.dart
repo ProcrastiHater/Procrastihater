@@ -13,7 +13,8 @@ import 'profile_picture_selection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
-import 'package:app_screen_time/main.dart';
+//import 'package:app_screen_time/main.dart';
+import '../main.dart';
 
 
 final CollectionReference MAIN_COLLECTION = FirebaseFirestore.instance.collection('UID');
@@ -111,6 +112,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
   Future<void> _deleteAccount() async {
     try {
       await _auth.currentUser!.delete();
+      makeUIDNull();
       // Go back to the previous screen
       Navigator.of(context).pop(); 
     } catch (e) {
