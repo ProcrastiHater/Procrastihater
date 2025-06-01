@@ -132,6 +132,7 @@ class ProcrastiHater extends StatelessWidget {
   Widget build(BuildContext context) {
     double? screenHeight = MediaQuery.of(context).size.height;
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         //brightness: Brightness.dark,
         scaffoldBackgroundColor: darkBlue,
