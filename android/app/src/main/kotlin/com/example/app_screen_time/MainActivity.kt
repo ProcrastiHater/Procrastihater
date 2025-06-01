@@ -1,6 +1,7 @@
 package com.example.app_screen_time
 
 import kotlin.Double
+import kotlin.time.*
 import android.Manifest
 import android.util.Log
 import androidx.annotation.NonNull
@@ -58,6 +59,8 @@ lateinit var auth: FirebaseAuth
 lateinit var mainCollection: CollectionReference
 var uid: String? = null
 var userRef: DocumentReference? = null
+val timeSource = TimeSource.Monotonic
+var startTime = timeSource.markNow()
 
 ///*********************************************
 /// Name: MainActivity
@@ -76,6 +79,7 @@ class MainActivity: FlutterActivity() {
     /// Description: Initializes activity
     ///**********************************************
     override fun onCreate(savedInstanceState: Bundle?) {
+        startTime = timeSource.markNow()
         super.onCreate(savedInstanceState)
         firestore = Firebase.firestore
         auth = Firebase.auth
