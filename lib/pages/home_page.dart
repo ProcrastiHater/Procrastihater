@@ -243,6 +243,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         color: beige,
                         height: 2,
                       ),
+                      SizedBox(
+                        height: 4,
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -329,6 +332,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                             ),
                           ),
                         ],
+                      ),
+                      SizedBox(
+                        height: 4,
                       ),
                       Container(
                         color: beige,
