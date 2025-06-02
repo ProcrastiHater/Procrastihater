@@ -91,9 +91,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);   
+    WidgetsBinding.instance.addObserver(this);
   }
-  
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -129,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future<void> onRefresh() async {
     await getScreenTime();
-    await fetchWeeklyScreenTime(); 
+    await fetchWeeklyScreenTime();
     await generateAppsList();
     await initializeAppNameColorMapping();
     setState(() {
@@ -225,7 +225,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 body: [
                   //Daily Graph
                   SizedBox(
-                    child: DailyGraphView(onFilteredData: updateFilteredDayData, data: dayData),
+                    child: DailyGraphView(
+                        onFilteredData: updateFilteredDayData, data: dayData),
                   ),
                   //Weekly Graph
                   SizedBox(
@@ -245,12 +246,19 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Card(
-                            color: graphIndex == 0 ? beige : null,
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10.0))),
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.bounceInOut,
+                            decoration: BoxDecoration(
+                              color: graphIndex == 0 ? beige : lightBlue,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                )
+                              ],
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
                             child: InkWell(
                               child: Padding(
                                 padding: EdgeInsets.all(5.0),
@@ -279,12 +287,19 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                               },
                             ),
                           ),
-                          Card(
-                            color: graphIndex == 1 ? beige : null,
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10.0))),
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.bounceInOut,
+                            decoration: BoxDecoration(
+                              color: graphIndex == 1 ? beige : lightBlue,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                )
+                              ],
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                            ),
                             child: InkWell(
                               child: Padding(
                                 padding: EdgeInsets.all(5.0),

@@ -1,7 +1,7 @@
 ///*********************************
 /// Name: graph.dart
 ///
-/// Description: File for holding 
+/// Description: File for holding
 /// graph classes for easy switching
 /// between different graphs
 ///*******************************
@@ -36,14 +36,15 @@ Map<String, Map<String, String>> dailyData = {};
 
 ///*********************************
 /// Name: WeeklyGraphView
-/// 
+///
 /// Description: Stateful widget for
 /// weekly state
 ///*********************************
 class WeeklyGraphView extends StatefulWidget {
   final Function(String) onBarSelected;
   final Function(Map<String, Map<String, Map<String, dynamic>>>) onFilteredData;
-  const WeeklyGraphView({super.key, required this.onBarSelected, required this.onFilteredData});
+  const WeeklyGraphView(
+      {super.key, required this.onBarSelected, required this.onFilteredData});
 
   @override
   State<WeeklyGraphView> createState() => _WeeklyGraphViewState();
@@ -51,9 +52,9 @@ class WeeklyGraphView extends StatefulWidget {
 
 ///*********************************
 /// Name: _WeeklyGraphViewState
-/// 
+///
 /// Description: State for WeeklyGraphView,
-/// holds layout and state management for 
+/// holds layout and state management for
 /// weekly graph
 ///*********************************
 class _WeeklyGraphViewState extends State<WeeklyGraphView> {
@@ -61,13 +62,13 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
   List<String> selectedCategories = [];
   List<String> selectedApps = [];
   String? selectedFilter = "";
-  
+
   //Varaibles for week scrolling data
   Map<String, Map<String, Map<String, dynamic>>> weekData = {};
   String currentWeek = DateFormat('MM-dd-yyyy').format(currentDataset);
   bool isLoading = false;
-  
-  //Wrapper for loading bar touch, 
+
+  //Wrapper for loading bar touch,
   BarTouchData loadTouch(Map<String, Map<String, Map<String, dynamic>>> data) {
     return getBarWeekTouch(data, widget.onBarSelected);
   }
@@ -121,13 +122,13 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
     }
 
     //Multi-Select filtering for selecting one or more categories
-    if (selectedCategories.isNotEmpty){
+    if (selectedCategories.isNotEmpty) {
       filteredData.forEach((dayKey, dayData) {
         dayData.removeWhere((appKey, appData) {
           String? category = appData['appType'] as String?;
           return category == null || !selectedCategories.contains(category);
         });
-      }); 
+      });
     }
 
     //Filtering options for sorting data
@@ -136,31 +137,26 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       final entries = appsKey.entries.toList();
       switch (selectedFilter) {
         case 'Alphabet(asc)':
-          entries.sort((a, b) =>
-            a.key.compareTo(b.key)
-          );
+          entries.sort((a, b) => a.key.compareTo(b.key));
           break;
         case 'Alphabet(desc)':
-          entries.sort((a, b) =>
-            b.key.compareTo(a.key)
-          );
+          entries.sort((a, b) => b.key.compareTo(a.key));
           break;
         case 'Hours(asc)':
-          entries.sort((a, b) =>
-            (a.value['hours'])!.compareTo(b.value['hours']!)
-          );
+          entries
+              .sort((a, b) => (a.value['hours'])!.compareTo(b.value['hours']!));
           break;
         case 'Hours(desc)':
-          entries.sort((a, b) =>
-            (b.value['hours'])!.compareTo(a.value['hours']!)
-          );
+          entries
+              .sort((a, b) => (b.value['hours'])!.compareTo(a.value['hours']!));
           break;
         default:
           break;
-        }
+      }
       //Convert list of entries back into map
-      filteredData[dayKey] = Map<String, Map<String, dynamic>>.fromEntries(entries);
-    });    
+      filteredData[dayKey] =
+          Map<String, Map<String, dynamic>>.fromEntries(entries);
+    });
     return filteredData;
   }
 
@@ -174,246 +170,251 @@ class _WeeklyGraphViewState extends State<WeeklyGraphView> {
       return Center(child: Text("No Weekly Data"));
     }
     return Padding(
-      padding: const EdgeInsets.all(4.0),
-      //Column structure for home page
-      child: Column(
-        children: [
-          //Filter for individual apps
-          CustomDropdown.multiSelectSearch(
-            decoration: CustomDropdownDecoration(
-                    closedFillColor: lightBlue,
-                    expandedFillColor: lightBlue,
-                    searchFieldDecoration: SearchFieldDecoration(
-                      textStyle: TextStyle(color: lightBeige),
-                      fillColor: darkBlue,
-                    ),
-                    listItemDecoration: ListItemDecoration(
-                      highlightColor: darkBlue,
-                      selectedColor: darkBlue,
-                    ),
-                  ),
-            closedHeaderPadding: EdgeInsets.all(8.0),
-            expandedHeaderPadding: EdgeInsets.all(8.0),
-            //Options to select for this dropdown
-            items: appNameToColor.keys.toList(), 
-            //Text displayed when no options are selected
-            hintBuilder: (context, hint, enabled) {
-              return Text(
-                "All Apps", 
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16.0,
+        padding: const EdgeInsets.all(4.0),
+        //Column structure for home page
+        child: Column(
+          children: [
+            //Filter for individual apps
+            CustomDropdown.multiSelectSearch(
+              decoration: CustomDropdownDecoration(
+                closedFillColor: lightBlue,
+                expandedFillColor: lightBlue,
+                searchFieldDecoration: SearchFieldDecoration(
+                  textStyle: TextStyle(color: lightBeige),
+                  fillColor: darkBlue,
+                ),
+                listItemDecoration: ListItemDecoration(
+                  highlightColor: darkBlue,
+                  selectedColor: darkBlue,
+                ),
+              ),
+              closedHeaderPadding: EdgeInsets.all(8.0),
+              expandedHeaderPadding: EdgeInsets.all(8.0),
+              //Options to select for this dropdown
+              items: appNameToColor.keys.toList(),
+              //Text displayed when no options are selected
+              hintBuilder: (context, hint, enabled) {
+                return Text(
+                  "All Apps",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0,
                   ),
                 );
-              },   
-            //Filter the data on click and rerender all elements holding data
-            onListChanged: (value) {  
-              setState(() {
-                selectedApps = value;
-                weekData = filterData();
-                availableDays = weekData.keys.toList();
-                widget.onFilteredData(weekData);
-              });
-            },
-          ),
-          //Row structure for other filters
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              //Filter for categories
-              Expanded(
-                child: CustomDropdown.multiSelect(
-                  decoration: CustomDropdownDecoration(
-                    closedFillColor: lightBlue,
-                    expandedFillColor: lightBlue,
-                      listItemDecoration: ListItemDecoration(
-                      highlightColor: darkBlue,
-                      selectedColor: darkBlue,
-                    )
-                  ),
-                  overlayHeight: 525,
-                  closedHeaderPadding: EdgeInsets.all(8.0),
-                  expandedHeaderPadding: EdgeInsets.all(8.0),
-                  //Options to select for this dropdown
-                  items: categories,
-                  //Text displayed when no options are selected
-                  hintBuilder: (context, hint, enabled) {
-                    return Text(
-                      "All Categories", 
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16.0,
-                        ),
-                    );
-                  }, 
-                  //Filter the data on click and rerender all elements holding data               
-                  onListChanged: (value) {
-                    setState(() {
-                      selectedCategories = value;
-                      weekData = filterData();
-                      availableDays = weekData.keys.toList();
-                      widget.onFilteredData(weekData);
-                    });
-                  }
+              },
+              //Filter the data on click and rerender all elements holding data
+              onListChanged: (value) {
+                setState(() {
+                  selectedApps = value;
+                  weekData = filterData();
+                  availableDays = weekData.keys.toList();
+                  widget.onFilteredData(weekData);
+                });
+              },
+            ),
+            //Row structure for other filters
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                //Filter for categories
+                Expanded(
+                  child: CustomDropdown.multiSelect(
+                      decoration: CustomDropdownDecoration(
+                          closedFillColor: lightBlue,
+                          expandedFillColor: lightBlue,
+                          listItemDecoration: ListItemDecoration(
+                            highlightColor: darkBlue,
+                            selectedColor: darkBlue,
+                          )),
+                      overlayHeight: 525,
+                      closedHeaderPadding: EdgeInsets.all(8.0),
+                      expandedHeaderPadding: EdgeInsets.all(8.0),
+                      //Options to select for this dropdown
+                      items: categories,
+                      //Text displayed when no options are selected
+                      hintBuilder: (context, hint, enabled) {
+                        return Text(
+                          "All Categories",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16.0,
+                          ),
+                        );
+                      },
+                      //Filter the data on click and rerender all elements holding data
+                      onListChanged: (value) {
+                        setState(() {
+                          selectedCategories = value;
+                          weekData = filterData();
+                          availableDays = weekData.keys.toList();
+                          widget.onFilteredData(weekData);
+                        });
+                      }),
                 ),
-              ),
-              //Filters for data sorting
-              Expanded(
-                child: CustomDropdown(
-                  decoration: CustomDropdownDecoration(
-                    closedFillColor: lightBlue,
-                    expandedFillColor: lightBlue,
-                    listItemDecoration: ListItemDecoration(
-                      highlightColor: darkBlue,
-                      selectedColor: darkBlue,
-                    ),
-                  ),
-                  closedHeaderPadding: EdgeInsets.all(8.0),
-                  expandedHeaderPadding: EdgeInsets.all(8.0),
-                  items: filters, 
-                  hintBuilder: (context, hint, enabled) {
-                    return Text(
-                      "Filters", 
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16.0,
+                //Filters for data sorting
+                Expanded(
+                  child: CustomDropdown(
+                      decoration: CustomDropdownDecoration(
+                        closedFillColor: lightBlue,
+                        expandedFillColor: lightBlue,
+                        listItemDecoration: ListItemDecoration(
+                          highlightColor: darkBlue,
+                          selectedColor: darkBlue,
                         ),
-                    );
-                  },
-                  //Filter the data on click and rerender all elements holding data
-                  onChanged: (value) {
-                    setState(() {
-                      selectedFilter = value;
-                      weekData = filterData();
-                      availableDays = weekData.keys.toList();
-                      widget.onFilteredData(weekData);
-                    });
-                  }
+                      ),
+                      closedHeaderPadding: EdgeInsets.all(8.0),
+                      expandedHeaderPadding: EdgeInsets.all(8.0),
+                      items: filters,
+                      hintBuilder: (context, hint, enabled) {
+                        return Text(
+                          "Filters",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16.0,
+                          ),
+                        );
+                      },
+                      //Filter the data on click and rerender all elements holding data
+                      onChanged: (value) {
+                        setState(() {
+                          selectedFilter = value;
+                          weekData = filterData();
+                          availableDays = weekData.keys.toList();
+                          widget.onFilteredData(weekData);
+                        });
+                      }),
                 ),
-              ),
-            ],
-          ),
-          //Graph Title
-          Text("Historical Phone Usage", style: TextStyle(fontSize: 18),),
-          Expanded(
-            child: SizedBox(
-              width: screenWidth - (screenWidth * 0.05),
-              child: BarChart(
-              BarChartData(
-                maxY: tallestDayBar(weekData),
-                groupsSpace: 60,
-                alignment: BarChartAlignment.spaceAround,
-                backgroundColor: lightBlue,
-                //Title Widgets
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
+              ],
+            ),
+            //Graph Title
+            Text(
+              "Historical Phone Usage",
+              style: TextStyle(fontSize: 18),
+            ),
+            Expanded(
+              child: SizedBox(
+                width: screenWidth - (screenWidth * 0.05),
+                child: BarChart(BarChartData(
+                  maxY: tallestDayBar(weekData),
+                  groupsSpace: 60,
+                  alignment: BarChartAlignment.spaceAround,
+                  backgroundColor: lightBlue,
+                  //Title Widgets
+                  titlesData: FlTitlesData(
+                    leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
                       maxIncluded: true,
                       showTitles: true,
                       interval: 1,
                       reservedSize: 20,
                       getTitlesWidget: sideTitles,
-                    )
-                  ),
-                  rightTitles: AxisTitles(
-                    sideTitles: SideTitles(
+                    )),
+                    rightTitles: AxisTitles(
+                        sideTitles: SideTitles(
                       maxIncluded: true,
                       showTitles: true,
                       interval: 1,
                       reservedSize: 20,
                       getTitlesWidget: sideTitles,
-                    )
-                  ),
-                  topTitles: const AxisTitles(),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
+                    )),
+                    topTitles: const AxisTitles(),
+                    bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: bottomDayTitles,
                       reservedSize: 20,
-                    )
+                    )),
                   ),
-                ),
-                //Style Widgets
-                borderData: FlBorderData(
-                  border: Border.all(
-                    color: beige,
-                    width: 2,
+                  //Style Widgets
+                  borderData: FlBorderData(
+                      border: Border.all(
+                        color: beige,
+                        width: 2,
+                      ),
+                      show: true),
+                  gridData: FlGridData(
+                    show: false,
                   ),
-                  show: true
-                ),
-                gridData: FlGridData(
-                  show: false,
-                ),
-                //Functionality Widgets
-                barTouchData: loadTouch(weekData),
-                barGroups: generateWeeklyChart(weekData),
-              )
-            ),
-            ),
-          ),
-          Row(
-            //Equal spacing between children
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              //Previous arrow button
-              IconButton(
-                onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) > 0 && !isLoading
-                  ? () async {
-                  setState(() {
-                    isLoading = true;
-                });
-                  int currentIndex = availableWeekKeys.indexOf(currentWeek);
-                  currentWeek = availableWeekKeys[currentIndex - 1];
-                  currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                  await fetchWeeklyScreenTime();
-                  weekData = filterData();
-                  availableDays = weekData.keys.toList();
-                  widget.onFilteredData(weekData);
-                  setState(() {
-                    isLoading = false;
-                  });
-                } : null,
-                icon: Icon(Icons.arrow_back),
+                  //Functionality Widgets
+                  barTouchData: loadTouch(weekData),
+                  barGroups: generateWeeklyChart(weekData),
+                )),
               ),
-              Text(currentWeek),
-              //Next arrow button
-              IconButton(
-                onPressed: availableWeekKeys.isNotEmpty && availableWeekKeys.indexOf(currentWeek) < availableWeekKeys.length - 1 && !isLoading
-                  ? () async {
-                  setState(() {
-                    isLoading = true;
-                  });
-                  int currentIndex = availableWeekKeys.indexOf(currentWeek);
-                  currentWeek = availableWeekKeys[currentIndex + 1];
-                  currentDataset = DateFormat('MM-dd-yyyy').parse(currentWeek);
-                  await fetchWeeklyScreenTime();
-                  weekData = filterData();
-                  availableDays = weekData.keys.toList();
-                  widget.onFilteredData(weekData);
-                  setState(() {
-                    isLoading = false;
-                  });
-                } : null,
-                icon: Icon(Icons.arrow_forward),
-              ),
-            ],
-          ),
-        ],
-      )
-    );
+            ),
+            Row(
+              //Equal spacing between children
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                //Previous arrow button
+                IconButton(
+                  onPressed: availableWeekKeys.isNotEmpty &&
+                          availableWeekKeys.indexOf(currentWeek) > 0 &&
+                          !isLoading
+                      ? () async {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          int currentIndex =
+                              availableWeekKeys.indexOf(currentWeek);
+                          currentWeek = availableWeekKeys[currentIndex - 1];
+                          currentDataset =
+                              DateFormat('MM-dd-yyyy').parse(currentWeek);
+                          await fetchWeeklyScreenTime();
+                          weekData = filterData();
+                          availableDays = weekData.keys.toList();
+                          widget.onFilteredData(weekData);
+                          setState(() {
+                            isLoading = false;
+                          });
+                        }
+                      : null,
+                  icon: Icon(Icons.arrow_back),
+                ),
+                Text(currentWeek),
+                //Next arrow button
+                IconButton(
+                  onPressed: availableWeekKeys.isNotEmpty &&
+                          availableWeekKeys.indexOf(currentWeek) <
+                              availableWeekKeys.length - 1 &&
+                          !isLoading
+                      ? () async {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          int currentIndex =
+                              availableWeekKeys.indexOf(currentWeek);
+                          currentWeek = availableWeekKeys[currentIndex + 1];
+                          currentDataset =
+                              DateFormat('MM-dd-yyyy').parse(currentWeek);
+                          await fetchWeeklyScreenTime();
+                          weekData = filterData();
+                          availableDays = weekData.keys.toList();
+                          widget.onFilteredData(weekData);
+                          setState(() {
+                            isLoading = false;
+                          });
+                        }
+                      : null,
+                  icon: Icon(Icons.arrow_forward),
+                ),
+              ],
+            ),
+          ],
+        ));
   }
 }
 
 ///*********************************
 /// Name: DailyGraphView
-/// 
+///
 /// Description: Stateful widget for
 /// daily state
 ///*********************************
 class DailyGraphView extends StatefulWidget {
   final Map<String, Map<String, String>> data;
   final Function(Map<String, Map<String, String>>) onFilteredData;
-  const DailyGraphView({super.key, required this.onFilteredData, required this.data});
+  const DailyGraphView(
+      {super.key, required this.onFilteredData, required this.data});
 
   @override
   State<DailyGraphView> createState() => _DailyGraphViewState();
@@ -421,9 +422,9 @@ class DailyGraphView extends StatefulWidget {
 
 ///*********************************
 /// Name: _DailyGraphViewState
-/// 
+///
 /// Description: State for DailyGraphView,
-/// holds layout and state management for 
+/// holds layout and state management for
 /// daily graph
 ///*********************************
 class _DailyGraphViewState extends State<DailyGraphView> {
@@ -452,7 +453,6 @@ class _DailyGraphViewState extends State<DailyGraphView> {
     }
   }
 
-
   Future<void> _initializeData() async {
     totalDaily = await fetchTotalDayScreentime();
     points = await fetchPoints();
@@ -463,203 +463,194 @@ class _DailyGraphViewState extends State<DailyGraphView> {
   }
 
   Map<String, Map<String, String>> filterData() {
-    Map<String, Map<String, String>> filteredData  = Map<String, Map<String, String>>.from(screenTimeData);
-    if (selectedCategories.isNotEmpty){
-      filteredData.removeWhere((key, value){
-      String? category = value['category'];
-      return category == null || !selectedCategories.contains(category);
-    }); 
+    Map<String, Map<String, String>> filteredData =
+        Map<String, Map<String, String>>.from(screenTimeData);
+    if (selectedCategories.isNotEmpty) {
+      filteredData.removeWhere((key, value) {
+        String? category = value['category'];
+        return category == null || !selectedCategories.contains(category);
+      });
     }
     final entries = filteredData.entries.toList();
     switch (selectedFilter) {
       case 'Alphabet(asc)':
-        entries.sort((a, b) =>
-          a.key.compareTo(b.key)
-        );
+        entries.sort((a, b) => a.key.compareTo(b.key));
         break;
       case 'Alphabet(desc)':
-        entries.sort((a, b) =>
-          b.key.compareTo(a.key)
-        );
+        entries.sort((a, b) => b.key.compareTo(a.key));
         break;
       case 'Hours(asc)':
-        entries.sort((a, b) =>
-          (a.value['hours'])!.compareTo(b.value['hours']!)
-        );
+        entries
+            .sort((a, b) => (a.value['hours'])!.compareTo(b.value['hours']!));
         break;
       case 'Hours(desc)':
-        entries.sort((a, b) =>
-          (b.value['hours'])!.compareTo(a.value['hours']!)
-        );
+        entries
+            .sort((a, b) => (b.value['hours'])!.compareTo(a.value['hours']!));
         break;
       default:
         break;
     }
-    return Map<String, Map<String, String>>.fromEntries(entries);  
+    return Map<String, Map<String, String>>.fromEntries(entries);
   }
 
   //Wrapper for loading bar touch
   BarTouchData loadTouch(Map<String, Map<String, String>> data) {
     return getBarDayTouch(data);
   }
+
   @override
   Widget build(BuildContext context) {
     double? screenWidth = MediaQuery.of(context).size.width;
     return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: CustomDropdown.multiSelect(
-                  decoration: CustomDropdownDecoration(
-                    closedFillColor: lightBlue,
-                    expandedFillColor: lightBlue,
-                    listItemDecoration: ListItemDecoration(
-                      highlightColor: darkBlue,
-                      selectedColor: darkBlue,
+        padding: const EdgeInsets.all(4.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: CustomDropdown.multiSelect(
+                    decoration: CustomDropdownDecoration(
+                      closedFillColor: lightBlue,
+                      expandedFillColor: lightBlue,
+                      listItemDecoration: ListItemDecoration(
+                        highlightColor: darkBlue,
+                        selectedColor: darkBlue,
+                      ),
                     ),
+                    items: categories,
+                    overlayHeight: 525,
+                    closedHeaderPadding: EdgeInsets.all(8.0),
+                    expandedHeaderPadding: EdgeInsets.all(8.0),
+                    hintBuilder: (context, hint, enabled) {
+                      return Text(
+                        "All Categories",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16.0,
+                        ),
+                      );
+                    },
+                    onListChanged: (value) {
+                      if (value.isEmpty) {
+                        setState(() {
+                          selectedCategories = [];
+                          dailyData = screenTimeData;
+                          availableApps = dailyData.keys.toList();
+                          widget.onFilteredData(dailyData);
+                        });
+                      } else {
+                        setState(() {
+                          selectedCategories = value;
+                          dailyData = filterData();
+                          availableApps = dailyData.keys.toList();
+                          widget.onFilteredData(dailyData);
+                        });
+                      }
+                    },
                   ),
-                  items: categories, 
-                  overlayHeight: 525,
-                  closedHeaderPadding: EdgeInsets.all(8.0),
-                  expandedHeaderPadding: EdgeInsets.all(8.0),
-                  hintBuilder: (context, hint, enabled) {
-                    return Text(
-                      "All Categories", 
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16.0,
-                        ),
-                    );
-                  },                
-                  onListChanged: (value) {
-                    if (value.isEmpty) {
-                      setState(() {
-                        selectedCategories = [];
-                        dailyData = screenTimeData;
-                        availableApps = dailyData.keys.toList();
-                        widget.onFilteredData(dailyData);
-                      });
-                    }
-                    else { 
-                      setState(() {
-                        selectedCategories = value;
-                        dailyData = filterData();
-                        availableApps = dailyData.keys.toList();
-                        widget.onFilteredData(dailyData);
-                      });
-                    }
-                  },
                 ),
-              ),
-              Expanded(
-                child: CustomDropdown(
-                   decoration: CustomDropdownDecoration(
-                    closedFillColor: lightBlue,
-                    expandedFillColor: lightBlue,
-                    listItemDecoration: ListItemDecoration(
-                      highlightColor: darkBlue,
-                      selectedColor: darkBlue,
-                    ),
-                  ),
-                  closedHeaderPadding: EdgeInsets.all(8.0),
-                  expandedHeaderPadding: EdgeInsets.all(8.0),
-                  items: filters, 
-                  hintBuilder: (context, hint, enabled) {
-                    return Text(
-                      "Filters", 
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16.0,
-                        ),
-                    );
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      selectedFilter = value;
-                      dailyData = filterData();
-                      availableApps = dailyData.keys.toList();
-                      widget.onFilteredData(dailyData);
-                    });
-                  }
-                ),
-              )
-            ],
-          ),
-          //Title for graph
-          Text("Current Phone Usage", style: TextStyle(fontSize: 18),),
-          Expanded(
-            //Widget to allow scrolling of graph if it overflows the screen
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                //Sets a minimum size for graph
-                constraints: BoxConstraints(minWidth: screenWidth - (screenWidth * 0.05)),
-                child: SizedBox(
-                  //Dynamically size graph based on amount of apps
-                  width: 100 + availableApps.length * 70,
-                  child: BarChart(
-                    BarChartData(
-                      maxY: tallestAppBar(dailyData),
-                      groupsSpace: 60,
-                      alignment: BarChartAlignment.spaceAround,
-                      backgroundColor: lightBlue,
-                      //Title Widgets
-                      titlesData: FlTitlesData(
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            maxIncluded: true,
-                            showTitles: true,
-                            interval: 1,
-                            reservedSize: 20,
-                            getTitlesWidget: sideTitles,
-                          )
-                        ),
-                        rightTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            maxIncluded: true,
-                            showTitles: true,
-                            interval: 1,
-                            reservedSize: 20,
-                            getTitlesWidget: sideTitles,
-                          )
-                        ),
-                        topTitles: const AxisTitles(),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            getTitlesWidget: bottomAppTitles,
-                            reservedSize: 25,
-                          )
+                Expanded(
+                  child: CustomDropdown(
+                      decoration: CustomDropdownDecoration(
+                        closedFillColor: lightBlue,
+                        expandedFillColor: lightBlue,
+                        listItemDecoration: ListItemDecoration(
+                          highlightColor: darkBlue,
+                          selectedColor: darkBlue,
                         ),
                       ),
-                      //Style Widgets
-                      borderData: FlBorderData(
-                        border: Border.all(
-                          color: beige,
-                          width: 2,
-                        ),
-                        show: true
-                        ),
-                      gridData: FlGridData(
-                        show: false,
-                      ),
-                      //Functionality Widgets
-                      barTouchData: loadTouch(dailyData),
-                      barGroups: generateDailyChart(dailyData),
-                    )
-                  )
-                ),
-              )
+                      closedHeaderPadding: EdgeInsets.all(8.0),
+                      expandedHeaderPadding: EdgeInsets.all(8.0),
+                      items: filters,
+                      hintBuilder: (context, hint, enabled) {
+                        return Text(
+                          "Filters",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16.0,
+                          ),
+                        );
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          selectedFilter = value;
+                          dailyData = filterData();
+                          availableApps = dailyData.keys.toList();
+                          widget.onFilteredData(dailyData);
+                        });
+                      }),
+                )
+              ],
             ),
-          ),
-          Text("Today's Procrastination Total:",),
-          Text("Hours: $totalDaily | Points: $points"),
-        ],
-      )
-    );
+            //Title for graph
+            Text(
+              "Current Phone Usage",
+              style: TextStyle(fontSize: 18),
+            ),
+            Expanded(
+              //Widget to allow scrolling of graph if it overflows the screen
+              child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    //Sets a minimum size for graph
+                    constraints: BoxConstraints(
+                        minWidth: screenWidth - (screenWidth * 0.05)),
+                    child: SizedBox(
+                        //Dynamically size graph based on amount of apps
+                        width: 100 + availableApps.length * 70,
+                        child: BarChart(BarChartData(
+                          maxY: tallestAppBar(dailyData),
+                          groupsSpace: 60,
+                          alignment: BarChartAlignment.spaceAround,
+                          backgroundColor: lightBlue,
+                          //Title Widgets
+                          titlesData: FlTitlesData(
+                            leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                              maxIncluded: true,
+                              showTitles: true,
+                              interval: 1,
+                              reservedSize: 20,
+                              getTitlesWidget: sideTitles,
+                            )),
+                            rightTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                              maxIncluded: true,
+                              showTitles: true,
+                              interval: 1,
+                              reservedSize: 20,
+                              getTitlesWidget: sideTitles,
+                            )),
+                            topTitles: const AxisTitles(),
+                            bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: bottomAppTitles,
+                              reservedSize: 25,
+                            )),
+                          ),
+                          //Style Widgets
+                          borderData: FlBorderData(
+                              border: Border.all(
+                                color: beige,
+                                width: 2,
+                              ),
+                              show: true),
+                          gridData: FlGridData(
+                            show: false,
+                          ),
+                          //Functionality Widgets
+                          barTouchData: loadTouch(dailyData),
+                          barGroups: generateDailyChart(dailyData),
+                        ))),
+                  )),
+            ),
+            Text(
+              "Today's Procrastination Total:",
+            ),
+            Text("Hours: $totalDaily | Points: $points"),
+          ],
+        ));
   }
 }
