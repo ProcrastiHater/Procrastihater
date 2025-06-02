@@ -69,11 +69,11 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
 
   @override
   Widget build(BuildContext context) {
-      if (!_isInitialized) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
-  }
+    if (!_isInitialized) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return GestureDetector(
         onHorizontalDragEnd: (details) {
           if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
@@ -246,8 +246,7 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
 
                   List<String> friends =
                       List<String>.from(userData['friends'] ?? []);
-                  if(showFriendsLeaderboard && friends.isEmpty)
-                  {
+                  if (showFriendsLeaderboard && friends.isEmpty) {
                     return const Text("You have no friends! :(");
                   }
                   return StreamBuilder<QuerySnapshot>(
@@ -279,15 +278,29 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
                         itemCount: users.length,
                         itemBuilder: (context, index) {
                           var user = users[index];
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage: NetworkImage(user['pfp']),
-                            ),
-                            title: Text(user['displayName']),
-                            subtitle: Text(
-                              'Points: ${(user['points'] as num).toStringAsFixed(0)}',
-                            ),
-                            trailing: Text("${index + 1}"),
+                          return TweenAnimationBuilder(
+                            tween: Tween<Offset>(
+                                begin: Offset(0, 0.1), end: Offset.zero),
+                            duration: Duration(milliseconds: 300 + index * 100),
+                            builder: (context, offset, child) {
+                              return Transform.translate(
+                                offset: offset * 100,
+                                child: Opacity(
+                                  opacity: 1.0 - offset.dy,
+                                  child: ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundImage:
+                                          NetworkImage(user['pfp']),
+                                    ),
+                                    title: Text(user['displayName']),
+                                    subtitle: Text(
+                                      'Points: ${(user['points'] as num).toStringAsFixed(0)}',
+                                    ),
+                                    trailing: Text("${index + 1}"),
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
                       );
