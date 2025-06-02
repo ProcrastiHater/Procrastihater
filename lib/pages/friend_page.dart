@@ -604,6 +604,10 @@ class FriendRequestsSheet extends StatelessWidget {
                   .collection('friendRequests')
                   .snapshots(),
               builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const Center(child: Text("No friend requests"));
                 }
@@ -619,7 +623,7 @@ class FriendRequestsSheet extends StatelessWidget {
                     return FutureBuilder<DocumentSnapshot>(
                       future: _firestore.collection('UID').doc(senderUID).get(),
                       builder: (context, userSnapshot) {
-                        if (!userSnapshot.hasData) {
+                        if (!userSnapshot.hasData || snapshot.data!.docs.isEmpty) {
                           return const SizedBox.shrink();
                         }
                         var friendData =
