@@ -707,6 +707,11 @@ class FriendRequestsSheet extends StatelessWidget {
   }
 }
 
+///*********************************
+/// Name: _showExitConfirmationDialog
+///
+/// Description: Creates the exit app dialog
+///*********************************
 Future<bool> _showExitConfirmationDialog(BuildContext context) async {
   return await showDialog<bool>(
         context: context,
@@ -726,17 +731,10 @@ Future<bool> _showExitConfirmationDialog(BuildContext context) async {
           actions: _isExiting
               ? null // Hide buttons while exiting
               : <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
                   ElevatedButton(
-                    onPressed: () async {
-                      _isExiting = true;
-
+                    onPressed: () async {                     
+                        _isExiting = true;
+                     
                       await Future.delayed(const Duration(milliseconds: 500));
 
                       if (context.mounted) {
@@ -744,6 +742,13 @@ Future<bool> _showExitConfirmationDialog(BuildContext context) async {
                       }
                     },
                     child: const Text('Yes'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
                 ],
         ),

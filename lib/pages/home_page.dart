@@ -163,13 +163,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             actions: _isExiting
                 ? null // Hide buttons while exiting
                 : <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
                     ElevatedButton(
                       onPressed: () async {
                         setState(() {
@@ -183,6 +176,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         }
                       },
                       child: const Text('Yes'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.red),
+                      ),
                     ),
                   ],
           ),
