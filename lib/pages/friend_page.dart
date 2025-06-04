@@ -36,12 +36,11 @@ class FriendsPage extends StatelessWidget {
     //Wait for a gesture
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
         final bool shouldPop = await _showExitConfirmationDialog(context);
 
-        // If user confirmed exit, close the app
         if (shouldPop && context.mounted) {
           SystemNavigator.pop();
         }
@@ -474,6 +473,8 @@ class PokeNotificationsPage extends StatelessWidget {
   }
 }
 
+bool _isExiting = false;
+
 ///*********************************************************
 /// Name: ShowAddFriendsSheet
 ///
@@ -706,30 +707,45 @@ class FriendRequestsSheet extends StatelessWidget {
   }
 }
 
-///*********************************
-/// Name: _showExitConfirmationDialog
-///
-/// Description: Creates the exit app dialog
-///*********************************
-Future<bool> _showExitConfirmationDialog(dynamic context) async {
-  return await showDialog(
+Future<bool> _showExitConfirmationDialog(BuildContext context) async {
+  return await showDialog<bool>(
         context: context,
+        barrierDismissible: false, // Prevent dismissing by tapping outside
         builder: (context) => AlertDialog(
-          title: Text('Exit App'),
-          content: Text('Are you sure you want to exit the app?'),
-          actions: <Widget>[
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text('Yes'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
+          title: const Text('Exit App'),
+          content: _isExiting
+              ? const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Exiting app...'),
+                  ],
+                )
+              : const Text('Are you sure you want to exit the app?'),
+          actions: _isExiting
+              ? null // Hide buttons while exiting
+              : <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      _isExiting = true;
+
+                      await Future.delayed(const Duration(milliseconds: 500));
+
+                      if (context.mounted) {
+                        Navigator.of(context).pop(true);
+                      }
+                    },
+                    child: const Text('Yes'),
+                  ),
+                ],
         ),
       ) ??
       false;

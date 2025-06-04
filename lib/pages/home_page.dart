@@ -88,6 +88,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   Map<String, Map<String, String>> dayData = screenTimeData;
   Map<String, Map<String, Map<String, dynamic>>> weekData = weeklyData;
   int graphIndex = 0;
+  bool _isExiting = false;
 
   @override
   void initState() {
@@ -143,25 +144,47 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   ///
   /// Description: Creates the exit app dialog
   ///*********************************
-  Future<bool> _showExitConfirmationDialog(dynamic context) async {
-    return await showDialog(
+  Future<bool> _showExitConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
           context: context,
+          barrierDismissible: false, // Prevent dismissing by tapping outside
           builder: (context) => AlertDialog(
-            title: Text('Exit App'),
-            content: Text('Are you sure you want to exit the app?'),
-            actions: <Widget>[
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text('Yes'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
+            title: const Text('Exit App'),
+            content: _isExiting
+                ? const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Exiting app...'),
+                    ],
+                  )
+                : const Text('Are you sure you want to exit the app?'),
+            actions: _isExiting
+                ? null // Hide buttons while exiting
+                : <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          _isExiting = true;
+                        });
+                        
+                        await Future.delayed(const Duration(milliseconds: 500));
+                        
+                        if (context.mounted) {
+                          Navigator.of(context).pop(true);
+                        }
+                      },
+                      child: const Text('Yes'),
+                    ),
+                  ],
           ),
         ) ??
         false;
@@ -173,12 +196,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     double? screenHeight = MediaQuery.of(context).size.height;
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
         final bool shouldPop = await _showExitConfirmationDialog(context);
 
-        // If user confirmed exit, close the app
         if (shouldPop && context.mounted) {
           SystemNavigator.pop();
         }
