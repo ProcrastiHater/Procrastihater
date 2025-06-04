@@ -428,20 +428,23 @@ class DailyGraphView extends StatefulWidget {
 /// daily graph
 ///*********************************
 class _DailyGraphViewState extends State<DailyGraphView> {
+  //Variables for filtered data
   List<String> selectedCategories = [];
-  Map<String, Map<String, String>> dailyData = {};
   String? selectedFilter = "";
+
+  Map<String, Map<String, String>> dailyData = {};
   double totalDaily = 0;
   int points = 0;
 
+  //Initial state for view
   @override
-  //Initialize colors making sure all apps are mapped to a color before displaying
   void initState() {
     super.initState();
     _initializeData();
     dailyData = screenTimeData;
   }
 
+  //Forces new state if parent widget has updated
   @override
   void didUpdateWidget(covariant DailyGraphView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -453,24 +456,32 @@ class _DailyGraphViewState extends State<DailyGraphView> {
     }
   }
 
+  //Asynchronous function for initializing data
   Future<void> _initializeData() async {
     totalDaily = await fetchTotalDayScreentime();
     points = await fetchPoints();
+    //Do not run following code if the build context is mounted
     if (!mounted) return;
     setState(() {
       availableApps = screenTimeData.keys.toList();
     });
   }
 
+  //Filter function for data
   Map<String, Map<String, String>> filterData() {
+    //Member for holding filtered data and fill with unfiltered data
     Map<String, Map<String, String>> filteredData =
         Map<String, Map<String, String>>.from(screenTimeData);
+
+    //Multi-Select filtering for selecting one or more categories
     if (selectedCategories.isNotEmpty) {
       filteredData.removeWhere((key, value) {
         String? category = value['category'];
         return category == null || !selectedCategories.contains(category);
       });
     }
+
+    //Filtering options for sorting data
     final entries = filteredData.entries.toList();
     switch (selectedFilter) {
       case 'Alphabet(asc)':
@@ -498,16 +509,21 @@ class _DailyGraphViewState extends State<DailyGraphView> {
     return getBarDayTouch(data);
   }
 
+  //Daily graph view widget tree
   @override
   Widget build(BuildContext context) {
+    //Width of users phone
     double? screenWidth = MediaQuery.of(context).size.width;
     return Padding(
         padding: const EdgeInsets.all(4.0),
+        //Column structure for home page
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            //Row structure for filters
             Row(
               children: [
+                //Filter for categories
                 Expanded(
                   child: CustomDropdown.multiSelect(
                     decoration: CustomDropdownDecoration(
@@ -518,10 +534,13 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                         selectedColor: darkBlue,
                       ),
                     ),
+                    //Options to select for this dropdown
                     items: categories,
                     overlayHeight: 525,
                     closedHeaderPadding: EdgeInsets.all(8.0),
                     expandedHeaderPadding: EdgeInsets.all(8.0),
+                    //Text displayed when no options are selected
+
                     hintBuilder: (context, hint, enabled) {
                       return Text(
                         "All Categories",
@@ -531,6 +550,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                         ),
                       );
                     },
+                    //Filter the data on click and rerender all elements holding data
                     onListChanged: (value) {
                       if (value.isEmpty) {
                         setState(() {
@@ -550,6 +570,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                     },
                   ),
                 ),
+                //Filters for data sorting
                 Expanded(
                   child: CustomDropdown(
                       decoration: CustomDropdownDecoration(
@@ -572,6 +593,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                           ),
                         );
                       },
+                      //Filter the data on click and rerender all elements holding data
                       onChanged: (value) {
                         setState(() {
                           selectedFilter = value;
@@ -646,6 +668,7 @@ class _DailyGraphViewState extends State<DailyGraphView> {
                         ))),
                   )),
             ),
+            //Basic information for user to read
             Text(
               "Today's Procrastination Total:",
             ),

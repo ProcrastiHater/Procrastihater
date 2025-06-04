@@ -86,8 +86,9 @@ class _ExpandedListViewState extends State<ExpandedListView> {
               final appName = entry.key;
               final appHours = entry.value['hours'];
               String? appType = entry.value['category'];
-              //Data tile
+              //Animated Data tile
               return TweenAnimationBuilder(
+                //Slide up animation based on offset
                 tween: Tween<Offset>(begin: Offset(0, 0.1), end: Offset.zero),
                 duration: Duration(milliseconds: 300 + index * 50),
                 builder: (context, offset, child) {
@@ -129,9 +130,6 @@ class _ExpandedListViewState extends State<ExpandedListView> {
         }
         //Load loading screen if data is empty
         if (!weeklyData.containsKey(widget.selectedBar)) {
-          /*if (weeklyData.isEmpty) {
-            return Center(child: CircularProgressIndicator());
-          } */
           //Return text string if the selected bar does not contain data
           return Center(
             child: Text(
@@ -171,8 +169,9 @@ class _ExpandedListViewState extends State<ExpandedListView> {
               final appName = entry.key;
               final appHours = entry.value['hours'];
               final appType = entry.value['appType'];
-              //Data tile
+              //Animated Data tile
               return TweenAnimationBuilder(
+                //Slide up animation based on offset
                 tween: Tween<Offset>(begin: Offset(0, 0.1), end: Offset.zero),
                 duration: Duration(milliseconds: 300 + index * 100),
                 builder: (context, offset, child) {

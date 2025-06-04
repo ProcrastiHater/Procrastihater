@@ -88,30 +88,35 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   Map<String, Map<String, Map<String, dynamic>>> weekData = weeklyData;
   int graphIndex = 0;
 
+  //Initialize lifecycle manager
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
 
+  //Dispose of lifecycle manager
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+  //Callback function for updating listview
   void updateSelectedBar(String bar) {
     setState(() {
       selectedBar = bar;
     });
   }
 
+  //Callback function for updating filtered daily data
   void updateFilteredDayData(Map<String, Map<String, String>> data) {
     setState(() {
       dayData = data;
     });
   }
 
+  //Callback function for updating filtereds weekly data
   void updateFilteredWeekData(
       Map<String, Map<String, Map<String, dynamic>>> data) {
     setState(() {
@@ -119,9 +124,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     });
   }
 
+  //Lifecycle manager
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    //Refresh data when the app is resumed
     if (state == AppLifecycleState.resumed) {
       onRefresh();
     }
@@ -164,6 +171,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           )
         ],
       ),
+      //Navigation Drawer for sub-pages
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.all(4.0),
@@ -184,6 +192,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 ],
               )),
             ),
+            //Calendar Page Tile
             ListTile(
               trailing: Icon(Icons.calendar_today),
               title: Text("Calendar"),
@@ -195,6 +204,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               height: 1,
               color: lightBeige,
             ),
+            //Study Mode Page Tile
             ListTile(
               trailing: Icon(Icons.school),
               title: Text("Study Mode"),
@@ -206,6 +216,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               height: 1,
               color: lightBeige,
             ),
+            //App Limits Page Tile
             ListTile(
               trailing: Icon(Icons.alarm),
               title: Text("App Limits"),
@@ -235,6 +246,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         onBarSelected: updateSelectedBar),
                   ),
                 ][graphIndex],
+                //Custom Bottom Nav Bar Widget
                 bottomNavigationBar: SizedBox(
                   height: 72,
                   child: Column(
@@ -249,6 +261,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
+                          //Card like container with animations
                           AnimatedContainer(
                             duration: Duration(milliseconds: 300),
                             curve: Curves.bounceInOut,
@@ -290,6 +303,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                               },
                             ),
                           ),
+                          //Card like container with animations
                           AnimatedContainer(
                             duration: Duration(milliseconds: 300),
                             curve: Curves.bounceInOut,
