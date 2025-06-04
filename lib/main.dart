@@ -75,6 +75,12 @@ void main() async {
   runApp(const ProcrastiHater());
 }
 
+void makeUIDNull()
+{
+  uid = null;
+}
+
+
 Future<void> initializeMain() async {
   await checkNotifsPermission();
   if (auth.currentUser != null) {
