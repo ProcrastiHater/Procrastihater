@@ -72,7 +72,6 @@ class StudyModePageState extends State<StudyModePage> with WidgetsBindingObserve
 ///*********************************************************
 Future<void> _updateTotalPoints() async {
   updateUserRef();
-  final user = auth.currentUser;
   int totalPoints = 0;
   try {
     final userDoc = await userRef.get();
@@ -120,7 +119,6 @@ void _startStudySession() {
 ///*********************************************************
  Future<void> _endSession() async {
     updateUserRef();
-    final user = auth.currentUser;
     int earnedPoints = _stopwatch.elapsed.inMinutes;
     try {
       final userDoc = await userRef.get();
@@ -158,7 +156,6 @@ void _startStudySession() {
   ///*********************************************************
   Future<void> applyPenalty() async {
     updateUserRef();
-    final user = auth.currentUser;
     try {
       final userDoc = await userRef.get();
       if (userDoc.exists) {

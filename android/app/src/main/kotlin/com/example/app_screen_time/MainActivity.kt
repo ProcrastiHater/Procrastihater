@@ -1,6 +1,7 @@
 package com.example.app_screen_time
 
 import kotlin.Double
+import kotlin.time.*
 import android.Manifest
 import android.util.Log
 import androidx.annotation.NonNull
@@ -39,7 +40,7 @@ import android.content.pm.PackageManager
 import android.app.NotificationChannel
 //Background service imports
 import androidx.work.*
-import com.example.app_screen_time.TotalSTWorker
+import com.example.app_screen_time.DailySTWorker
 import com.example.app_screen_time.BGWritesWorker
 import com.example.app_screen_time.AppLimitWorker
 import java.util.concurrent.TimeUnit
@@ -58,6 +59,8 @@ lateinit var auth: FirebaseAuth
 lateinit var mainCollection: CollectionReference
 var uid: String? = null
 var userRef: DocumentReference? = null
+val timeSource = TimeSource.Monotonic
+var startTime = timeSource.markNow()
 
 ///*********************************************
 /// Name: MainActivity
@@ -76,6 +79,7 @@ class MainActivity: FlutterActivity() {
     /// Description: Initializes activity
     ///**********************************************
     override fun onCreate(savedInstanceState: Bundle?) {
+        startTime = timeSource.markNow()
         super.onCreate(savedInstanceState)
         firestore = Firebase.firestore
         auth = Firebase.auth
@@ -91,7 +95,7 @@ class MainActivity: FlutterActivity() {
 
         //Purge old instances of notifications
         wm.cancelAllWork()
-        //WorkManager.getInstance().cancelUniqueWork("totalSTNotification")
+        wm.cancelUniqueWork("dailySTNotification")
         createNotificationChannel()
         if(!checkNotificationsPermission())
         {
@@ -146,14 +150,20 @@ class MainActivity: FlutterActivity() {
                         openNotificationSettings()
                         result.success(true)
                     }
-                    "startTotalSTNotifications" -> {
-                        startTotalSTNotifs()
+                    "startDailySTNotifications" -> {
+                        startDailySTNotifs()
                         Log.d("MainActivity", "Started Screen Time Notifications")
                         result.success(true)
                     }
-                    "cancelTotalSTNotifications" -> {
-                        wm.cancelUniqueWork("totalSTNotification")
+                    "cancelDailySTNotifications" -> {
+                        wm.cancelUniqueWork("dailySTNotification")
                         Log.d("MainActivity", "Canceled Screen Time Notifications")
+                        result.success(true)
+                    }
+                    "sendWeeklyNotification" -> {
+                        var weeklyHrs = call.arguments as Double
+                        weeklySTNotif(weeklyHrs)
+                        Log.d("MainActivity", "Sent Weekly Summary Notification")
                         result.success(true)
                     }
                     else -> {
@@ -264,15 +274,15 @@ class MainActivity: FlutterActivity() {
     /// Description: Starts background task for
     /// sending totalSTNotifications
     ///**********************************************
-    fun startTotalSTNotifs() {
+    fun startDailySTNotifs() {
         //Create bg work request
-        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<TotalSTWorker>(
+        val notifRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<DailySTWorker>(
             15, TimeUnit.MINUTES
         )
             .build()
         //Put work into queue
         wm.enqueueUniquePeriodicWork(
-            "totalSTNotification",
+            "dailySTNotification",
             ExistingPeriodicWorkPolicy.REPLACE,
             notifRequest,
         )
@@ -303,6 +313,43 @@ class MainActivity: FlutterActivity() {
             ExistingPeriodicWorkPolicy.REPLACE,
             notifRequest,
         )
+    }
+
+    ///**********************************************
+    /// Name: weeklySTNotif
+    ///
+    /// Description: Sends notification for weekly ST
+    /// report
+    ///***********************************************
+    fun weeklySTNotif(weeklyHrs: Double)
+    {
+        var notifText = "";
+        //Message options
+        if(weeklyHrs < 12) {
+            notifText += "At least you've been somewhat productive."
+        }else if (weeklyHrs < 16)
+        {
+            notifText += "Maybe spend less time scrolling aimlessly."
+        }
+        else if (weeklyHrs < 24) {
+            notifText += "This phone isn't making you any smarter."
+        }
+        else if (weeklyHrs < 36){
+            notifText += "It really is that darn phone."
+        }
+        else {
+            notifText += "There is this thing called a life. You should get one."
+        }
+        var builder = NotificationCompat.Builder(context, "ProcrastiNotif")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle("$weeklyHrs hours on your phone last week")
+            .setContentText(notifText)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        //Executes notify on MainActivity
+        with(NotificationManagerCompat.from(context)) {
+            //Sends notification with random id
+            notify(Random.nextInt(), builder.build())
+        }
     }
 
     ///**********************************************
@@ -398,8 +445,11 @@ class MainActivity: FlutterActivity() {
                 continue
             }
         }
-    
-        prevScreenTime.putAll(screenTimeMap)
+        screenTimeMap.forEach{(key, value) -> prevScreenTime[key] = value.toMutableMap()}
+        for(app in prevScreenTime.entries.iterator())
+        {
+            prevScreenTime[app.component1()]!!["hours"] = "0.05"
+        }
         return screenTimeMap
     }
 }
