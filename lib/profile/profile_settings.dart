@@ -112,6 +112,7 @@ class ProfileSettingsState extends State<ProfileSettings> {
   Future<void> _deleteAccount() async {
     try {
       await _auth.currentUser!.delete();
+      makeUIDNull();
       // Go back to the previous screen
       Navigator.of(context).pop(); 
     } catch (e) {
