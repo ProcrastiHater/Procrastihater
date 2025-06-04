@@ -34,86 +34,98 @@ class FriendsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //Wait for a gesture
-    return GestureDetector(
-      //The user swipes horizontally
-      onHorizontalDragEnd: (details) {
-        //The user swipes from right to left
-        if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
-          //Load back animation for page
-          Navigator.pushReplacementNamed(context, '/friendsPageBack');
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        final bool shouldPop = await _showExitConfirmationDialog(context);
+
+        if (shouldPop && context.mounted) {
+          SystemNavigator.pop();
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("ProcrastiFriends"),
-          actions: [
-            // Creating little user icon you can press to view account info
-            IconButton(
-              icon: CircleAvatar(
-                backgroundImage: NetworkImage(
-                  // Use user's pfp as icon image if there is no pfp use this link as a default
-                  auth.currentUser?.photoURL ??
-                      'https://picsum.photos/id/237/200/300',
+      child: GestureDetector(
+        //The user swipes horizontally
+        onHorizontalDragEnd: (details) {
+          //The user swipes from right to left
+          if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
+            //Load back animation for page
+            Navigator.pushReplacementNamed(context, '/friendsPageBack');
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("ProcrastiFriends"),
+            actions: [
+              // Creating little user icon you can press to view account info
+              IconButton(
+                icon: CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    // Use user's pfp as icon image if there is no pfp use this link as a default
+                    auth.currentUser?.photoURL ??
+                        'https://picsum.photos/id/237/200/300',
+                  ),
                 ),
-              ),
-              onPressed: () async {
-                await Navigator.pushNamed(context, "/profileSettings");
-                // Reload the user in case anything changed
-                await auth.currentUser?.reload();
-                // Reload UI in case things changed
-                // setState(() {});
-              },
-            )
-          ],
-        ),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              SizedBox(
-                height: 80,
-                child: DrawerHeader(
-                    decoration: BoxDecoration(),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12.0),
-                          child: Image.asset("assets/logo.jpg"),
-                        ),
-                        Text(
-                          "ProcrastiTools",
-                        ),
-                      ],
-                    )),
-              ),
-              ListTile(
-                trailing: Icon(Icons.calendar_today),
-                title: Text("Calendar"),
-                onTap: () {
-                  Navigator.pushNamed(context, '/calendarPage');
-                },
-              ),
-              // const Divider(),
-              ListTile(
-                trailing: Icon(Icons.school),
-                title: Text("Study Mode"),
-                onTap: () {
-                  Navigator.pushNamed(context, '/studyModePage');
-                },
-              ),
-              //const Divider(),
-              ListTile(
-                trailing: Icon(Icons.alarm),
-                title: Text("App Limits"),
-                onTap: () {
-                  Navigator.pushNamed(context, '/appLimitsPage');
+                onPressed: () async {
+                  await Navigator.pushNamed(context, "/profileSettings");
+                  // Reload the user in case anything changed
+                  await auth.currentUser?.reload();
+                  // Reload UI in case things changed
+                  // setState(() {});
                 },
               )
             ],
           ),
+          drawer: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                SizedBox(
+                  height: 80,
+                  child: DrawerHeader(
+                      decoration: BoxDecoration(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12.0),
+                            child: Image.asset("assets/logo.jpg"),
+                          ),
+                          Text(
+                            "ProcrastiTools",
+                          ),
+                        ],
+                      )),
+                ),
+                ListTile(
+                  trailing: Icon(Icons.calendar_today),
+                  title: Text("Calendar"),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/calendarPage');
+                  },
+                ),
+                // const Divider(),
+                ListTile(
+                  trailing: Icon(Icons.school),
+                  title: Text("Study Mode"),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/studyModePage');
+                  },
+                ),
+                //const Divider(),
+                ListTile(
+                  trailing: Icon(Icons.alarm),
+                  title: Text("App Limits"),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/appLimitsPage');
+                  },
+                )
+              ],
+            ),
+          ),
+          body: FriendsList(),
         ),
-        body: FriendsList(),
       ),
     );
   }
@@ -461,6 +473,8 @@ class PokeNotificationsPage extends StatelessWidget {
   }
 }
 
+bool _isExiting = false;
+
 ///*********************************************************
 /// Name: ShowAddFriendsSheet
 ///
@@ -695,4 +709,53 @@ class FriendRequestsSheet extends StatelessWidget {
       await userDocRef.collection('friendRequests').doc(friendUID).delete();
     }
   }
+}
+
+///*********************************
+/// Name: _showExitConfirmationDialog
+///
+/// Description: Creates the exit app dialog
+///*********************************
+Future<bool> _showExitConfirmationDialog(BuildContext context) async {
+  return await showDialog<bool>(
+        context: context,
+        barrierDismissible: false, // Prevent dismissing by tapping outside
+        builder: (context) => AlertDialog(
+          title: const Text('Exit App'),
+          content: _isExiting
+              ? const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Exiting app...'),
+                  ],
+                )
+              : const Text('Are you sure you want to exit the app?'),
+          actions: _isExiting
+              ? null // Hide buttons while exiting
+              : <Widget>[
+                  ElevatedButton(
+                    onPressed: () async {                     
+                        _isExiting = true;
+                     
+                      await Future.delayed(const Duration(milliseconds: 500));
+
+                      if (context.mounted) {
+                        Navigator.of(context).pop(true);
+                      }
+                    },
+                    child: const Text('Yes'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+        ),
+      ) ??
+      false;
 }

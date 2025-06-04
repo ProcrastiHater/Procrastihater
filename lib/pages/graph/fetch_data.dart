@@ -34,28 +34,27 @@ String formattedCurrent = DateFormat('MM-dd-yyyy').format(currentDataset);
 /// into a list
 ///*********************************
 ///
-Future<void> getAvailableWeeks() async{
-   //Update the reference to the user doc before accessing
+Future<void> getAvailableWeeks() async {
+  //Update the reference to the user doc before accessing
   updateUserRef();
   //Variable for scoping into the users appUsageHistory collection
   final current = userRef.collection("appUsageHistory");
   try {
     //Get all documents from the collection
     QuerySnapshot querySnapshot = await current.get();
-    if (querySnapshot.docs.isNotEmpty)
-    {
+    if (querySnapshot.docs.isNotEmpty) {
       //Extract the document IDs
       List<String> availableWeeks =
-        querySnapshot.docs.map((doc) => doc.id).toList();
+          querySnapshot.docs.map((doc) => doc.id).toList();
 
       // Sort the week keys by date
       final DateFormat formatter = DateFormat('MM-dd-yyyy');
-      availableWeeks.sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
+      availableWeeks
+          .sort((a, b) => formatter.parse(a).compareTo(formatter.parse(b)));
       availableWeekKeys = availableWeeks;
     }
     currentDataset = DateFormat('MM-dd-yyyy').parse(availableWeekKeys.last);
-  }
-  catch (e) {
+  } catch (e) {
     debugPrint("error fetching screentime data: $e");
   }
 }
@@ -117,31 +116,47 @@ Future<void> fetchWeeklyScreenTime() async {
   weeklyData = fetchedData;
   weeklyData = Map.fromEntries(
     weeklyData.entries.toList()
-      ..sort((a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key))),
+      ..sort(
+          (a, b) => dayOrder.indexOf(a.key).compareTo(dayOrder.indexOf(b.key))),
   );
 }
+
+///*********************************
+/// Name: fetchTotalDayScreentime
+///
+/// Description: Return the total number
+/// of hours the user has been on their phone
+/// for the given day
+///*********************************
 Future<double> fetchTotalDayScreentime() async {
+  //Try block for accessing field in users doc
   try {
     final userDoc = await userRef.get();
     if (userDoc.exists) {
       double dailyScreenTime = await userDoc.get("totalDailyHours") ?? 0.0;
       return dailyScreenTime;
     }
-  }
-  catch (e) {
+  } catch (e) {
     debugPrint("error fetching daily screentime data: $e");
   }
   return 0;
 }
+
+///*********************************
+/// Name: fetchPoints
+///
+/// Description: Return the users
+/// point total
+///*********************************
 Future<int> fetchPoints() async {
-    try {
+  //Try block for accessing field in users doc
+  try {
     final userDoc = await userRef.get();
     if (userDoc.exists) {
       int points = await userDoc.get("points") ?? 0.0;
       return points;
     }
-  }
-  catch (e) {
+  } catch (e) {
     debugPrint("error fetching screentime data: $e");
   }
   return 0;
