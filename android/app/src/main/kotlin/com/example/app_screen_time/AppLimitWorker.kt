@@ -10,6 +10,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.example.app_screen_time.MainActivity
 import com.example.app_screen_time.screenTimeMap
 import com.example.app_screen_time.AppLimitWorker
+import com.example.app_screen_time.startTime
 import kotlin.random.Random
 //Screen time usage import
 import android.app.usage.UsageStatsManager
@@ -43,7 +44,6 @@ class AppLimitWorker(context: Context, workerParams: WorkerParameters) : Worker(
     /// hit limit for an app
     ///**********************************************    
     override fun doWork(): Result {
-        prevScreenTime.putAll(screenTimeMap)
         Log.d("GetStatsAppLimit", "Prev Screen Time: $prevScreenTime");
         getAppLimits()
         Log.d("AppLimitWorker", "Notification should be showing")
@@ -69,7 +69,8 @@ class AppLimitWorker(context: Context, workerParams: WorkerParameters) : Worker(
                 val hours = screenTimeMap[app.component1()]!!["hours"]!!.toDouble()
                 Log.d("AppLimitWorker", "Prev Hours: $prevhours")
                 Log.d("AppLimitWorker", "Cur Hours: $hours")
-                if(hours >= app.component2() && prevhours <= app.component2()){
+                val curRuntime = startTime.elapsedNow().inWholeSeconds/360.0
+                if(hours + curRuntime + 0.012 >= app.component2() && prevhours <= app.component2()){
                     var builder = NotificationCompat.Builder(context, "ProcrastiNotif")
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("You've exceeded your screen time limit for ${app.component1()}")
@@ -83,6 +84,7 @@ class AppLimitWorker(context: Context, workerParams: WorkerParameters) : Worker(
                 }
             }
         } 
+        screenTimeMap.forEach{(key, value) -> prevScreenTime[key] = value.toMutableMap()}
     }
 
     private fun getAppLimits() : MutableMap<String, Double>{

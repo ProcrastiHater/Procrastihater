@@ -20,12 +20,12 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 
 ///*********************************************
-/// Name: TotalSTWorker
+/// Name: DailySTWorker
 ///
 /// Description: Helper class for sending
 /// total screentime notifications
 ///**********************************************
-class TotalSTWorker(context: Context, workerParams: WorkerParameters) : Worker (context, workerParams){
+class DailySTWorker(context: Context, workerParams: WorkerParameters) : Worker (context, workerParams){
     val context = getApplicationContext()
 
     ///**********************************************
@@ -36,7 +36,7 @@ class TotalSTWorker(context: Context, workerParams: WorkerParameters) : Worker (
     ///**********************************************    
     override fun doWork(): Result {
         showNotification()
-        Log.d("TotalSTWorker", "Notification should be showing")
+        Log.d("DailySTWorker", "Notification should be showing")
         return Result.success()
     }
 
@@ -150,7 +150,7 @@ class TotalSTWorker(context: Context, workerParams: WorkerParameters) : Worker (
                     screenTimeMap[appName]!!.put("category", "Other")
                 }
             } catch (e: Exception) {
-                Log.e("TotalSTWorker", "Error getting app info for ${stats.packageName}", e)
+                Log.e("DailySTWorker", "Error getting app info for ${stats.packageName}", e)
                 continue
             }
         }
