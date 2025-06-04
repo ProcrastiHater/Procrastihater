@@ -10,11 +10,13 @@ library;
 //Dart Imports
 import 'dart:async';
 import 'dart:io';
-import 'package:app_screen_time/pages/graph/colors.dart';
-import 'package:app_screen_time/pages/graph/fetch_data.dart';
+import 'package:app_screen_time/daily_st_notifs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+//Other Imports
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
@@ -33,6 +35,8 @@ import 'pages/calendar.dart';
 import 'pages/study_mode.dart';
 import 'pages/app_limits_page.dart';
 import 'apps_list.dart';
+import 'package:app_screen_time/pages/graph/colors.dart';
+import 'package:app_screen_time/pages/graph/fetch_data.dart';
 
 //Global Variables
 //Native Kotlin method channel
@@ -50,6 +54,10 @@ final CollectionReference mainCollection = firestore.collection('UID');
 String? uid = auth.currentUser?.uid;
 //Reference to user's document in Firestore
 DocumentReference userRef = mainCollection.doc(uid);
+
+SharedPreferencesWithCache? preferences;
+bool dailySTNotifsOn = false;
+bool dailyNotifsShowing = false;
 
 const Color darkBlue = Color.fromRGBO(10, 27, 46, 1);
 const Color lightBlue = Color.fromRGBO(14, 40, 77, 1);
@@ -72,6 +80,11 @@ void main() async {
   if (!hasPermission) {
     await _requestSTPermission();
   }
+  preferences = await SharedPreferencesWithCache.create(
+    cacheOptions: SharedPreferencesWithCacheOptions(
+      allowList: <String>{'dailySTNotifsOn'}
+    )
+  );
   runApp(const ProcrastiHater());
 }
 
@@ -83,6 +96,15 @@ void makeUIDNull()
 
 Future<void> initializeMain() async {
   await checkNotifsPermission();
+  if(hasNotifsPermission) {
+    if(!preferences!.containsKey('dailySTNotifsOn')) {
+      await preferences!.setBool('dailySTNotifsOn', true);
+    }
+  }
+  else {
+    await preferences!.setBool('dailySTNotifsOn', false);
+  }
+  dailySTNotifsOn = preferences!.getBool('dailySTNotifsOn')!;
   if (auth.currentUser != null) {
     await _currentToHistorical();
     await _checkSTPermission();
@@ -94,6 +116,11 @@ Future<void> initializeMain() async {
     await initializeAppNameColorMapping();
     await fetchTotalDayScreentime();
     await fetchPoints();
+    if(dailySTNotifsOn && !dailyNotifsShowing)
+    {
+      await startDailySTNotifications();
+      dailyNotifsShowing = true;
+    }
   }
 }
 
@@ -111,6 +138,7 @@ class ProcrastiHater extends StatelessWidget {
   Widget build(BuildContext context) {
     double? screenHeight = MediaQuery.of(context).size.height;
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         //brightness: Brightness.dark,
         scaffoldBackgroundColor: darkBlue,
@@ -333,6 +361,7 @@ Future<void> _currentToHistorical() async {
   DateTime currentTime = DateTime.now();
   DateTime dateUpdated;
   bool needToMoveData = false;
+  bool nextWeek = false;
   //Grab data from current
   try {
     final current = userRef.collection('appUsageCurrent');
@@ -385,11 +414,18 @@ Future<void> _currentToHistorical() async {
             dateUpdated.year != currentTime.year) {
           //Gets the number of the day of the week for the last update day
           int dayOfWeekNum = dateUpdated.weekday;
+          int curDayOfWeekNum = currentTime.weekday;
           //Gets the name of the day of the week for last update day
           String dayOfWeekStr = DateFormat('EEEE').format(dateUpdated);
           //Gets the start of that week
           String startOfWeek = DateFormat('MM-dd-yyyy')
               .format(dateUpdated.subtract(Duration(days: dayOfWeekNum - 1)));
+          String curWeekStart = DateFormat('MM-dd-yyyy')
+              .format(currentTime.subtract(Duration(days: curDayOfWeekNum - 1)));
+          if(startOfWeek != curWeekStart)
+          {
+            nextWeek = true;
+          }
           var historical =
               userRef.collection('appUsageHistory').doc(startOfWeek);
           histSnapshot ??= await historical.get();
@@ -448,7 +484,10 @@ Future<void> _currentToHistorical() async {
       
       //Commit the batch
       await batch.commit();
-
+      if(nextWeek)
+      {
+        await _sendWeeklyNotif(totalWeekly);
+      }
       debugPrint('Successfully wrote screen time data to History');
     } catch (e) {
       debugPrint('Error writing screen time data to Firestore: $e');
@@ -487,6 +526,20 @@ Future<void> checkNotifsPermission() async {
     hasNotifsPermission = notifsPermission;
   } on PlatformException catch (e) {
     debugPrint("Failed to check permission: ${e.message}");
+  }
+}
+
+///*********************************
+/// Name: _sendWeeklyNotif
+/// 
+/// Description: Invokes method from platform channel
+/// to send weekly summary notification
+///*********************************
+Future<void> _sendWeeklyNotif(double weeklyHrs) async {
+  try{
+    await platformChannel.invokeMethod('sendWeeklyNotification', weeklyHrs);
+  } on PlatformException catch (e) {
+    debugPrint("Failed to send weekly summary notification: ${e.message}");
   }
 }
 
