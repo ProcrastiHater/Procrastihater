@@ -123,9 +123,20 @@ class _LeaderBoardPageState extends State<LeaderBoardPage> {
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) async {
+            if (didPop) return;
+
+            final bool shouldPop = await _showExitConfirmationDialog(context);
+
+            if (shouldPop && context.mounted) {
+              SystemNavigator.pop();
+            }
+          },
+          child: const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          ));
     }
     return PopScope(
         canPop: false,
