@@ -11,6 +11,7 @@ library;
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 //fl_chart imports
 import 'package:fl_chart/fl_chart.dart';
@@ -87,13 +88,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   Map<String, Map<String, String>> dayData = screenTimeData;
   Map<String, Map<String, Map<String, dynamic>>> weekData = weeklyData;
   int graphIndex = 0;
+  bool _isExiting = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);   
+    WidgetsBinding.instance.addObserver(this);
   }
-  
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -129,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future<void> onRefresh() async {
     await getScreenTime();
-    await fetchWeeklyScreenTime(); 
+    await fetchWeeklyScreenTime();
     await generateAppsList();
     await initializeAppNameColorMapping();
     setState(() {
@@ -137,221 +139,286 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     });
   }
 
+  ///*********************************
+  /// Name: _showExitConfirmationDialog
+  ///
+  /// Description: Creates the exit app dialog
+  ///*********************************
+  Future<bool> _showExitConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false, // Prevent dismissing by tapping outside
+          builder: (context) => AlertDialog(
+            title: const Text('Exit App'),
+            content: _isExiting
+                ? const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Exiting app...'),
+                    ],
+                  )
+                : const Text('Are you sure you want to exit the app?'),
+            actions: _isExiting
+                ? null // Hide buttons while exiting
+                : <Widget>[
+                    ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          _isExiting = true;
+                        });
+
+                        await Future.delayed(const Duration(milliseconds: 500));
+
+                        if (context.mounted) {
+                          Navigator.of(context).pop(true);
+                        }
+                      },
+                      child: const Text('Yes'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+          ),
+        ) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
     //Screensize
     double? screenHeight = MediaQuery.of(context).size.height;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("ProcrastiStats"),
-        actions: [
-          // Creating little user icon you can press to view account info
-          IconButton(
-            icon: CircleAvatar(
-              backgroundImage: NetworkImage(
-                // Use user's pfp as icon image if there is no pfp use this link as a default
-                auth.currentUser?.photoURL ??
-                    'https://picsum.photos/id/237/200/300',
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        final bool shouldPop = await _showExitConfirmationDialog(context);
+
+        if (shouldPop && context.mounted) {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("ProcrastiStats"),
+          actions: [
+            // Creating little user icon you can press to view account info
+            IconButton(
+              icon: CircleAvatar(
+                backgroundImage: NetworkImage(
+                  // Use user's pfp as icon image if there is no pfp use this link as a default
+                  auth.currentUser?.photoURL ??
+                      'https://picsum.photos/id/237/200/300',
+                ),
               ),
-            ),
-            onPressed: () async {
-              await Navigator.pushNamed(context, "/profileSettings");
-              // Reload the user in case anything changed
-              await auth.currentUser?.reload();
-              // Reload UI in case things changed
-              setState(() {});
-            },
-          )
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.all(4.0),
-          children: <Widget>[
-            SizedBox(
-              height: screenHeight * .15,
-              child: DrawerHeader(
-                  child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "ProcrastiTools",
-                  ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: Image.asset("assets/logo.jpg"),
-                  ),
-                ],
-              )),
-            ),
-            ListTile(
-              trailing: Icon(Icons.calendar_today),
-              title: Text("Calendar"),
-              onTap: () {
-                Navigator.pushNamed(context, '/calendarPage');
-              },
-            ),
-            const Divider(
-              height: 1,
-              color: lightBeige,
-            ),
-            ListTile(
-              trailing: Icon(Icons.school),
-              title: Text("Study Mode"),
-              onTap: () {
-                Navigator.pushNamed(context, '/studyModePage');
-              },
-            ),
-            const Divider(
-              height: 1,
-              color: lightBeige,
-            ),
-            ListTile(
-              trailing: Icon(Icons.alarm),
-              title: Text("App Limits"),
-              onTap: () {
-                Navigator.pushNamed(context, '/appLimitsPage');
+              onPressed: () async {
+                await Navigator.pushNamed(context, "/profileSettings");
+                // Reload the user in case anything changed
+                await auth.currentUser?.reload();
+                // Reload UI in case things changed
+                setState(() {});
               },
             )
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-              flex: 13,
-              //Container holding graph in top portion of screen
-              child: Scaffold(
-                body: [
-                  //Daily Graph
-                  SizedBox(
-                    child: DailyGraphView(onFilteredData: updateFilteredDayData, data: dayData),
-                  ),
-                  //Weekly Graph
-                  SizedBox(
-                    child: WeeklyGraphView(
-                        onFilteredData: updateFilteredWeekData,
-                        onBarSelected: updateSelectedBar),
-                  ),
-                ][graphIndex],
-                bottomNavigationBar: SizedBox(
-                  height: 72,
-                  child: Column(
-                    children: [
-                      Container(
-                        color: beige,
-                        height: 2,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Card(
-                            color: graphIndex == 0 ? beige : null,
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10.0))),
-                            child: InkWell(
-                              child: Padding(
-                                padding: EdgeInsets.all(5.0),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_today_rounded,
-                                      color: graphIndex == 0
-                                          ? lightBlue
-                                          : lightBeige,
-                                      size: screenHeight * 0.035,
-                                    ),
-                                    Text("  Daily  ",
-                                        style: TextStyle(
-                                            color: graphIndex == 0
-                                                ? darkBlue
-                                                : null)),
-                                  ],
-                                ),
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  selectedBar = "null";
-                                  graphIndex = 0;
-                                });
-                              },
-                            ),
-                          ),
-                          Card(
-                            color: graphIndex == 1 ? beige : null,
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10.0))),
-                            child: InkWell(
-                              child: Padding(
-                                padding: EdgeInsets.all(5.0),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_view_week_rounded,
-                                      color: graphIndex == 1
-                                          ? lightBlue
-                                          : lightBeige,
-                                      size: screenHeight * 0.035,
-                                    ),
-                                    Text("  Weekly  ",
-                                        style: TextStyle(
-                                            color: graphIndex == 1
-                                                ? darkBlue
-                                                : null)),
-                                  ],
-                                ),
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  selectedBar = "null";
-                                  graphIndex = 1;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        color: beige,
-                        height: 2,
-                      ),
-                    ],
-                  ),
-                ),
-              )),
-          Expanded(
-            flex: 7,
-            //Container holding list view in bottom portion of screen
-            child: ExpandedListView(
-                dayFilteredData: dayData,
-                weekFilteredData: weekData,
-                selectedBar: selectedBar,
-                appColors: appNameToColor,
-                graphIndex: graphIndex),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.all(4.0),
+            children: <Widget>[
+              SizedBox(
+                height: screenHeight * .15,
+                child: DrawerHeader(
+                    child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "ProcrastiTools",
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: Image.asset("assets/logo.jpg"),
+                    ),
+                  ],
+                )),
+              ),
+              ListTile(
+                trailing: Icon(Icons.calendar_today),
+                title: Text("Calendar"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/calendarPage');
+                },
+              ),
+              const Divider(
+                height: 1,
+                color: lightBeige,
+              ),
+              ListTile(
+                trailing: Icon(Icons.school),
+                title: Text("Study Mode"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/studyModePage');
+                },
+              ),
+              const Divider(
+                height: 1,
+                color: lightBeige,
+              ),
+              ListTile(
+                trailing: Icon(Icons.alarm),
+                title: Text("App Limits"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/appLimitsPage');
+                },
+              )
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Center(
-              child: SmoothPageIndicator(
-                controller: PageController(initialPage: 1), // Dummy controller
-                count: 3,
-                effect: WormEffect(
-                  paintStyle: PaintingStyle.stroke,
-                  activeDotColor: beige,
-                  dotColor: lightBeige,
-                  dotHeight: 8,
-                  dotWidth: 8,
-                  spacing: 12,
+        ),
+        body: Column(
+          children: [
+            Expanded(
+                flex: 13,
+                //Container holding graph in top portion of screen
+                child: Scaffold(
+                  body: [
+                    //Daily Graph
+                    SizedBox(
+                      child: DailyGraphView(
+                          onFilteredData: updateFilteredDayData, data: dayData),
+                    ),
+                    //Weekly Graph
+                    SizedBox(
+                      child: WeeklyGraphView(
+                          onFilteredData: updateFilteredWeekData,
+                          onBarSelected: updateSelectedBar),
+                    ),
+                  ][graphIndex],
+                  bottomNavigationBar: SizedBox(
+                    height: 72,
+                    child: Column(
+                      children: [
+                        Container(
+                          color: beige,
+                          height: 2,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Card(
+                              color: graphIndex == 0 ? beige : null,
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10.0))),
+                              child: InkWell(
+                                child: Padding(
+                                  padding: EdgeInsets.all(5.0),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_today_rounded,
+                                        color: graphIndex == 0
+                                            ? lightBlue
+                                            : lightBeige,
+                                        size: screenHeight * 0.035,
+                                      ),
+                                      Text("  Daily  ",
+                                          style: TextStyle(
+                                              color: graphIndex == 0
+                                                  ? darkBlue
+                                                  : null)),
+                                    ],
+                                  ),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    selectedBar = "null";
+                                    graphIndex = 0;
+                                  });
+                                },
+                              ),
+                            ),
+                            Card(
+                              color: graphIndex == 1 ? beige : null,
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10.0))),
+                              child: InkWell(
+                                child: Padding(
+                                  padding: EdgeInsets.all(5.0),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_view_week_rounded,
+                                        color: graphIndex == 1
+                                            ? lightBlue
+                                            : lightBeige,
+                                        size: screenHeight * 0.035,
+                                      ),
+                                      Text("  Weekly  ",
+                                          style: TextStyle(
+                                              color: graphIndex == 1
+                                                  ? darkBlue
+                                                  : null)),
+                                    ],
+                                  ),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    selectedBar = "null";
+                                    graphIndex = 1;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          color: beige,
+                          height: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                )),
+            Expanded(
+              flex: 7,
+              //Container holding list view in bottom portion of screen
+              child: ExpandedListView(
+                  dayFilteredData: dayData,
+                  weekFilteredData: weekData,
+                  selectedBar: selectedBar,
+                  appColors: appNameToColor,
+                  graphIndex: graphIndex),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Center(
+                child: SmoothPageIndicator(
+                  controller:
+                      PageController(initialPage: 1), // Dummy controller
+                  count: 3,
+                  effect: WormEffect(
+                    paintStyle: PaintingStyle.stroke,
+                    activeDotColor: beige,
+                    dotColor: lightBeige,
+                    dotHeight: 8,
+                    dotWidth: 8,
+                    spacing: 12,
+                  ),
                 ),
               ),
             ),
-          ),
-          Container(height: 16),
-        ],
+            Container(height: 16),
+          ],
+        ),
       ),
     );
   }
