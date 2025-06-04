@@ -175,9 +175,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         setState(() {
                           _isExiting = true;
                         });
-                        
+
                         await Future.delayed(const Duration(milliseconds: 500));
-                        
+
                         if (context.mounted) {
                           Navigator.of(context).pop(true);
                         }
