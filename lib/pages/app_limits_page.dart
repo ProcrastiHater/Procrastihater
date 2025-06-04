@@ -19,14 +19,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+
 ///*********************************
 /// Name: AppLimitsPage
-/// 
-/// Description: Root stateful widget of 
-/// the AppLimitsPage, builds and displays 
+///
+/// Description: Root stateful widget of
+/// the AppLimitsPage, builds and displays
 /// app limits page view
 ///*********************************
-class AppLimitsPage extends StatefulWidget{
+class AppLimitsPage extends StatefulWidget {
   const AppLimitsPage({super.key});
 
   @override
@@ -39,19 +40,20 @@ class AppLimitsPage extends StatefulWidget{
 /// Description: State for AppLimitsPage,
 /// holds main layout widget for page
 ///*********************************
-class _AppLimitsPageState extends State<AppLimitsPage>{
-  final List<TextEditingController> _appLimitControllers = List.generate(appNames.length, (int i) => TextEditingController());
+class _AppLimitsPageState extends State<AppLimitsPage> {
+  final List<TextEditingController> _appLimitControllers =
+      List.generate(appNames.length, (int i) => TextEditingController());
   Map<String, int> appLimits = {};
-  final List<Color> _limitTextColors = List.generate(appNames.length, (int i) => Colors.transparent);
+  final List<Color> _limitTextColors =
+      List.generate(appNames.length, (int i) => Colors.transparent);
   @override
   void initState() {
     super.initState();
-    _readAppLimits().whenComplete((){
-      for(int ii = 0; ii < appNames.length; ii++){
-        if(appLimits.containsKey(appNames[ii]))
-        {
+    _readAppLimits().whenComplete(() {
+      for (int ii = 0; ii < appNames.length; ii++) {
+        if (appLimits.containsKey(appNames[ii])) {
           _appLimitControllers[ii].text = appLimits[appNames[ii]]!.toString();
-          if(context.mounted){
+          if (context.mounted) {
             _limitTextColors[ii] = TextTheme.of(context).bodyLarge!.color!;
           }
         }
@@ -61,7 +63,7 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
 
   @override
   Widget build(BuildContext context) {
-    if(appNames.isNotEmpty){
+    if (appNames.isNotEmpty) {
       return Scaffold(
         appBar: AppBar(
           title: Text("App Screen Time Limits"),
@@ -70,144 +72,150 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
           ),
           actions: [
             IconButton(
-              onPressed: () => showDialog(
-                context: context, 
-                builder: (BuildContext infoContext) => AlertDialog(
-                  title: Text("App Limits Page Help"),
-                  content: Text(
-                    "This page allows you to set limits for how many minutes you want to be allowed to spend on an app."
-                    " When you reach the limit you set for an app, as long as you have ProcrastiHater open, you will receive"
-                    " a notification. Limits you have previously set will be the default text color\n\nTo set a limit for an app:"
-                    "\n\t•Scroll down the App Limits Page and locate the app\n \t•Enter a limit (in minutes) less than 24 hours"
-                    ". The text for the limit will be red\n\t•Save the limit using the Save button on the left. The text for the limit"
-                    " will turn green\n\n NOTE: If you have not used an app since you installed ProcrastiHater, you cannot set a limit"
-                    " for it. You cannot set a limit for less than 5 minutes"
-                  ),
-                  actions: [
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(infoContext, "Close Help"),
-                      child: Text("Close Help")
-                    )
-                  ],
-                  scrollable: true,
-                )
-              ),
-              icon: Icon(Icons.help_outline_rounded)
-            )
+                onPressed: () => showDialog(
+                    context: context,
+                    builder: (BuildContext infoContext) => AlertDialog(
+                          title: Text("App Limits Page Help"),
+                          content: Text(
+                              "This page allows you to set limits for how many minutes you want to be allowed to spend on an app."
+                              " When you reach the limit you set for an app, as long as you have ProcrastiHater open, you will receive"
+                              " a notification. Limits you have previously set will be the default text color\n\nTo set a limit for an app:"
+                              "\n\t•Scroll down the App Limits Page and locate the app\n \t•Enter a limit (in minutes) less than 24 hours"
+                              ". The text for the limit will be red\n\t•Save the limit using the Save button on the left. The text for the limit"
+                              " will turn green\n\n NOTE: If you have not used an app since you installed ProcrastiHater, you cannot set a limit"
+                              " for it. You cannot set a limit for less than 5 minutes"),
+                          actions: [
+                            ElevatedButton(
+                                onPressed: () =>
+                                    Navigator.pop(infoContext, "Close Help"),
+                                child: Text("Close Help"))
+                          ],
+                          scrollable: true,
+                        )),
+                icon: Icon(Icons.help_outline_rounded))
           ],
         ),
         body: ListView.builder(
           padding: EdgeInsets.all(4.0),
           itemCount: appNames.length,
           itemBuilder: (context, index) {
-            return Card(
-              child: ListTile(
-                titleAlignment: ListTileTitleAlignment.center,
-                contentPadding: EdgeInsets.only(bottom: 5, left: 10),
-                title: Text(
-                  appNames[index],
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: appNameToColor[appNames[index]],
-                  ),
-                ),
-                trailing: SizedBox(
-                  width: 200,
-                  child: TextField(
-                    controller: _appLimitControllers[index],
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'\d')),
-                      LengthLimitingTextInputFormatter(4)
-                    ],
-                    onChanged: (String val){
-                      setState(() {
-                        _limitTextColors[index] = Colors.red;
-                      });
-                      return;
-                    },
-                    style: TextStyle(
-                      color: _limitTextColors[index]
-                    ),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      labelText: 'Time limit',
-                      prefixIcon: IconButton(
-                        icon: Icon(
-                          Icons.save,
+            return TweenAnimationBuilder(
+              tween: Tween<Offset>(begin: Offset(0, 0.1), end: Offset.zero),
+              duration: Duration(milliseconds: 300 + index * 100),
+              builder: (context, offset, child) {
+                return Transform.translate(
+                  offset: offset * 100,
+                  child: Opacity(
+                    opacity: 1.0 - offset.dy,
+                    child: Card(
+                      child: ListTile(
+                        titleAlignment: ListTileTitleAlignment.center,
+                        contentPadding: EdgeInsets.only(bottom: 5, left: 10),
+                        title: Text(
+                          appNames[index],
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: appNameToColor[appNames[index]],
+                          ),
                         ),
-                        onPressed: () {
-                          _updateAppLimit(appNames[index], _appLimitControllers[index].text).then((updated){
-                            if(updated){
+                        trailing: SizedBox(
+                          width: 200,
+                          child: TextField(
+                            controller: _appLimitControllers[index],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'\d')),
+                              LengthLimitingTextInputFormatter(4)
+                            ],
+                            onChanged: (String val) {
                               setState(() {
-                                _limitTextColors[index] = const Color.fromARGB(255, 65, 228, 70);
+                                _limitTextColors[index] = Colors.red;
                               });
-                            }
-                          });
-                        },
+                              return;
+                            },
+                            style: TextStyle(color: _limitTextColors[index]),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              labelText: 'Time limit',
+                              prefixIcon: IconButton(
+                                icon: Icon(
+                                  Icons.save,
+                                ),
+                                onPressed: () {
+                                  _updateAppLimit(appNames[index],
+                                          _appLimitControllers[index].text)
+                                      .then((updated) {
+                                    if (updated) {
+                                      setState(() {
+                                        _limitTextColors[index] =
+                                            const Color.fromARGB(
+                                                255, 65, 228, 70);
+                                      });
+                                    }
+                                  });
+                                },
+                              ),
+                              suffixIcon: IconButton(
+                                onPressed: () => _deleteAppLimit(index),
+                                icon: Icon(
+                                  Icons.close_rounded,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                      suffixIcon: IconButton(
-                        onPressed: () => _deleteAppLimit(index), 
-                        icon: Icon(
-                          Icons.close_rounded,
-                          color: Colors.red,
-                        )
-                      )
-                    )
-                  )
-                )
-              ),
+                    ),
+                  ),
+                );
+              },
             );
-          }
-        )
+          },
+        ),
       );
     }
     //If this else happens, the app list failed to generate
     // or the user simply hasn't used any apps the day they downloaded ours
     else {
       return Scaffold(
-      appBar: AppBar(
-        title: Text("App Screen Time Limits"),
-        titleTextStyle: TextStyle(
-          fontSize: 20,
-        ),
-        actions: [
-          IconButton(
-            onPressed: () => showDialog(
-              context: context, 
-              builder: (BuildContext infoContext) => AlertDialog(
-                title: Text("App Limits Page Help"),
-                content: Text(
-                  "This page allows you to set limits for how many minutes you want to be allowed to spend on an app."
-                  " When you reach the limit you set for an app, as long as you have ProcrastiHater open, you will receive"
-                  " a notification. Limits you have previously set will be the default text color\n\nTo set a limit for an app:"
-                  "\n\t•Scroll down the App Limits Page and locate the app\n \t•Enter a limit (in minutes) less than 24 hours"
-                  ". The text for the limit will be red\n\t•Save the limit using the Save button on the left. The text for the limit"
-                  " will turn green\n\n NOTE: If you have not used an app since you installed ProcrastiHater, you cannot set a limit"
-                  " for it. You cannot set a limit for less than 5 minutes"
-                ),
-                actions: [
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(infoContext, "Close Help"),
-                    child: Text("Close Help")
-                  )
-                ],
-                scrollable: true,
-              )
+          appBar: AppBar(
+            title: Text("App Screen Time Limits"),
+            titleTextStyle: TextStyle(
+              fontSize: 20,
             ),
-            icon: Icon(Icons.help_outline_rounded)
-          )
-        ],
-      ),
-      body: 
-        Text(
-          "There are either no apps with recorded screen time or something went wrong",
-          style: TextStyle(
-            fontSize: 18,
+            actions: [
+              IconButton(
+                  onPressed: () => showDialog(
+                      context: context,
+                      builder: (BuildContext infoContext) => AlertDialog(
+                            title: Text("App Limits Page Help"),
+                            content: Text(
+                                "This page allows you to set limits for how many minutes you want to be allowed to spend on an app."
+                                " When you reach the limit you set for an app, as long as you have ProcrastiHater open, you will receive"
+                                " a notification. Limits you have previously set will be the default text color\n\nTo set a limit for an app:"
+                                "\n\t•Scroll down the App Limits Page and locate the app\n \t•Enter a limit (in minutes) less than 24 hours"
+                                ". The text for the limit will be red\n\t•Save the limit using the Save button on the left. The text for the limit"
+                                " will turn green\n\n NOTE: If you have not used an app since you installed ProcrastiHater, you cannot set a limit"
+                                " for it. You cannot set a limit for less than 5 minutes"),
+                            actions: [
+                              ElevatedButton(
+                                  onPressed: () =>
+                                      Navigator.pop(infoContext, "Close Help"),
+                                  child: Text("Close Help"))
+                            ],
+                            scrollable: true,
+                          )),
+                  icon: Icon(Icons.help_outline_rounded))
+            ],
           ),
-          textAlign: TextAlign.center,
-        )
-      );
-    }    
+          body: Text(
+            "There are either no apps with recorded screen time or something went wrong",
+            style: TextStyle(
+              fontSize: 18,
+            ),
+            textAlign: TextAlign.center,
+          ));
+    }
   }
 
   ///*********************************
@@ -216,19 +224,18 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
   /// Description: Lists app limits
   /// for page
   ///*********************************
-  Future<void> _readAppLimits() async{
+  Future<void> _readAppLimits() async {
     updateUserRef();
-    try{
+    try {
       var limitRef = userRef.collection('limits');
       var limitColl = await limitRef.get();
-      for(DocumentSnapshot limitDoc in limitColl.docs) {
+      for (DocumentSnapshot limitDoc in limitColl.docs) {
         setState(() {
           debugPrint('Limit: ${(limitDoc['limit'] * 60).round()}');
-          appLimits.addAll({limitDoc.id : (limitDoc['limit'] * 60).round()});
+          appLimits.addAll({limitDoc.id: (limitDoc['limit'] * 60).round()});
         });
       }
-    }
-    catch(e){
+    } catch (e) {
       debugPrint("Error Getting Limits: $e");
     }
   }
@@ -243,28 +250,23 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
     updateUserRef();
     int? newLimit = int.tryParse(newLimitStr);
     if (newLimit! > 1440) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Limit cannot be greater than 24 hours'))
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Limit cannot be greater than 24 hours')));
       return false;
-    }
-    else{
+    } else {
       var limitRef = userRef.collection('limits').doc(appName);
-      if (newLimit < 5){
+      if (newLimit < 5) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Limit cannot be less than 5'))
-        );
+            const SnackBar(content: Text('Limit cannot be less than 5')));
         return false;
-      }
-      else{
+      } else {
         try {
           //Set Limit in DB
           await limitRef.set(
               {'limit': ((newLimit / 60) * 100).round().toDouble() / 100},
               SetOptions(merge: true));
           return true;
-        }
-        catch(e){
+        } catch (e) {
           debugPrint("Error setting limit: $e");
           return false;
         }
@@ -288,8 +290,7 @@ class _AppLimitsPageState extends State<AppLimitsPage>{
       if (limitDoc.exists) {
         await limitRef.delete();
       }
-    }
-    catch(e){
+    } catch (e) {
       debugPrint("Error deleting limit: $e");
     }
   }

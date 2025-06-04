@@ -15,12 +15,12 @@ import '/main.dart';
 import '/apps_list.dart';
 
 //Global variables
-Map<String, Color> appNameToColor = {}; 
+Map<String, Color> appNameToColor = {};
 
 ///*********************************
 /// Name: generateDistinctColors
 ///
-/// Description: Generates a list of 
+/// Description: Generates a list of
 /// colors based on the amount of total
 /// apps that the user has in database.
 /// Uses goldenRatio constant and hue
@@ -45,16 +45,16 @@ List<Color> generateDistinctColors(int count) {
 /// Name: initializeAppNameColorMapping
 ///
 /// Description: Loads all apps the user
-/// has stored in the database(historical 
-/// and current) before mapping all apps 
-/// to a distinct color provided by 
+/// has stored in the database(historical
+/// and current) before mapping all apps
+/// to a distinct color provided by
 /// generateDistinctColor()
 ///*******************************
 Future<void> initializeAppNameColorMapping() async {
-    //Get distinct colors
-    List<Color> distinctColors = generateDistinctColors(appNames.length);
-    //Map colors to app name
-    for (int i = 0; i < appNames.length; i++) {
-      appNameToColor[appNames[i]] = distinctColors[i];
-    }
+  //Get distinct colors
+  List<Color> distinctColors = generateDistinctColors(appNames.length);
+  //Map colors to app name
+  for (int i = 0; i < appNames.length; i++) {
+    appNameToColor[appNames[i]] = distinctColors[i];
+  }
 }

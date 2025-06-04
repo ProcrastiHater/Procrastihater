@@ -212,14 +212,15 @@ class ProcrastiHater extends StatelessWidget {
           //initializeMain();
           //return const HomePage();
           return FutureBuilder(
-            future: initializeMain(), 
-            builder: (builder, initSnap) {
-              if (initSnap.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator(),);
-              }
-              return const HomePage();
-            }
-            );
+              future: initializeMain(),
+              builder: (builder, initSnap) {
+                if (initSnap.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return const HomePage();
+              });
         },
       ),
       onGenerateRoute: _generateRoutes,
@@ -436,10 +437,10 @@ Future<void> _currentToHistorical() async {
           }
           totalDaily += screenTimeHours;
           totalWeekly += screenTimeHours;
-          if(appMap.value['appType'] == 'Productivity'){
+          if (appMap.value['appType'] == 'Productivity') {
             pointChange += (screenTimeHours * 3).toInt();
           }
-          if(appMap.value['appType'] == 'Social & Communication'){
+          if (appMap.value['appType'] == 'Social & Communication') {
             pointChange -= (screenTimeHours * 3).toInt();
           }
           // Move data to historical
@@ -481,7 +482,7 @@ Future<void> _currentToHistorical() async {
       await userRef.update({
         'points': FieldValue.increment(pointChange),
       });
-      
+
       //Commit the batch
       await batch.commit();
       if(nextWeek)

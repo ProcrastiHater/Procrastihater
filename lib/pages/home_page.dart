@@ -90,30 +90,35 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   int graphIndex = 0;
   bool _isExiting = false;
 
+  //Initialize lifecycle manager
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
 
+  //Dispose of lifecycle manager
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+  //Callback function for updating listview
   void updateSelectedBar(String bar) {
     setState(() {
       selectedBar = bar;
     });
   }
 
+  //Callback function for updating filtered daily data
   void updateFilteredDayData(Map<String, Map<String, String>> data) {
     setState(() {
       dayData = data;
     });
   }
 
+  //Callback function for updating filtereds weekly data
   void updateFilteredWeekData(
       Map<String, Map<String, Map<String, dynamic>>> data) {
     setState(() {
@@ -121,9 +126,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     });
   }
 
+  //Lifecycle manager
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    //Refresh data when the app is resumed
     if (state == AppLifecycleState.resumed) {
       onRefresh();
     }
@@ -228,7 +235,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             )
           ],
         ),
-        drawer: Drawer(
+        //Navigation Drawer for sub-pages
+      drawer: Drawer(
           child: ListView(
             padding: EdgeInsets.all(4.0),
             children: <Widget>[
@@ -248,7 +256,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   ],
                 )),
               ),
-              ListTile(
+              //Calendar Page Tile
+            ListTile(
                 trailing: Icon(Icons.calendar_today),
                 title: Text("Calendar"),
                 onTap: () {
@@ -259,7 +268,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 height: 1,
                 color: lightBeige,
               ),
-              ListTile(
+              //Study Mode Page Tile
+            ListTile(
                 trailing: Icon(Icons.school),
                 title: Text("Study Mode"),
                 onTap: () {
@@ -270,7 +280,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 height: 1,
                 color: lightBeige,
               ),
-              ListTile(
+              //App Limits Page Tile
+            ListTile(
                 trailing: Icon(Icons.alarm),
                 title: Text("App Limits"),
                 onTap: () {
@@ -290,7 +301,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     //Daily Graph
                     SizedBox(
                       child: DailyGraphView(
-                          onFilteredData: updateFilteredDayData, data: dayData),
+                          
+                        onFilteredData: updateFilteredDayData, data: dayData),
                     ),
                     //Weekly Graph
                     SizedBox(
@@ -299,7 +311,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           onBarSelected: updateSelectedBar),
                     ),
                   ][graphIndex],
-                  bottomNavigationBar: SizedBox(
+                  //Custom Bottom Nav Bar Widget
+                bottomNavigationBar: SizedBox(
                     height: 72,
                     child: Column(
                       children: [
@@ -307,15 +320,26 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           color: beige,
                           height: 2,
                         ),
-                        Row(
+                        SizedBox(
+                        height: 4,
+                      ),
+                      Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            Card(
-                              color: graphIndex == 0 ? beige : null,
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10.0))),
+                            //Card like container with animations
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.bounceInOut,
+                            decoration: BoxDecoration(
+                                color: graphIndex == 0 ? beige : lightBlue,
+                                boxShadow: [
+                                  BoxShadow(
+                                  color: Colors.black26,
+                                )
+                              ],
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0)),
+                            ),
                               child: InkWell(
                                 child: Padding(
                                   padding: EdgeInsets.all(5.0),
@@ -344,12 +368,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                 },
                               ),
                             ),
-                            Card(
-                              color: graphIndex == 1 ? beige : null,
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10.0))),
+                            //Card like container with animations
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.bounceInOut,
+                            decoration: BoxDecoration(
+                                color: graphIndex == 1 ? beige : lightBlue,
+                                boxShadow: [
+                                  BoxShadow(
+                                  color: Colors.black26,
+                                )
+                              ],
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0)),
+                            ),
                               child: InkWell(
                                 child: Padding(
                                   padding: EdgeInsets.all(5.0),
@@ -380,7 +412,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                             ),
                           ],
                         ),
-                        Container(
+                        SizedBox(
+                        height: 4,
+                      ),
+                      Container(
                           color: beige,
                           height: 2,
                         ),
